@@ -1,4 +1,5 @@
 use bit_seq::bseq_32;
+
 use crate::instruction_stream::InstrStream;
 use crate::types::Register;
 

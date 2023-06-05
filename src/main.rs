@@ -1,21 +1,23 @@
+use bad64::{decode, disasm};
+
+use crate::instruction_stream::InstrStream;
+use crate::mc_memory::McMemory;
+use crate::types::HW;
+
 mod mc_memory;
 mod instruction_emitter;
 mod types;
 mod instruction_stream;
 
-use bad64::{decode, disasm};
-use crate::instruction_stream::InstrStream;
-use crate::mc_memory::McMemory;
-
-
 fn main() {
     let mut mem = McMemory::new_pagesize();
     let mut stream = InstrStream::new(&mut mem);
-    stream.mov_64_imm(0, 0x23, 0.into());
+    stream.mov_64_imm(1, 0x23);
+    stream.add_64_imm(0, 1, 4);
     stream.ret();
 
     stream.patch_at(stream.base_ptr(), |s| {
-        s.mov_64_imm(0, 0x78, 0.into());
+        s.movn_64_imm(1, 4);
     });
     stream.print_disasm();
 

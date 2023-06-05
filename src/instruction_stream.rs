@@ -1,12 +1,14 @@
-pub mod data_proc_imm;
-pub mod ret;
-
 use std::{mem, slice};
+
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+
 use crate::instruction_emitter::InstrEmitter;
 use crate::mc_memory::McMemory;
 use crate::types::{Instruction, InstructionPointer, Register};
+
+pub mod data_proc_imm;
+pub mod ret;
 
 pub type PatchFn = fn(&mut InstrStream) -> ();
 

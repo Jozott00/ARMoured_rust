@@ -1,5 +1,6 @@
 use std::{mem, ptr};
 use std::mem::size_of;
+
 use crate::mc_memory::McMemory;
 use crate::types::{Instruction, InstructionPointer};
 
