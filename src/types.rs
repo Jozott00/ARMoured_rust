@@ -8,6 +8,7 @@ pub type InstructionPointer = *mut Instruction;
 pub type Register = u8;
 pub type Imm16 = u16;
 pub type Imm12 = u16;
+pub type Imm6 = u8;
 
 // halfworld of instruction like movz, movn, ...
 pub enum HW {
