@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 bit_seq = "0.2.0"
 libc = "0.2.144"
+num = "0.4.0"

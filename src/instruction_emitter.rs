@@ -36,6 +36,12 @@ impl InstrEmitter {
         self.base_ptr
     }
 
+    pub fn instr_ptr(&self) -> InstructionPointer { self.iptr }
+
+    pub fn set_instr_ptr(&mut self, iptr: InstructionPointer) {
+        self.iptr = iptr;
+    }
+
     /// Returns true if emitting a new instruction does not override
     /// memory boundaries
     fn in_bound(&self) -> bool {

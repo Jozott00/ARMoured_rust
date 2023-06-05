@@ -1,10 +1,13 @@
-mod mov;
+pub mod data_proc_imm;
+pub mod ret;
 
 use std::mem;
-use bit_seq::bseq;
+use bit_seq::{bseq, bseq_32};
 use crate::instruction_emitter::InstrEmitter;
 use crate::mc_memory::McMemory;
 use crate::types::{Instruction, InstructionPointer, Register};
+
+pub type PatchFn = fn(&mut InstrStream) -> ();
 
 pub struct InstrStream<'mem> {
     mem: &'mem mut McMemory,
@@ -21,10 +24,13 @@ impl<'mem> InstrStream<'mem> {
         }
     }
 
-    pub fn ret(&mut self) {
-        let x30 = 30;
-        let r: u32 = bseq!(1 101011001011111 0:6 x30:5 0:5);
-        self.emit(r);
+    pub fn patch_at(&mut self, intr_ptr: InstructionPointer, patch: PatchFn) {
+        // save instruction pointer
+        let iptr = self.emitter.instr_ptr();
+        self.emitter.set_instr_ptr(intr_ptr);
+        patch(self);
+        // restore instruction pointer
+        self.emitter.set_instr_ptr(iptr);
     }
 
     #[inline(always)]
@@ -33,7 +39,7 @@ impl<'mem> InstrStream<'mem> {
     }
 
     #[inline(always)]
-    fn base_ptr(&self) -> InstructionPointer {
+    pub fn base_ptr(&self) -> InstructionPointer {
         self.emitter.base_ptr()
     }
 

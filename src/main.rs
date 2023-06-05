@@ -13,6 +13,10 @@ fn main() {
     stream.mov_imm(0, 0x23);
     stream.ret();
 
+    stream.patch_at(stream.base_ptr(), |s| {
+        s.mov_imm(0, 0x78);
+    });
+
     let func = stream.nullary_fn_ptr();
     mem.make_executable();
 
