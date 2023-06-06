@@ -4,11 +4,13 @@
 //! - [CASP](InstrStream::casp)
 
 use bit_seq::bseq_32;
+use crate::instruction_emitter::Emitter;
 use crate::instruction_stream::InstrStream;
+use crate::mc_memory::Memory;
 use crate::types::instruction::Instr;
 use crate::types::Register;
 
-impl<'mem> InstrStream<'mem> {
+impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     #[inline(always)]
     fn emit_casp_x(&mut self, sz: u8, L: u8, rs: Register, o0: u8, rn: Register, rt: Register) -> Instr {
         let r = bseq_32!(0 sz:1 0010000 L:1 1 rs:5 o0:1 !0:5 rn:5 rt:5);

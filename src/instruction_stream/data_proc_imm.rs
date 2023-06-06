@@ -21,12 +21,14 @@ pub mod add_subtract_imm {
     //! - SUBS 64bit
 
     use bit_seq::bseq_32;
+    use crate::instruction_emitter::Emitter;
 
     use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::Memory;
     use crate::types::{Imm12, Register};
     use crate::types::shifts::Shift1;
 
-    impl<'mem> InstrStream<'mem> {
+    impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
         /// The `add_sub_imm` function is a helper function to generate ADD/SUB instructions
         /// (with immediate value) according to the ARMv8 encoding rules. This is not intended to be used
         /// directly but rather used internally by other public-facing functions.
@@ -171,10 +173,12 @@ pub mod bitfield {
     //! - UBFM 64bit
 
     use bit_seq::bseq_32;
+    use crate::instruction_emitter::Emitter;
     use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::Memory;
     use crate::types::{Imm6, Register};
 
-    impl<'mem> InstrStream<'mem> {
+    impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
         /// Generates the base instruction for a bitfield operation.
         /// `sf`, `opc`, `N`, `immr`, `imms`, `rn`, and `rd` parameters are used to construct the instruction.
         /// Note that the details of the instruction encoding should be checked with the ARM documentation.
@@ -246,10 +250,12 @@ pub mod extract {
     //! - EXTR 64bit
 
     use bit_seq::{bseq_32, bseq_8};
+    use crate::instruction_emitter::Emitter;
     use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::Memory;
     use crate::types::{Imm5, Imm6, Register};
 
-    impl<'mem> InstrStream<'mem> {
+    impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
         /// Generates the base instruction for a bit extraction operation.
         /// `sf`, `op21`, `N`, `o0`, `rm`, `imms`, `rn`, and `rd` parameters are used to construct the instruction.
         /// The specifics of the instruction encoding should be verified with the ARM documentation.
@@ -312,11 +318,13 @@ pub mod logical_imm {
     //! - ANDS 64bit
 
     use bit_seq::{bseq_32, bseq_64, bseq_8};
+    use crate::instruction_emitter::Emitter;
     use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::Memory;
     use crate::types::{Imm12, Imm13, Imm32, Imm6, Imm64, Register};
     use crate::types::bitmask_immediate::BitmaskImmediate;
 
-    impl<'mem> InstrStream<'mem> {
+    impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
         /// Encodes and emits a logical instruction with an immediate value.
         /// This is a helper function used by logical instruction variants that accept an immediate.
         ///
@@ -513,11 +521,13 @@ pub mod mov_wide_imm {
     //! - MOVK 64bit
 
     use bit_seq::bseq_32;
+    use crate::instruction_emitter::Emitter;
 
     use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::Memory;
     use crate::types::{HW, Imm16, Register};
 
-    impl<'mem> InstrStream<'mem> {
+    impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
         // TODO: move somewhere else
         #[inline(always)]
         pub fn mov_reg(&mut self, sf: bool, dest: Register, src: Register) {
@@ -673,12 +683,15 @@ pub mod mov_wide_imm {
 
         pub use bit_seq::{bseq_32, bseq_8};
         use num::Signed;
+        use crate::instruction_emitter::Emitter;
 
         use crate::instruction_stream::InstrStream;
+        use crate::mc_memory::Memory;
         use crate::types::{HW, Imm16, InstructionPointer, Offset32, Offset64, Register};
+        use crate::types::instruction::Instr;
 
         // TODO: Add ADR with label as soon as labels exists
-        impl<'mem> InstrStream<'mem> {
+        impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
             /// Helper function to emit PC-relative addressing instructions.
             ///
             /// # Arguments
@@ -688,7 +701,7 @@ pub mod mov_wide_imm {
             /// * `immhi` - The higher 19 bits of the immediate value.
             /// * `rd` - The destination register.
             #[inline(always)]
-            fn emit_pc_rel_addr(&mut self, op: u8, immlo: u8, immhi: u32, rd: Register) {
+            fn emit_pc_rel_addr(&mut self, op: u8, immlo: u8, immhi: u32, rd: Register) -> Instr {
                 let r = bseq_32!(op:1 immlo:2 10000 immhi:19 rd:5);
                 self.emit(r)
             }
@@ -703,7 +716,7 @@ pub mod mov_wide_imm {
             /// * `rd` - The destination register.
             /// * `offset` - The PC-relative offset in bytes. It must be within the range ±1MB and multiple of 4.
             #[inline(always)]
-            pub fn adr_from_byte_offset(&mut self, rd: Register, offset: Offset32) {
+            pub fn adr_from_byte_offset(&mut self, rd: Register, offset: Offset32) -> Instr {
                 // check if offset is in range of +-1MB and a multiply of 4
                 debug_assert!(-(1 << 20) <= offset && offset < (1 << 20), "Offset must be within ±1MB");
                 debug_assert!(offset % 4 == 0, "Offset must be a multiply of 4!");
@@ -722,7 +735,7 @@ pub mod mov_wide_imm {
             /// * `rd` - The destination register.
             /// * `addr` - The absolute address. It must be 4-byte aligned.
             #[inline(always)]
-            pub fn adr_from_addr(&mut self, rd: Register, addr: usize) {
+            pub fn adr_from_addr(&mut self, rd: Register, addr: usize) -> Instr {
                 debug_assert!(addr % 4 == 0, "Address must be 4 byte aligned!");
 
                 let pc = self.emitter.instr_ptr() as usize;
@@ -747,7 +760,7 @@ pub mod mov_wide_imm {
             /// * `rd` - The destination register.
             /// * `offset` - The PC-relative offset in bytes. It must be a multiple of 4096 and within ±4GB.
             #[inline(always)]
-            pub fn adrp_from_byte_offset(&mut self, rd: Register, offset: Offset64) {
+            pub fn adrp_from_byte_offset(&mut self, rd: Register, offset: Offset64) -> Instr {
                 debug_assert!(offset % 4096 == 0, "Offset must be a multiply of 4096!");
                 debug_assert!(-((1 << 30) * 4) <= offset && offset < ((1 << 30) * 4), "Offset must be within ±1MB");
 

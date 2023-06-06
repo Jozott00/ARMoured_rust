@@ -1,8 +1,10 @@
 use bad64::{decode, disasm};
 
 use crate::instruction_stream::InstrStream;
-use crate::mc_memory::McMemory;
+use crate::mc_memory::{McMemory, Memory};
 use crate::types::{HW, Imm32, Imm64};
+use std::fs;
+use std::io::Result;
 
 mod mc_memory;
 mod instruction_emitter;
@@ -24,15 +26,32 @@ fn main() {
     stream.bfm_32(0, 1, 31, 31);
     stream.adr_from_byte_offset(0, 0x10);
     stream.adr_from_byte_offset(0, -0x10);
+    stream.casp_32(0, 1, 4, 5, 0);
+    stream.casp_64(0, 1, 4, 5, 0);
+    stream.caspa_32(0, 1, 4, 5, 0);
+    stream.caspa_64(0, 1, 4, 5, 0);
+    stream.caspal_32(0, 1, 4, 5, 0);
+    stream.caspal_64(0, 1, 4, 5, 0);
+    stream.caspl_32(0, 1, 4, 5, 0);
+    stream.caspl_64(0, 1, 4, 5, 0);
 
     stream.patch_at(stream.base_ptr(), |s| {
         s.movn_64_imm(1, 4);
     });
     stream.print_disasm();
 
+    let memory = stream.written_memory();
+    write_bytes_to_file("target/test", memory);
+
+
     let func = stream.nullary_fn_ptr();
     mem.make_executable();
 
     let res = unsafe { func() };
     println!("Called function with result: {res:#x}");
+}
+
+fn write_bytes_to_file(path: &str, bytes: &[u8]) -> std::io::Result<()> {
+    fs::write(path, bytes)?;
+    Ok(())
 }

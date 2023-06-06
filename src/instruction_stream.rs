@@ -3,31 +3,36 @@ use std::{mem, slice};
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
 
-use crate::instruction_emitter::InstrEmitter;
-use crate::mc_memory::McMemory;
+use crate::instruction_emitter::{Emitter, InstrEmitter};
+use crate::mc_memory::{McMemory, Memory};
 use crate::types::{Instruction, InstructionPointer, Register};
+use crate::types::instruction::Instr;
 
 pub mod data_proc_imm;
 pub mod ret;
+pub mod loads_and_stores;
 
-pub type PatchFn = fn(&mut InstrStream) -> ();
+pub type PatchFn<M: Memory, E: Emitter> = fn(&mut InstrStream<M, E>) -> ();
 
-pub struct InstrStream<'mem> {
-    mem: &'mem mut McMemory,
-    emitter: InstrEmitter,
+pub struct InstrStream<'mem, M: Memory, E: Emitter> {
+    mem: &'mem mut M,
+    emitter: E,
 }
 
 
-impl<'mem> InstrStream<'mem> {
+impl<'mem> InstrStream<'mem, McMemory, InstrEmitter> {
     pub fn new(mem: &'mem mut McMemory) -> Self {
-        let emitter = InstrEmitter::new(&mem);
+        let emitter = InstrEmitter::new(mem);
         Self {
             mem,
             emitter,
         }
     }
+}
 
-    pub fn patch_at(&mut self, intr_ptr: InstructionPointer, patch: PatchFn) {
+impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
+
+    pub fn patch_at(&mut self, intr_ptr: InstructionPointer, patch: PatchFn<M, E>) {
         // save instruction pointer
         let iptr = self.emitter.instr_ptr();
         self.emitter.set_instr_ptr(intr_ptr);
@@ -47,9 +52,13 @@ impl<'mem> InstrStream<'mem> {
     }
 
     #[inline(always)]
-    fn emit(&mut self, instr: Instruction) {
+    fn emit(&mut self, instr: Instruction) -> Instr {
         debug_assert!(!self.mem.is_executable(), "Cannot emit instruction while memory is in execution mode");
+
+        let iptr = self.emitter.instr_ptr();
         self.emitter.emit(instr);
+
+        Instr::new(instr, iptr)
     }
 
     pub fn print_disasm(&self) {
@@ -65,7 +74,7 @@ impl<'mem> InstrStream<'mem> {
         }
     }
 
-    fn written_memory(&self) -> &[u8] {
+    pub fn written_memory(&self) -> &[u8] {
         let len = (self.emitter.instr_ptr() as usize) - (self.mem.addr() as usize);
         let ptr = self.mem.addr() as *const u8;
 

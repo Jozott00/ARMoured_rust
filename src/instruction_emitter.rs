@@ -1,8 +1,20 @@
 use std::{mem, ptr};
 use std::mem::size_of;
+use mockall::automock;
 
-use crate::mc_memory::McMemory;
+use crate::mc_memory::{McMemory, Memory};
 use crate::types::{Instruction, InstructionPointer};
+
+
+// TODO: write documentation
+#[automock]
+pub trait Emitter {
+    fn new<M: Memory + 'static>(mc_mem: &M) -> Self;
+    fn emit(&mut self, instr: Instruction);
+    fn base_ptr(&self) -> InstructionPointer;
+    fn instr_ptr(&self) -> InstructionPointer;
+    fn set_instr_ptr(&mut self, iptr: InstructionPointer);
+}
 
 pub struct InstrEmitter {
     base_ptr: InstructionPointer,
@@ -10,8 +22,8 @@ pub struct InstrEmitter {
     bound_ptr: InstructionPointer,
 }
 
-impl InstrEmitter {
-    pub fn new(mc_mem: &McMemory) -> Self {
+impl Emitter for InstrEmitter {
+    fn new<M: Memory>(mc_mem: &M) -> Self {
         let base_ptr = mc_mem.addr() as InstructionPointer;
         let bound_ptr = mc_mem.bound_ptr() as InstructionPointer;
         InstrEmitter {
@@ -22,7 +34,7 @@ impl InstrEmitter {
     }
 
     #[inline(always)]
-    pub fn emit(&mut self, instr: Instruction) {
+    fn emit(&mut self, instr: Instruction) {
         debug_assert!(
             self.in_bound(),
             "Memory out of bound! Emitting an instruction would write out of memory bounds.");
@@ -33,16 +45,18 @@ impl InstrEmitter {
         }
     }
 
-    pub fn base_ptr(&self) -> InstructionPointer {
+    fn base_ptr(&self) -> InstructionPointer {
         self.base_ptr
     }
 
-    pub fn instr_ptr(&self) -> InstructionPointer { self.iptr }
+    fn instr_ptr(&self) -> InstructionPointer { self.iptr }
 
-    pub fn set_instr_ptr(&mut self, iptr: InstructionPointer) {
+    fn set_instr_ptr(&mut self, iptr: InstructionPointer) {
         self.iptr = iptr;
     }
+}
 
+impl InstrEmitter {
     /// Returns true if emitting a new instruction does not override
     /// memory boundaries
     fn in_bound(&self) -> bool {

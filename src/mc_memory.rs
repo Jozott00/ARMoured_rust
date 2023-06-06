@@ -3,6 +3,23 @@ use std::io::Error;
 use std::ptr::null_mut;
 
 use libc::{MAP_ANON, MAP_PRIVATE, PROT_READ, PROT_WRITE};
+use mockall::automock;
+
+
+#[automock]
+pub trait Memory {
+    fn make_executable(&mut self);
+
+    fn make_writable(&mut self);
+
+    fn addr(&self) -> *mut c_void;
+
+    fn len(&self) -> usize;
+
+    fn is_executable(&self) -> bool;
+
+    fn bound_ptr(&self) -> *mut c_void;
+}
 
 #[derive(Debug)]
 pub struct McMemory {
@@ -51,8 +68,10 @@ impl McMemory {
     pub fn new_pagesize() -> Self {
         Self::new(0)
     }
+}
 
-    pub fn make_executable(&mut self) {
+impl Memory for McMemory {
+    fn make_executable(&mut self) {
         unsafe {
             if libc::mprotect(self.addr, self.len, libc::PROT_READ | libc::PROT_EXEC) != 0 {
                 panic!("Failed to set memory as executable");
@@ -62,7 +81,7 @@ impl McMemory {
         self.executable = true;
     }
 
-    pub fn make_writable(&mut self) {
+    fn make_writable(&mut self) {
         unsafe {
             if libc::mprotect(self.addr, self.len, libc::PROT_READ | libc::PROT_WRITE) != 0 {
                 panic!("Failed to set memory as writable");
@@ -72,19 +91,19 @@ impl McMemory {
         self.executable = false;
     }
 
-    pub fn addr(&self) -> *mut c_void {
+    fn addr(&self) -> *mut c_void {
         self.addr
     }
 
-    pub fn len(&self) -> usize {
+    fn len(&self) -> usize {
         self.len
     }
 
-    pub fn is_executable(&self) -> bool {
+    fn is_executable(&self) -> bool {
         self.executable
     }
 
-    pub fn bound_ptr(&self) -> *mut c_void {
+    fn bound_ptr(&self) -> *mut c_void {
         (self.addr as usize + self.len) as *mut c_void
     }
 }
