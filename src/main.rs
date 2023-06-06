@@ -14,11 +14,16 @@ fn main() {
     let mut stream = InstrStream::new(&mut mem);
     stream.mov_64_imm(1, 0x23);
     stream.add_64_imm(0, 1, 4);
+    stream.adr_from_addr(0, stream.base_ptr() as usize);
+    stream.adrp_from_byte_offset(0, 0x1000);
     stream.ret();
-    stream.and_64_imm(0, 1, Imm64::MAX - 1);
-    stream.orr_64_imm(0, 1, Imm64::MAX - 1);
-    stream.eor_64_imm(0, 1, Imm64::MAX - 1);
-    stream.ands_64_imm(0, 1, Imm64::MAX - 1);
+    stream.and_64_imm(0, 1, Imm64::MAX - 2);
+    stream.orr_64_imm(0, 1, Imm64::MAX - 2);
+    stream.eor_64_imm(0, 1, Imm64::MAX - 2);
+    stream.ands_64_imm(0, 1, Imm64::MAX - 2);
+    stream.bfm_32(0, 1, 31, 31);
+    stream.adr_from_byte_offset(0, 0x10);
+    stream.adr_from_byte_offset(0, -0x10);
 
     stream.patch_at(stream.base_ptr(), |s| {
         s.movn_64_imm(1, 4);

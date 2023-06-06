@@ -15,6 +15,9 @@ pub type Imm12 = u16;
 pub type Imm6 = u8;
 pub type Imm5 = u8;
 
+pub type Offset32 = i32;
+pub type Offset64 = i64;
+
 // halfworld of instruction like movz, movn, ...
 pub enum HW {
     LSL0,

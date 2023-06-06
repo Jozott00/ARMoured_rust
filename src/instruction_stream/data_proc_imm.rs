@@ -6,6 +6,7 @@
 //! - Extract
 //! - Logical (immediate)
 //! - Move wide (immediate)
+//! - PC rel. addressing
 
 pub mod add_subtract_imm {
     //! # Add/subtract (immediate)
@@ -173,13 +174,20 @@ pub mod bitfield {
     use crate::instruction_stream::InstrStream;
     use crate::types::{Imm6, Register};
 
-    // FIXME: Wrong bitmask encoding for all methods
     impl<'mem> InstrStream<'mem> {
         /// Generates the base instruction for a bitfield operation.
         /// `sf`, `opc`, `N`, `immr`, `imms`, `rn`, and `rd` parameters are used to construct the instruction.
         /// Note that the details of the instruction encoding should be checked with the ARM documentation.
         #[inline(always)]
         fn emit_bitfield(&mut self, sf: u8, opc: u8, N: u8, immr: Imm6, imms: Imm6, rn: Register, rd: Register) {
+            if sf == 1 {
+                debug_assert!(0 <= immr && immr <= 63, "Immr can only be in range of 0 to 63");
+                debug_assert!(0 <= immr && immr <= 63, "Immr can only be in range of 0 to 63");
+            } else {
+                debug_assert!(0 <= immr && immr <= 31, "Immr can only be in range of 0 to 31");
+                debug_assert!(0 <= immr && immr <= 31, "Immr can only be in range of 0 to 31");
+            }
+
             let r = bseq_32!(sf:1 opc:2 100110 N:1 immr:6 imms:6 rn:5 rd:5);
             self.emit(r);
         }
@@ -251,18 +259,41 @@ pub mod extract {
             self.emit(r);
         }
 
-        /// Generates a 32-bit `EXTR` (Extract) instruction using [`emit_extr_x`](#method.emit_extr_x).
-        /// `EXTR` extracts a bit field from the concatenated value of `rn` and `rm` registers, and writes it to `rd`.
-        /// The `rd`, `rn`, `rm` and `lsb` parameters represent the destination register, first source register, second source register, and least significant bit of the extracted bit field respectively.
+        /// Encodes and emits a 32-bit EXTR (extract) operation.
+        ///
+        /// # Panics
+        ///
+        /// This function asserts that the `lsb` argument (which represents the least significant
+        /// bit number to start the extraction from) is in the range of 0 to 31 inclusive.
+        ///
+        /// # Arguments
+        ///
+        /// * `rd` - The destination register.
+        /// * `rn` - The first source register.
+        /// * `rm` - The second source register.
+        /// * `lsb` - The least significant bit number where the extraction starts.
         #[inline(always)]
         pub fn extr_32(&mut self, rd: Register, rn: Register, rm: Register, lsb: Imm5) {
+            debug_assert!(0 <= lsb && lsb <= 31, "lsb must be in range 0 to 63");
             self.emit_extr_x(0, 0b00, 0, 0, rm, bseq_8!(0 lsb:5), rn, rd);
         }
 
-        /// Generates a 64-bit `EXTR` (Extract) instruction.
-        /// The parameters and behavior are the same as for [`extr_32`](#method.extr_32), but operates on 64-bit registers.
+        /// Encodes and emits a 64-bit EXTR (extract) operation.
+        ///
+        /// # Panics
+        ///
+        /// This function asserts that the `lsb` argument (which represents the least significant
+        /// bit number to start the extraction from) is in the range of 0 to 63 inclusive.
+        ///
+        /// # Arguments
+        ///
+        /// * `rd` - The destination register.
+        /// * `rn` - The first source register.
+        /// * `rm` - The second source register.
+        /// * `lsb` - The least significant bit number where the extraction starts.
         #[inline(always)]
         pub fn extr_64(&mut self, rd: Register, rn: Register, rm: Register, lsb: Imm6) {
+            debug_assert!(0 <= lsb && lsb <= 63, "lsb must be in range 0 to 63");
             self.emit_extr_x(1, 0b00, 1, 0, rm, lsb, rn, rd);
         }
     }
@@ -631,6 +662,103 @@ pub mod mov_wide_imm {
         #[inline(always)]
         pub fn mov_64_imm_lsl(&mut self, d: Register, imm: Imm16, lsl: HW) {
             self.movz_imm(true, d, imm, lsl);
+        }
+    }
+
+    pub mod pc_rel_addr {
+        //! # PC-rel. addressing
+        //!
+        //! - ADR
+        //! - ADRP
+
+        pub use bit_seq::{bseq_32, bseq_8};
+        use num::Signed;
+
+        use crate::instruction_stream::InstrStream;
+        use crate::types::{HW, Imm16, InstructionPointer, Offset32, Offset64, Register};
+
+        // TODO: Add ADR with label as soon as labels exists
+        impl<'mem> InstrStream<'mem> {
+            /// Helper function to emit PC-relative addressing instructions.
+            ///
+            /// # Arguments
+            ///
+            /// * `op` - This is an operation selector. It is `0` for `ADR` and `1` for `ADRP`.
+            /// * `immlo` - The lower 2 bits of the immediate value.
+            /// * `immhi` - The higher 19 bits of the immediate value.
+            /// * `rd` - The destination register.
+            #[inline(always)]
+            fn emit_pc_rel_addr(&mut self, op: u8, immlo: u8, immhi: u32, rd: Register) {
+                let r = bseq_32!(op:1 immlo:2 10000 immhi:19 rd:5);
+                self.emit(r)
+            }
+
+            /// Emit an `ADR` instruction.
+            ///
+            /// This function generates an `ADR` instruction that forms a PC-relative address
+            /// using an offset in bytes.
+            ///
+            /// # Arguments
+            ///
+            /// * `rd` - The destination register.
+            /// * `offset` - The PC-relative offset in bytes. It must be within the range ±1MB and multiple of 4.
+            #[inline(always)]
+            pub fn adr_from_byte_offset(&mut self, rd: Register, offset: Offset32) {
+                // check if offset is in range of +-1MB and a multiply of 4
+                debug_assert!(-(1 << 20) <= offset && offset < (1 << 20), "Offset must be within ±1MB");
+                debug_assert!(offset % 4 == 0, "Offset must be a multiply of 4!");
+                let immlo = offset & 0b11;
+                let immhi = offset >> 2;
+                self.emit_pc_rel_addr(0, immlo as u8, immhi as u32, rd)
+            }
+
+            /// Emit an `ADR` instruction.
+            ///
+            /// This function generates an `ADR` instruction that forms a PC-relative address
+            /// from a given address.
+            ///
+            /// # Arguments
+            ///
+            /// * `rd` - The destination register.
+            /// * `addr` - The absolute address. It must be 4-byte aligned.
+            #[inline(always)]
+            pub fn adr_from_addr(&mut self, rd: Register, addr: usize) {
+                debug_assert!(addr % 4 == 0, "Address must be 4 byte aligned!");
+
+                let pc = self.emitter.instr_ptr() as usize;
+                let offset_abs = pc.checked_sub(addr)
+                    .unwrap_or_else(|| addr.checked_sub(pc).unwrap());
+
+                debug_assert!(offset_abs < (1 << 20), "Offset must be within ±1MB");
+                let offset = if addr >= pc { offset_abs as i32 } else { -(offset_abs as i32) };
+
+                let immlo = offset & 0b11;
+                let immhi = offset >> 2;
+                self.emit_pc_rel_addr(0, immlo as u8, immhi as u32, rd)
+            }
+
+            /// Emit an `ADRP` instruction.
+            ///
+            /// This function generates an `ADRP` instruction that forms a PC-relative address
+            /// to a 4KB page, using an offset in bytes.
+            ///
+            /// # Arguments
+            ///
+            /// * `rd` - The destination register.
+            /// * `offset` - The PC-relative offset in bytes. It must be a multiple of 4096 and within ±4GB.
+            #[inline(always)]
+            pub fn adrp_from_byte_offset(&mut self, rd: Register, offset: Offset64) {
+                debug_assert!(offset % 4096 == 0, "Offset must be a multiply of 4096!");
+                debug_assert!(-((1 << 30) * 4) <= offset && offset < ((1 << 30) * 4), "Offset must be within ±1MB");
+
+                // shift 12 bits (divide by 4096)
+                let offset = offset >> 12;
+
+                let immlo = offset & 0b11;
+                let immhi = offset >> 2;
+
+                self.emit_pc_rel_addr(1, immlo as u8, immhi as u32, rd)
+            }
         }
     }
 }
