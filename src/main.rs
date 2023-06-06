@@ -2,7 +2,7 @@ use bad64::{decode, disasm};
 
 use crate::instruction_stream::InstrStream;
 use crate::mc_memory::McMemory;
-use crate::types::HW;
+use crate::types::{HW, Imm32, Imm64};
 
 mod mc_memory;
 mod instruction_emitter;
@@ -15,6 +15,10 @@ fn main() {
     stream.mov_64_imm(1, 0x23);
     stream.add_64_imm(0, 1, 4);
     stream.ret();
+    stream.and_64_imm(0, 1, Imm64::MAX - 1);
+    stream.orr_64_imm(0, 1, Imm64::MAX - 1);
+    stream.eor_64_imm(0, 1, Imm64::MAX - 1);
+    stream.ands_64_imm(0, 1, Imm64::MAX - 1);
 
     stream.patch_at(stream.base_ptr(), |s| {
         s.movn_64_imm(1, 4);

@@ -2,10 +2,10 @@
 //!
 //! It consists of
 //! - Add/subtract (immediate)
-//! - Logical (immediate)
-//! - Move wide (immediate)
 //! - Bitfield
 //! - Extract
+//! - Logical (immediate)
+//! - Move wide (immediate)
 
 pub mod add_subtract_imm {
     //! # Add/subtract (immediate)
@@ -173,6 +173,7 @@ pub mod bitfield {
     use crate::instruction_stream::InstrStream;
     use crate::types::{Imm6, Register};
 
+    // FIXME: Wrong bitmask encoding for all methods
     impl<'mem> InstrStream<'mem> {
         /// Generates the base instruction for a bitfield operation.
         /// `sf`, `opc`, `N`, `immr`, `imms`, `rn`, and `rd` parameters are used to construct the instruction.
@@ -226,6 +227,246 @@ pub mod bitfield {
         #[inline(always)]
         pub fn ubfm_64(&mut self, rd: Register, rn: Register, immr: Imm6, imms: Imm6) {
             self.emit_bitfield(1, 0b10, 1, immr, imms, rn, rd);
+        }
+    }
+}
+
+pub mod extract {
+    //! # Extract
+    //!
+    //! - EXTR 32bit
+    //! - EXTR 64bit
+
+    use bit_seq::{bseq_32, bseq_8};
+    use crate::instruction_stream::InstrStream;
+    use crate::types::{Imm5, Imm6, Register};
+
+    impl<'mem> InstrStream<'mem> {
+        /// Generates the base instruction for a bit extraction operation.
+        /// `sf`, `op21`, `N`, `o0`, `rm`, `imms`, `rn`, and `rd` parameters are used to construct the instruction.
+        /// The specifics of the instruction encoding should be verified with the ARM documentation.
+        #[inline(always)]
+        fn emit_extr_x(&mut self, sf: u8, op21: u8, N: u8, o0: u8, rm: Register, imms: u8, rn: Register, rd: Register) {
+            let r = bseq_32!(sf:1 op21:2 100111 N:1 o0:1 rm:5 imms:6 rn:5 rd:5);
+            self.emit(r);
+        }
+
+        /// Generates a 32-bit `EXTR` (Extract) instruction using [`emit_extr_x`](#method.emit_extr_x).
+        /// `EXTR` extracts a bit field from the concatenated value of `rn` and `rm` registers, and writes it to `rd`.
+        /// The `rd`, `rn`, `rm` and `lsb` parameters represent the destination register, first source register, second source register, and least significant bit of the extracted bit field respectively.
+        #[inline(always)]
+        pub fn extr_32(&mut self, rd: Register, rn: Register, rm: Register, lsb: Imm5) {
+            self.emit_extr_x(0, 0b00, 0, 0, rm, bseq_8!(0 lsb:5), rn, rd);
+        }
+
+        /// Generates a 64-bit `EXTR` (Extract) instruction.
+        /// The parameters and behavior are the same as for [`extr_32`](#method.extr_32), but operates on 64-bit registers.
+        #[inline(always)]
+        pub fn extr_64(&mut self, rd: Register, rn: Register, rm: Register, lsb: Imm6) {
+            self.emit_extr_x(1, 0b00, 1, 0, rm, lsb, rn, rd);
+        }
+    }
+}
+
+pub mod logical_imm {
+    //! # Logical (immediate)
+    //!
+    //! - AND 32bit
+    //! - ORR 32bit
+    //! - EOR 32bit
+    //! - ANDS 32bit
+    //! - AND 64bit
+    //! - ORR 64bit
+    //! - EOR 64bit
+    //! - ANDS 64bit
+
+    use bit_seq::{bseq_32, bseq_64, bseq_8};
+    use crate::instruction_stream::InstrStream;
+    use crate::types::{Imm12, Imm13, Imm32, Imm6, Imm64, Register};
+    use crate::types::bitmask_immediate::BitmaskImmediate;
+
+    impl<'mem> InstrStream<'mem> {
+        /// Encodes and emits a logical instruction with an immediate value.
+        /// This is a helper function used by logical instruction variants that accept an immediate.
+        ///
+        /// # Arguments
+        ///
+        /// * `sf` - Operand size. If sf = 0, 32-bit operands are used. If sf = 1, 64-bit operands are used.
+        /// * `opc` - Opcode to determine the specific logical operation.
+        /// * `bit_mask` - A BitmaskImmediate object representing the immediate value in the appropriate format for logical instructions.
+        /// * `rn` - The source register.
+        /// * `rd` - The destination register, where the result of the operation will be stored.
+        #[inline(always)]
+        fn emit_logical_imm(&mut self, sf: u8, opc: u8, bit_mask: &BitmaskImmediate, rn: Register, rd: Register) {
+            let nrs_mask = bit_mask.as_u16();
+            let r = bseq_32!(sf:1 opc:2 100100 nrs_mask:13 rn:5 rd:5);
+            self.emit(r);
+        }
+
+        /// Encodes and emits a 32-bit AND operation with an immediate value.
+        /// This function will fail if the immediate value cannot be encoded as a valid logical immediate.
+        ///
+        /// # Arguments
+        ///
+        /// * `rd` - The destination register, where the result of the operation will be stored.
+        /// * `rn` - The source register.
+        /// * `imm` - An immediate 32-bit value to be logically ANDed with the value in the source register.
+        ///
+        /// # Returns
+        ///
+        /// * `Ok(())` if the operation was successful.
+        /// * `Err(())` if the immediate value could not be encoded as a valid logical immediate.
+        #[inline(always)]
+        pub fn and_32_imm(&mut self, rd: Register, rn: Register, imm: Imm32) -> Result<(), ()> {
+            let mask_64 = bseq_64!(imm:32 imm:32);
+            let bit_mask = BitmaskImmediate::try_from(mask_64)?;
+            self.emit_logical_imm(0, 0b00, &bit_mask, rn, rd);
+            Ok(())
+        }
+
+        /// Encodes and emits a 64-bit AND operation with an immediate value.
+        /// This function will fail if the immediate value cannot be encoded as a valid logical immediate.
+        ///
+        /// # Arguments
+        ///
+        /// * `rd` - The destination register, where the result of the operation will be stored.
+        /// * `rn` - The source register.
+        /// * `imm` - An immediate 64-bit value to be logically ANDed with the value in the source register.
+        ///
+        /// # Returns
+        ///
+        /// * `Ok(())` if the operation was successful.
+        /// * `Err(())` if the immediate value could not be encoded as a valid logical immediate.
+        #[inline(always)]
+        pub fn and_64_imm(&mut self, rd: Register, rn: Register, imm: Imm64) -> Result<(), ()> {
+            let bit_mask = BitmaskImmediate::try_from(imm)?;
+            self.emit_logical_imm(1, 0b00, &bit_mask, rn, rd);
+            Ok(())
+        }
+
+        /// Encodes and emits a 32-bit ORR operation with an immediate value.
+        /// This function will fail if the immediate value cannot be encoded as a valid logical immediate.
+        ///
+        /// # Arguments
+        ///
+        /// * `rd` - The destination register, where the result of the operation will be stored.
+        /// * `rn` - The source register.
+        /// * `imm` - An immediate 32-bit value to be logically ORed with the value in the source register.
+        ///
+        /// # Returns
+        ///
+        /// * `Ok(())` if the operation was successful.
+        /// * `Err(())` if the immediate value could not be encoded as a valid logical immediate.
+        #[inline(always)]
+        pub fn orr_32_imm(&mut self, rd: Register, rn: Register, imm: Imm32) -> Result<(), ()> {
+            let mask_64 = bseq_64!(imm:32 imm:32);
+            let bit_mask = BitmaskImmediate::try_from(mask_64)?;
+            self.emit_logical_imm(0, 0b01, &bit_mask, rn, rd);
+            Ok(())
+        }
+
+        /// Encodes and emits a 64-bit ORR operation with an immediate value.
+        /// This function will fail if the immediate value cannot be encoded as a valid logical immediate.
+        ///
+        /// # Arguments
+        ///
+        /// * `rd` - The destination register, where the result of the operation will be stored.
+        /// * `rn` - The source register.
+        /// * `imm` - An immediate 64-bit value to be logically ORed with the value in the source register.
+        ///
+        /// # Returns
+        ///
+        /// * `Ok(())` if the operation was successful.
+        /// * `Err(())` if the immediate value could not be encoded as a valid logical immediate.
+        #[inline(always)]
+        pub fn orr_64_imm(&mut self, rd: Register, rn: Register, imm: Imm64) -> Result<(), ()> {
+            let bit_mask = BitmaskImmediate::try_from(imm)?;
+            self.emit_logical_imm(1, 0b01, &bit_mask, rn, rd);
+            Ok(())
+        }
+
+        /// Encodes and emits a 32-bit EOR operation with an immediate value.
+        /// This function will fail if the immediate value cannot be encoded as a valid logical immediate.
+        ///
+        /// # Arguments
+        ///
+        /// * `rd` - The destination register, where the result of the operation will be stored.
+        /// * `rn` - The source register.
+        /// * `imm` - An immediate 32-bit value to be logically XORed with the value in the source register.
+        ///
+        /// # Returns
+        ///
+        /// * `Ok(())` if the operation was successful.
+        /// * `Err(())` if the immediate value could not be encoded as a valid logical immediate.
+        #[inline(always)]
+        pub fn eor_32_imm(&mut self, rd: Register, rn: Register, imm: Imm32) -> Result<(), ()> {
+            let mask_64 = bseq_64!(imm:32 imm:32);
+            let bit_mask = BitmaskImmediate::try_from(mask_64)?;
+            self.emit_logical_imm(0, 0b10, &bit_mask, rn, rd);
+            Ok(())
+        }
+
+        /// Encodes and emits a 64-bit EOR operation with an immediate value.
+        /// This function will fail if the immediate value cannot be encoded as a valid logical immediate.
+        ///
+        /// # Arguments
+        ///
+        /// * `rd` - The destination register, where the result of the operation will be stored.
+        /// * `rn` - The source register.
+        /// * `imm` - An immediate 64-bit value to be logically XORed with the value in the source register.
+        ///
+        /// # Returns
+        ///
+        /// * `Ok(())` if the operation was successful.
+        /// * `Err(())` if the immediate value could not be encoded as a valid logical immediate.
+        #[inline(always)]
+        pub fn eor_64_imm(&mut self, rd: Register, rn: Register, imm: Imm64) -> Result<(), ()> {
+            let bit_mask = BitmaskImmediate::try_from(imm)?;
+            self.emit_logical_imm(1, 0b10, &bit_mask, rn, rd);
+            Ok(())
+        }
+
+        /// Encodes and emits a 32-bit ANDS operation with an immediate value.
+        /// This function will fail if the immediate value cannot be encoded as a valid logical immediate.
+        ///
+        /// # Arguments
+        ///
+        /// * `rd` - The destination register, where the result of the operation will be stored.
+        /// * `rn` - The source register.
+        /// * `imm` - An immediate 32-bit value to be logically ANDed with the value in the source register.
+        ///            The condition flags will be updated based on the result.
+        ///
+        /// # Returns
+        ///
+        /// * `Ok(())` if the operation was successful.
+        /// * `Err(())` if the immediate value could not be encoded as a valid logical immediate.
+        #[inline(always)]
+        pub fn ands_32_imm(&mut self, rd: Register, rn: Register, imm: Imm32) -> Result<(), ()> {
+            let mask_64 = bseq_64!(imm:32 imm:32);
+            let bit_mask = BitmaskImmediate::try_from(mask_64)?;
+            self.emit_logical_imm(0, 0b11, &bit_mask, rn, rd);
+            Ok(())
+        }
+
+        /// Encodes and emits a 64-bit ANDS operation with an immediate value.
+        /// This function will fail if the immediate value cannot be encoded as a valid logical immediate.
+        ///
+        /// # Arguments
+        ///
+        /// * `rd` - The destination register, where the result of the operation will be stored.
+        /// * `rn` - The source register.
+        /// * `imm` - An immediate 64-bit value to be logically ANDed with the value in the source register.
+        ///            The condition flags will be updated based on the result.
+        ///
+        /// # Returns
+        ///
+        /// * `Ok(())` if the operation was successful.
+        /// * `Err(())` if the immediate value could not be encoded as a valid logical immediate.
+        #[inline(always)]
+        pub fn ands_64_imm(&mut self, rd: Register, rn: Register, imm: Imm64) -> Result<(), ()> {
+            let bit_mask = BitmaskImmediate::try_from(imm)?;
+            self.emit_logical_imm(1, 0b11, &bit_mask, rn, rd);
+            Ok(())
         }
     }
 }

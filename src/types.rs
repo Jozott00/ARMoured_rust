@@ -1,14 +1,19 @@
 use crate::types::HW::{LSL0, LSL16, LSL32, LSL48};
 
 pub mod shifts;
+pub mod bitmask_immediate;
 
 pub type Instruction = u32;
 pub type InstructionPointer = *mut Instruction;
 
 pub type Register = u8;
+pub type Imm64 = u64;
+pub type Imm32 = u32;
 pub type Imm16 = u16;
+pub type Imm13 = u16;
 pub type Imm12 = u16;
 pub type Imm6 = u8;
+pub type Imm5 = u8;
 
 // halfworld of instruction like movz, movn, ...
 pub enum HW {
