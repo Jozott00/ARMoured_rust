@@ -1,5 +1,7 @@
 use std::{mem, ptr};
 use std::mem::size_of;
+
+#[cfg(test)]
 use mockall::automock;
 
 use crate::mc_memory::{McMemory, Memory};
@@ -7,9 +9,9 @@ use crate::types::{Instruction, InstructionPointer};
 
 
 // TODO: write documentation
-#[automock]
+#[cfg_attr(test, automock)]
 pub trait Emitter {
-    fn new<M: Memory + 'static>(mc_mem: &M) -> Self;
+    fn from_mem<M: Memory + 'static>(mc_mem: &M) -> Self;
     fn emit(&mut self, instr: Instruction);
     fn base_ptr(&self) -> InstructionPointer;
     fn instr_ptr(&self) -> InstructionPointer;
@@ -23,7 +25,7 @@ pub struct InstrEmitter {
 }
 
 impl Emitter for InstrEmitter {
-    fn new<M: Memory>(mc_mem: &M) -> Self {
+    fn from_mem<M: Memory>(mc_mem: &M) -> Self {
         let base_ptr = mc_mem.addr() as InstructionPointer;
         let bound_ptr = mc_mem.bound_ptr() as InstructionPointer;
         InstrEmitter {

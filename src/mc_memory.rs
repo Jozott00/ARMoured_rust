@@ -3,10 +3,11 @@ use std::io::Error;
 use std::ptr::null_mut;
 
 use libc::{MAP_ANON, MAP_PRIVATE, PROT_READ, PROT_WRITE};
+#[cfg(test)]
 use mockall::automock;
 
 
-#[automock]
+#[cfg_attr(test, automock)]
 pub trait Memory {
     fn make_executable(&mut self);
 

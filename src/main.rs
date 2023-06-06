@@ -10,6 +10,7 @@ mod mc_memory;
 mod instruction_emitter;
 mod types;
 mod instruction_stream;
+mod test_utils;
 
 fn main() {
     let mut mem = McMemory::new_pagesize();

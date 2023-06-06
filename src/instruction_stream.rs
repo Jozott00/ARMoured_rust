@@ -22,7 +22,7 @@ pub struct InstrStream<'mem, M: Memory, E: Emitter> {
 
 impl<'mem> InstrStream<'mem, McMemory, InstrEmitter> {
     pub fn new(mem: &'mem mut McMemory) -> Self {
-        let emitter = InstrEmitter::new(mem);
+        let emitter = InstrEmitter::from_mem(mem);
         Self {
             mem,
             emitter,
@@ -31,7 +31,6 @@ impl<'mem> InstrStream<'mem, McMemory, InstrEmitter> {
 }
 
 impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
-
     pub fn patch_at(&mut self, intr_ptr: InstructionPointer, patch: PatchFn<M, E>) {
         // save instruction pointer
         let iptr = self.emitter.instr_ptr();

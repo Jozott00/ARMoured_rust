@@ -102,11 +102,174 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
+    use crate::mc_memory::MockMemory;
+    use crate::instruction_emitter::MockEmitter;
+    use crate::{stream_mock, assert_panic};
+    use crate::types::InstructionPointer;
 
 
     #[test]
-    fn test_casp_32() {
+    fn test_casp() {
+        stream_mock!(stream, {
+            let instr = stream.casp_32(0, 1, 4, 5, 0);
+            assert_eq!(instr.to_string(), "casp w0, w1, w4, w5, [x0]");
 
+            let instr = stream.casp_64(0, 1, 4, 5, 0);
+            assert_eq!(instr.to_string(), "casp x0, x1, x4, x5, [x0]");
+
+
+            // panic 32
+            assert_panic!("Should panic because of odd ws1"; {
+                stream.casp_32(1, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because ws2 not ws1+1 "; {
+                stream.casp_32(0, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because of odd wt1"; {
+                stream.casp_32(1, 2, 3, 5, 0)
+            });
+            assert_panic!("Should panic because wt2 not wt1+1 "; {
+                stream.casp_32(0, 2, 4, 6, 0)
+            });
+
+
+            // panic 64
+            assert_panic!("Should panic because of odd ws1"; {
+                stream.casp_64(1, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because ws2 not ws1+1 "; {
+                stream.casp_64(0, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because of odd wt1"; {
+                stream.casp_64(1, 2, 3, 5, 0)
+            });
+            assert_panic!("Should panic because wt2 not wt1+1 "; {
+                stream.casp_64(0, 2, 4, 6, 0)
+            });
+
+        });
+    }
+
+    #[test]
+    fn test_caspa() {
+        stream_mock!(stream, {
+            let instr = stream.caspa_32(0, 1, 4, 5, 0);
+            assert_eq!(instr.to_string(), "caspa w0, w1, w4, w5, [x0]");
+
+            let instr = stream.caspa_64(0, 1, 4, 5, 0);
+            assert_eq!(instr.to_string(), "caspa x0, x1, x4, x5, [x0]");
+
+
+            // panic 32
+            assert_panic!("Should panic because of odd ws1"; {
+                stream.caspa_32(1, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because ws2 not ws1+1 "; {
+                stream.caspa_32(0, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because of odd wt1"; {
+                stream.caspa_32(1, 2, 3, 5, 0)
+            });
+            assert_panic!("Should panic because wt2 not wt1+1 "; {
+                stream.caspa_32(0, 2, 4, 6, 0)
+            });
+
+
+            // panic 64
+            assert_panic!("Should panic because of odd ws1"; {
+                stream.caspa_64(1, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because ws2 not ws1+1 "; {
+                stream.caspa_64(0, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because of odd wt1"; {
+                stream.caspa_64(1, 2, 3, 5, 0)
+            });
+            assert_panic!("Should panic because wt2 not wt1+1 "; {
+                stream.caspa_64(0, 2, 4, 6, 0)
+            });
+        });
+    }
+
+    #[test]
+    fn test_caspal() {
+        stream_mock!(stream, {
+            let instr = stream.caspal_32(0, 1, 4, 5, 0);
+            assert_eq!(instr.to_string(), "caspal w0, w1, w4, w5, [x0]");
+
+            let instr = stream.caspal_64(0, 1, 4, 5, 0);
+            assert_eq!(instr.to_string(), "caspal x0, x1, x4, x5, [x0]");
+
+
+            // panic 32
+            assert_panic!("Should panic because of odd ws1"; {
+                stream.caspal_32(1, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because ws2 not ws1+1 "; {
+                stream.caspal_32(0, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because of odd wt1"; {
+                stream.caspal_32(1, 2, 3, 5, 0)
+            });
+            assert_panic!("Should panic because wt2 not wt1+1 "; {
+                stream.caspal_32(0, 2, 4, 6, 0)
+            });
+
+
+            // panic 64
+            assert_panic!("Should panic because of odd ws1"; {
+                stream.caspal_64(1, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because ws2 not ws1+1 "; {
+                stream.caspal_64(0, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because of odd wt1"; {
+                stream.caspal_64(1, 2, 3, 5, 0)
+            });
+            assert_panic!("Should panic because wt2 not wt1+1 "; {
+                stream.caspal_64(0, 2, 4, 6, 0)
+            });
+        });
+    }
+
+    #[test]
+    fn test_caspl() {
+        stream_mock!(stream, {
+            let instr = stream.caspl_32(0, 1, 4, 5, 0);
+            assert_eq!(instr.to_string(), "caspl w0, w1, w4, w5, [x0]");
+
+            let instr = stream.caspl_64(0, 1, 4, 5, 0);
+            assert_eq!(instr.to_string(), "caspl x0, x1, x4, x5, [x0]");
+
+
+            // panic 32
+            assert_panic!("Should panic because of odd ws1"; {
+                stream.caspl_32(1, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because ws2 not ws1+1 "; {
+                stream.caspl_32(0, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because of odd wt1"; {
+                stream.caspl_32(1, 2, 3, 5, 0)
+            });
+            assert_panic!("Should panic because wt2 not wt1+1 "; {
+                stream.caspl_32(0, 2, 4, 6, 0)
+            });
+
+
+            // panic 64
+            assert_panic!("Should panic because of odd ws1"; {
+                stream.caspl_64(1, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because ws2 not ws1+1 "; {
+                stream.caspl_64(0, 2, 4, 5, 0)
+            });
+            assert_panic!("Should panic because of odd wt1"; {
+                stream.caspl_64(1, 2, 3, 5, 0)
+            });
+            assert_panic!("Should panic because wt2 not wt1+1 "; {
+                stream.caspl_64(0, 2, 4, 6, 0)
+            });
+        });
     }
 }
