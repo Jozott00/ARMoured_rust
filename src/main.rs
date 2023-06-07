@@ -5,6 +5,7 @@ use crate::mc_memory::{McMemory, Memory};
 use crate::types::{HW, Imm32, Imm64};
 use std::fs;
 use std::io::Result;
+use crate::types::prefetch_memory::{PrfOp, PrfPolicy, PrfTarget, PrfType};
 
 mod mc_memory;
 mod instruction_emitter;
@@ -36,6 +37,7 @@ fn main() {
     stream.caspl_32(0, 1, 4, 5, 0);
     stream.caspl_64(0, 1, 4, 5, 0);
     stream.strb_pre_index(0, 3, -256);
+    stream.prfm_imm_prfop(PrfOp(PrfType::PLD, PrfTarget::L1, PrfPolicy::KEEP), 0, 0x0);
 
     stream.patch_at(stream.base_ptr(), |s| {
         s.movn_64_imm(1, 4);

@@ -7,7 +7,8 @@ use crate::instruction_emitter::Emitter;
 use crate::instruction_stream::InstrStream;
 use crate::mc_memory::Memory;
 use crate::types::instruction::Instr;
-use crate::types::{Imm6, Imm9, Register, UImm12};
+use crate::types::{Imm6, Imm9, Register, UImm12, UImm5};
+use crate::types::prefetch_memory::PrfOp;
 
 impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
 
@@ -98,8 +99,201 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
         self.emit_load_store_offset(0, 0, 0b10, pimm, xn_sp, xt)
     }
 
+    // STRH Imm instructions
 
-    // STR instructions
+    #[inline(always)]
+    pub fn strh_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b01, 0, 0, simm, 0b01, wt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn strh_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b01, 0, 0, simm, 0b11, wt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn strh_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+        debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
+        debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
+        let pimm = pimm / 2;
+        self.emit_load_store_offset(0b01, 0, 0, pimm, xn_sp, wt)
+    }
+
+    // LDRH Imm instructions
+
+    #[inline(always)]
+    pub fn ldrh_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b01, 0, 0b01, simm, 0b01, wt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn ldrh_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b01, 0, 0b01, simm, 0b11, wt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn ldrh_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+        debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
+        debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
+        let pimm = pimm / 2;
+        self.emit_load_store_offset(0b01, 0, 0b01, pimm, xn_sp, wt)
+    }
+
+    // LDRH Imm instructions
+
+    #[inline(always)]
+    pub fn ldrsh_32_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b01, 0, 0b11, simm, 0b01, xt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn ldrsh_32_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b01, 0, 0b11, simm, 0b11, wt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn ldrsh_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+        debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
+        debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
+        let pimm = pimm / 2;
+        self.emit_load_store_offset(0b01, 0, 0b11, pimm, xn_sp, wt)
+    }
+
+    #[inline(always)]
+    pub fn ldrsh_64_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b01, 0, 0b10, simm, 0b01, xt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn ldrsh_64_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b01, 0, 0b10, simm, 0b11, xt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn ldrsh_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+        debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
+        debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
+        let pimm = pimm / 2;
+        self.emit_load_store_offset(0b01, 0, 0b10, pimm, xn_sp, xt)
+    }
+
+    // STR Imm instructions
+
+    #[inline(always)]
+    pub fn str_32_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b10, 0, 0b00, simm, 0b01, wt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn str_32_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b10, 0, 0b00, simm, 0b11, wt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn str_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+        debug_assert!(pimm <= 16380, "pimm must be in range 0 to 16380, was {}", pimm);
+        debug_assert!(pimm % 4 == 0, "pimm must be multiply of 2, was {}", pimm);
+        let pimm = pimm / 4;
+        self.emit_load_store_offset(0b10, 0, 0b00, pimm, xn_sp, wt)
+    }
+
+    #[inline(always)]
+    pub fn str_64_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b11, 0, 0b00, simm, 0b01, xt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn str_64_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b11, 0, 0b00, simm, 0b11, xt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn str_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+        debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
+        debug_assert!(pimm % 8 == 0, "pimm must be multiply of 2, was {}", pimm);
+        let pimm = pimm / 8;
+        self.emit_load_store_offset(0b11, 0, 0b00, pimm, xn_sp, xt)
+    }
+
+    // LDR Imm instructions
+
+    #[inline(always)]
+    pub fn ldr_32_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b10, 0, 0b01, simm, 0b01, wt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn ldr_32_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b10, 0, 0b01, simm, 0b11, wt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn ldr_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+        debug_assert!(pimm <= 16380, "pimm must be in range 0 to 16380, was {}", pimm);
+        debug_assert!(pimm % 4 == 0, "pimm must be multiply of 2, was {}", pimm);
+        let pimm = pimm / 4;
+        self.emit_load_store_offset(0b10, 0, 0b01, pimm, xn_sp, wt)
+    }
+
+    #[inline(always)]
+    pub fn ldr_64_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b11, 0, 0b01, simm, 0b01, xt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn ldr_64_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b11, 0, 0b01, simm, 0b11, xt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn ldr_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+        debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
+        debug_assert!(pimm % 8 == 0, "pimm must be multiply of 2, was {}", pimm);
+        let pimm = pimm / 8;
+        self.emit_load_store_offset(0b11, 0, 0b01, pimm, xn_sp, xt)
+    }
+
+    // LDRSW Imm instructions
+
+    #[inline(always)]
+    pub fn ldrsw_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b10, 0, 0b10, simm, 0b01, xt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn ldrsw_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
+        self.emit_load_store_pre_post(0b10, 0, 0b10, simm, 0b11, xt, xn_sp)
+    }
+
+    #[inline(always)]
+    pub fn ldrsw_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+        debug_assert!(pimm <= 16380, "pimm must be in range 0 to 16380, was {}", pimm);
+        debug_assert!(pimm % 4 == 0, "pimm must be multiply of 4, was {}", pimm);
+        let pimm = pimm / 4;
+        self.emit_load_store_offset(0b10, 0, 0b10, pimm, xn_sp, xt)
+    }
+
+    // PFRM Imm instructions
+
+    #[inline(always)]
+    pub fn prfm_imm_prfop(&mut self, prfop: PrfOp, xn_sp: Register, pimm: UImm12) -> Instr {
+        debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
+        debug_assert!(pimm % 8 == 0, "pimm must be multiply of 8, was {}", pimm);
+        let pimm = pimm / 8;
+        self.emit_load_store_offset(0b11, 0, 0b10, pimm, xn_sp, prfop.encode())
+    }
+
+    #[inline(always)]
+    pub fn prfm_imm_custom(&mut self, imm5: UImm5, xn_sp: Register, pimm: UImm12) -> Instr {
+        debug_assert!(imm5 <= 31, "imm5 must be in range 0 to 31, was {}", imm5);
+        debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
+        debug_assert!(pimm % 8 == 0, "pimm must be multiply of 8, was {}", pimm);
+        let pimm = pimm / 8;
+        self.emit_load_store_offset(0b11, 0, 0b10, pimm, xn_sp, imm5)
+    }
+
+
+    // STR Imm SIMD&FP instructions
 
     #[inline(always)]
     pub fn str_8_imm_simd_post_index(&mut self, bt: Register, xn_sp: Register, simm: Imm9) -> Instr {
@@ -189,7 +383,7 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     }
 
 
-    // LDR imm simd instructions
+    // LDR Imm SIMD&FP instructions
 
     #[inline(always)]
     pub fn ldr_8_imm_simd_post_index(&mut self, bt: Register, xn_sp: Register, simm: Imm9) -> Instr {
@@ -287,6 +481,9 @@ mod tests {
     use crate::instruction_emitter::MockEmitter;
     use crate::{stream_mock, assert_panic};
     use crate::types::InstructionPointer;
+    use crate::types::prefetch_memory::PrfPolicy::{KEEP, STRM};
+    use crate::types::prefetch_memory::PrfTarget::{L1, L2, L3};
+    use crate::types::prefetch_memory::PrfType::{PLD, PLI, PST};
 
     // STRB Test Cases
 
@@ -458,7 +655,377 @@ mod tests {
         })
     }
 
-    // STR Test Cases
+    // STRH Imm Test Cases
+
+    #[test]
+    fn test_strh_imm_pre_index() {
+        stream_mock!(stream, {
+            let instr = stream.strh_imm_pre_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "strh w0, [x3, #0xffffffffffffff00]!");
+
+            let instr = stream.strh_imm_pre_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "strh w0, [sp, #0xff]!");
+
+            assert_panic!("Should panic: imm out of range"; stream.strh_imm_pre_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.strh_imm_pre_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_strh_imm_post_index() {
+        stream_mock!(stream, {
+            let instr = stream.strh_imm_post_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "strh w0, [x3], #0xffffffffffffff00");
+
+            let instr = stream.strh_imm_post_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "strh w0, [sp], #0xff");
+
+            assert_panic!("Should panic: imm out of range"; stream.strh_imm_post_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.strh_imm_post_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_strh_imm_unsigned_offset() {
+        stream_mock!(stream, {
+            let instr = stream.strh_imm_unsigned_offset(0, 3, 0);
+            assert_eq!(instr.to_string(), "strh w0, [x3]");
+
+            let instr = stream.strh_imm_unsigned_offset(0, 0b11111, 2);
+            assert_eq!(instr.to_string(), "strh w0, [sp, #0x2]");
+
+            let instr = stream.strh_imm_unsigned_offset(0, 0b11111, 8190);
+            assert_eq!(instr.to_string(), "strh w0, [sp, #0x1ffe]");
+
+            assert_panic!("Should panic: pimm not multiply of 2"; stream.strh_imm_unsigned_offset(0, 3, 1));
+            assert_panic!("Should panic: imm out of range"; stream.strh_imm_unsigned_offset(0, 3, 8191));
+        })
+    }
+
+    // LDRH Imm Test Cases
+
+    #[test]
+    fn test_ldrh_imm_pre_index() {
+        stream_mock!(stream, {
+            let instr = stream.ldrh_imm_pre_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "ldrh w0, [x3, #0xffffffffffffff00]!");
+
+            let instr = stream.ldrh_imm_pre_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "ldrh w0, [sp, #0xff]!");
+
+            assert_panic!("Should panic: imm out of range"; stream.ldrh_imm_pre_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldrh_imm_pre_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_ldrh_imm_post_index() {
+        stream_mock!(stream, {
+            let instr = stream.ldrh_imm_post_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "ldrh w0, [x3], #0xffffffffffffff00");
+
+            let instr = stream.ldrh_imm_post_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "ldrh w0, [sp], #0xff");
+
+            assert_panic!("Should panic: imm out of range"; stream.ldrh_imm_post_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldrh_imm_post_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_ldrh_imm_unsigned_offset() {
+        stream_mock!(stream, {
+            let instr = stream.ldrh_imm_unsigned_offset(0, 3, 0);
+            assert_eq!(instr.to_string(), "ldrh w0, [x3]");
+
+            let instr = stream.ldrh_imm_unsigned_offset(0, 0b11111, 2);
+            assert_eq!(instr.to_string(), "ldrh w0, [sp, #0x2]");
+
+            let instr = stream.ldrh_imm_unsigned_offset(0, 0b11111, 8190);
+            assert_eq!(instr.to_string(), "ldrh w0, [sp, #0x1ffe]");
+
+            assert_panic!("Should panic: pimm not multiply of 2"; stream.ldrh_imm_unsigned_offset(0, 3, 1));
+            assert_panic!("Should panic: imm out of range"; stream.ldrh_imm_unsigned_offset(0, 3, 8191));
+        })
+    }
+
+    // LDRSH Test Cases
+
+    #[test]
+    fn test_ldrsh_32_imm_pre_index() {
+        stream_mock!(stream, {
+            let instr = stream.ldrsh_32_imm_pre_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "ldrsh w0, [x3, #0xffffffffffffff00]!");
+
+            let instr = stream.ldrsh_32_imm_pre_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "ldrsh w0, [sp, #0xff]!");
+
+            assert_panic!("Should panic: imm out of range"; stream.ldrsh_32_imm_pre_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldrsh_32_imm_pre_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_ldrsh_32_imm_post_index() {
+        stream_mock!(stream, {
+            let instr = stream.ldrsh_32_imm_post_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "ldrsh w0, [x3], #0xffffffffffffff00");
+
+            let instr = stream.ldrsh_32_imm_post_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "ldrsh w0, [sp], #0xff");
+
+            assert_panic!("Should panic: imm out of range"; stream.ldrsh_32_imm_post_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldrsh_32_imm_post_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_ldrsh_32_imm_unsigned_offset() {
+        stream_mock!(stream, {
+            let instr = stream.ldrsh_32_imm_unsigned_offset(0, 3, 0);
+            assert_eq!(instr.to_string(), "ldrsh w0, [x3]");
+
+            let instr = stream.ldrsh_32_imm_unsigned_offset(0, 3, 2);
+            assert_eq!(instr.to_string(), "ldrsh w0, [x3, #0x2]");
+
+            let instr = stream.ldrsh_32_imm_unsigned_offset(0, 0b11111, 8190);
+            assert_eq!(instr.to_string(), "ldrsh w0, [sp, #0x1ffe]");
+
+            assert_panic!("Should panic: pimm not multiply of 2"; stream.ldrsh_32_imm_unsigned_offset(0, 3, 1));
+            assert_panic!("Should panic: imm out of range"; stream.ldrsh_32_imm_unsigned_offset(0, 3, 8191));
+        })
+    }
+
+    #[test]
+    fn test_ldrsh_64_imm_pre_index() {
+        stream_mock!(stream, {
+            let instr = stream.ldrsh_64_imm_pre_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "ldrsh x0, [x3, #0xffffffffffffff00]!");
+
+            let instr = stream.ldrsh_64_imm_pre_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "ldrsh x0, [sp, #0xff]!");
+
+            assert_panic!("Should panic: imm out of range"; stream.ldrsh_64_imm_pre_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldrsh_64_imm_pre_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_ldrsh_64_imm_post_index() {
+        stream_mock!(stream, {
+            let instr = stream.ldrsh_64_imm_post_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "ldrsh x0, [x3], #0xffffffffffffff00");
+
+            let instr = stream.ldrsh_64_imm_post_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "ldrsh x0, [sp], #0xff");
+
+            assert_panic!("Should panic: imm out of range"; stream.ldrsh_64_imm_post_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldrsh_64_imm_post_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_ldrsh_64_imm_unsigned_offset() {
+        stream_mock!(stream, {
+            let instr = stream.ldrsh_64_imm_unsigned_offset(0, 3, 0);
+            assert_eq!(instr.to_string(), "ldrsh x0, [x3]");
+
+            let instr = stream.ldrsh_64_imm_unsigned_offset(0, 3, 2);
+            assert_eq!(instr.to_string(), "ldrsh x0, [x3, #0x2]");
+
+            let instr = stream.ldrsh_64_imm_unsigned_offset(0, 0b11111, 8190);
+            assert_eq!(instr.to_string(), "ldrsh x0, [sp, #0x1ffe]");
+
+            assert_panic!("Should panic: pimm not multiply of 2"; stream.ldrsh_64_imm_unsigned_offset(0, 3, 1));
+            assert_panic!("Should panic: imm out of range"; stream.ldrsh_64_imm_unsigned_offset(0, 3, 8191));
+        })
+    }
+
+    // STR Imm Test Cases
+
+    #[test]
+    fn test_str_32_imm_pre_index() {
+        stream_mock!(stream, {
+            let instr = stream.str_32_imm_pre_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "str w0, [x3, #0xffffffffffffff00]!");
+
+            let instr = stream.str_32_imm_pre_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "str w0, [sp, #0xff]!");
+
+            assert_panic!("Should panic: imm out of range"; stream.str_32_imm_pre_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.str_32_imm_pre_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_str_32_imm_post_index() {
+        stream_mock!(stream, {
+            let instr = stream.str_32_imm_post_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "str w0, [x3], #0xffffffffffffff00");
+
+            let instr = stream.str_32_imm_post_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "str w0, [sp], #0xff");
+
+            assert_panic!("Should panic: imm out of range"; stream.str_32_imm_post_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.str_32_imm_post_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_str_32_imm_unsigned_offset() {
+        stream_mock!(stream, {
+            let instr = stream.str_32_imm_unsigned_offset(0, 3, 0);
+            assert_eq!(instr.to_string(), "str w0, [x3]");
+
+            let instr = stream.str_32_imm_unsigned_offset(0, 3, 4);
+            assert_eq!(instr.to_string(), "str w0, [x3, #0x4]");
+
+            let instr = stream.str_32_imm_unsigned_offset(0, 0b11111, 16380);
+            assert_eq!(instr.to_string(), "str w0, [sp, #0x3ffc]");
+
+            assert_panic!("Should panic: pimm not multiply of 4"; stream.str_32_imm_unsigned_offset(0, 3, 1));
+            assert_panic!("Should panic: imm out of range"; stream.str_32_imm_unsigned_offset(0, 3, 16381));
+        })
+    }
+
+    #[test]
+    fn test_str_64_imm_pre_index() {
+        stream_mock!(stream, {
+            let instr = stream.str_64_imm_pre_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "str x0, [x3, #0xffffffffffffff00]!");
+
+            let instr = stream.str_64_imm_pre_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "str x0, [sp, #0xff]!");
+
+            assert_panic!("Should panic: imm out of range"; stream.str_64_imm_pre_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.str_64_imm_pre_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_str_64_imm_post_index() {
+        stream_mock!(stream, {
+            let instr = stream.str_64_imm_post_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "str x0, [x3], #0xffffffffffffff00");
+
+            let instr = stream.str_64_imm_post_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "str x0, [sp], #0xff");
+
+            assert_panic!("Should panic: imm out of range"; stream.str_64_imm_post_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.str_64_imm_post_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_str_64_imm_unsigned_offset() {
+        stream_mock!(stream, {
+            let instr = stream.str_64_imm_unsigned_offset(0, 3, 0);
+            assert_eq!(instr.to_string(), "str x0, [x3]");
+
+            let instr = stream.str_64_imm_unsigned_offset(0, 3, 8);
+            assert_eq!(instr.to_string(), "str x0, [x3, #0x8]");
+
+            let instr = stream.str_64_imm_unsigned_offset(0, 0b11111, 32760);
+            assert_eq!(instr.to_string(), "str x0, [sp, #0x7ff8]");
+
+            assert_panic!("Should panic: pimm not multiply of 8"; stream.str_64_imm_unsigned_offset(0, 3, 1));
+            assert_panic!("Should panic: imm out of range"; stream.str_64_imm_unsigned_offset(0, 3, 32761));
+        })
+    }
+
+    // LDR Imm Test Cases
+
+    #[test]
+    fn test_ldr_32_imm_pre_index() {
+        stream_mock!(stream, {
+            let instr = stream.ldr_32_imm_pre_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "ldr w0, [x3, #0xffffffffffffff00]!");
+
+            let instr = stream.ldr_32_imm_pre_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "ldr w0, [sp, #0xff]!");
+
+            assert_panic!("Should panic: imm out of range"; stream.ldr_32_imm_pre_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldr_32_imm_pre_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_ldr_32_imm_post_index() {
+        stream_mock!(stream, {
+            let instr = stream.ldr_32_imm_post_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "ldr w0, [x3], #0xffffffffffffff00");
+
+            let instr = stream.ldr_32_imm_post_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "ldr w0, [sp], #0xff");
+
+            assert_panic!("Should panic: imm out of range"; stream.ldr_32_imm_post_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldr_32_imm_post_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_ldr_32_imm_unsigned_offset() {
+        stream_mock!(stream, {
+            let instr = stream.ldr_32_imm_unsigned_offset(0, 3, 0);
+            assert_eq!(instr.to_string(), "ldr w0, [x3]");
+
+            let instr = stream.ldr_32_imm_unsigned_offset(0, 3, 4);
+            assert_eq!(instr.to_string(), "ldr w0, [x3, #0x4]");
+
+            let instr = stream.ldr_32_imm_unsigned_offset(0, 0b11111, 16380);
+            assert_eq!(instr.to_string(), "ldr w0, [sp, #0x3ffc]");
+
+            assert_panic!("Should panic: pimm not multiply of 4"; stream.ldr_32_imm_unsigned_offset(0, 3, 1));
+            assert_panic!("Should panic: imm out of range"; stream.ldr_32_imm_unsigned_offset(0, 3, 16381));
+        })
+    }
+
+    #[test]
+    fn test_ldr_64_imm_pre_index() {
+        stream_mock!(stream, {
+            let instr = stream.ldr_64_imm_pre_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "ldr x0, [x3, #0xffffffffffffff00]!");
+
+            let instr = stream.ldr_64_imm_pre_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "ldr x0, [sp, #0xff]!");
+
+            assert_panic!("Should panic: imm out of range"; stream.ldr_64_imm_pre_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldr_64_imm_pre_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_ldr_64_imm_post_index() {
+        stream_mock!(stream, {
+            let instr = stream.ldr_64_imm_post_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "ldr x0, [x3], #0xffffffffffffff00");
+
+            let instr = stream.ldr_64_imm_post_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "ldr x0, [sp], #0xff");
+
+            assert_panic!("Should panic: imm out of range"; stream.ldr_64_imm_post_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldr_64_imm_post_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_ldr_64_imm_unsigned_offset() {
+        stream_mock!(stream, {
+            let instr = stream.ldr_64_imm_unsigned_offset(0, 3, 0);
+            assert_eq!(instr.to_string(), "ldr x0, [x3]");
+
+            let instr = stream.ldr_64_imm_unsigned_offset(0, 3, 8);
+            assert_eq!(instr.to_string(), "ldr x0, [x3, #0x8]");
+
+            let instr = stream.ldr_64_imm_unsigned_offset(0, 0b11111, 32760);
+            assert_eq!(instr.to_string(), "ldr x0, [sp, #0x7ff8]");
+
+            assert_panic!("Should panic: pimm not multiply of 8"; stream.ldr_64_imm_unsigned_offset(0, 3, 1));
+            assert_panic!("Should panic: imm out of range"; stream.ldr_64_imm_unsigned_offset(0, 3, 32761));
+        })
+    }
+
+    // STR Imm SIMD&FP Test Cases
 
     #[test]
     fn test_str_8_imm_simd_pre_index() {
@@ -498,6 +1065,97 @@ mod tests {
             assert_eq!(instr.to_string(), "str b0, [sp, #0xfff]");
 
             assert_panic!("Should panic: imm out of range"; stream.str_8_imm_simd_unsigned_offset(0, 3, 4096));
+        })
+    }
+
+    // LDRSW Imm Test Cases
+
+    #[test]
+    fn test_ldrsw_imm_pre_index() {
+        stream_mock!(stream, {
+            let instr = stream.ldrsw_imm_pre_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "ldrsw x0, [x3, #0xffffffffffffff00]!");
+
+            let instr = stream.ldrsw_imm_pre_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "ldrsw x0, [sp, #0xff]!");
+
+            assert_panic!("Should panic: imm out of range"; stream.ldrsw_imm_pre_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldrsw_imm_pre_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_ldrsw_imm_post_index() {
+        stream_mock!(stream, {
+            let instr = stream.ldrsw_imm_post_index(0, 3, -256);
+            assert_eq!(instr.to_string(), "ldrsw x0, [x3], #0xffffffffffffff00");
+
+            let instr = stream.ldrsw_imm_post_index(0, 0b11111, 255);
+            assert_eq!(instr.to_string(), "ldrsw x0, [sp], #0xff");
+
+            assert_panic!("Should panic: imm out of range"; stream.ldrsw_imm_post_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldrsw_imm_post_index(0, 3, 256));
+        })
+    }
+
+    #[test]
+    fn test_ldrsw_imm_unsigned_offset() {
+        stream_mock!(stream, {
+            let instr = stream.ldrsw_imm_unsigned_offset(0, 3, 0);
+            assert_eq!(instr.to_string(), "ldrsw x0, [x3]");
+
+            let instr = stream.ldrsw_imm_unsigned_offset(0, 0b11111, 4);
+            assert_eq!(instr.to_string(), "ldrsw x0, [sp, #0x4]");
+
+            let instr = stream.ldrsw_imm_unsigned_offset(0, 0b11111, 16380);
+            assert_eq!(instr.to_string(), "ldrsw x0, [sp, #0x3ffc]");
+
+            assert_panic!("Should panic: pimm not multiply of 4"; stream.ldrsw_imm_unsigned_offset(0, 3, 1));
+            assert_panic!("Should panic: imm out of range"; stream.ldrsw_imm_unsigned_offset(0, 3, 16381));
+        })
+    }
+
+    // PRFM Imm Test Cases
+
+    #[test]
+    fn test_prfm_imm_prfop() {
+        stream_mock!(stream, {
+
+            let prfop = PrfOp(PLD, L1, KEEP);
+            let instr = stream.prfm_imm_prfop(prfop, 3, 0x0);
+            assert_eq!(instr.to_string(), "prfm pldl1keep, [x3]");
+
+            let prfop = PrfOp(PLI, L2, STRM);
+            let instr = stream.prfm_imm_prfop(prfop, 3, 0x8);
+            assert_eq!(instr.to_string(), "prfm plil2strm, [x3, #0x8]");
+
+            let prfop = PrfOp(PST, L3, KEEP);
+            let instr = stream.prfm_imm_prfop(prfop, 3, 32760);
+            assert_eq!(instr.to_string(), "prfm pstl3keep, [x3, #0x7ff8]");
+
+
+            assert_panic!("Should panic: pimm not multiply of 8"; stream.prfm_imm_prfop(prfop, 3, 1));
+            assert_panic!("Should panic: imm out of range"; stream.prfm_imm_prfop(prfop, 3, 32761));
+        })
+    }
+
+    #[test]
+    fn test_prfm_imm_custom() {
+        stream_mock!(stream, {
+
+            let cust = PrfOp(PLD, L1, KEEP).encode();
+            let instr = stream.prfm_imm_custom(cust, 3, 0x0);
+            assert_eq!(instr.to_string(), "prfm pldl1keep, [x3]");
+
+            let instr = stream.prfm_imm_custom(cust, 3, 0x8);
+            assert_eq!(instr.to_string(), "prfm pldl1keep, [x3, #0x8]");
+
+            let instr = stream.prfm_imm_custom(cust, 3, 32760);
+            assert_eq!(instr.to_string(), "prfm pldl1keep, [x3, #0x7ff8]");
+
+            assert_panic!("Should panic: custom out of range"; stream.prfm_imm_custom(32, 3, 32760));
+            assert_panic!("Should panic: pimm not multiply of 8"; stream.prfm_imm_custom(0, 3, 1));
+            assert_panic!("Should panic: imm out of range"; stream.prfm_imm_custom(0, 3, 32761));
         })
     }
 

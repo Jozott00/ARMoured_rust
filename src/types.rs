@@ -3,6 +3,7 @@ use crate::types::HW::{LSL0, LSL16, LSL32, LSL48};
 pub mod shifts;
 pub mod bitmask_immediate;
 pub mod instruction;
+pub mod prefetch_memory;
 
 pub type Instruction = u32;
 pub type InstructionPointer = *mut Instruction;
@@ -19,6 +20,7 @@ pub type Imm5 = u8;
 
 pub type UImm12 = u16;
 pub type UImm6 = u8;
+pub type UImm5 = u8;
 pub type UImm4 = u8;
 
 pub type Offset32 = i32;
