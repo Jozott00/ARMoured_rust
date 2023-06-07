@@ -35,6 +35,7 @@ fn main() {
     stream.caspal_64(0, 1, 4, 5, 0);
     stream.caspl_32(0, 1, 4, 5, 0);
     stream.caspl_64(0, 1, 4, 5, 0);
+    stream.strb_pre_index(0, 3, -256);
 
     stream.patch_at(stream.base_ptr(), |s| {
         s.movn_64_imm(1, 4);

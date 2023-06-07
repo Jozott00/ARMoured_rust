@@ -5,3 +5,4 @@
 
 
 pub mod compare_and_swap_pair;
+pub mod load_store_reg_uimm;

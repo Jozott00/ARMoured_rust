@@ -13,9 +13,11 @@ pub type Imm32 = u32;
 pub type Imm16 = u16;
 pub type Imm13 = u16;
 pub type Imm12 = u16;
+pub type Imm9 = i16;
 pub type Imm6 = u8;
 pub type Imm5 = u8;
 
+pub type UImm12 = u16;
 pub type UImm6 = u8;
 pub type UImm4 = u8;
 
