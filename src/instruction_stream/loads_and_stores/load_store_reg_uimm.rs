@@ -1,6 +1,18 @@
-//! # Compare and swap pair
+//! # Load/Store Reg (unsigned immediate)
 //!
 //! Implements the following instructions:
+//! - STRB (immediate)
+//! - LDRB (immediate)
+//! - LDRSB (immediate)
+//! - STR (immediate)
+//! - LDR (immediate)
+//! - STRH (immediate)
+//! - LDRH (immediate)
+//! - LDRSH (immediate)
+//! - LDRSW (immediate)
+//! - PRFM (immediate)
+//! - STR (immediate, SIMD&FP)
+//! - LDR (immediate, SIMD&FP)
 
 use bit_seq::{bseq_16, bseq_32};
 use crate::instruction_emitter::Emitter;
