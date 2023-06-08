@@ -79,7 +79,7 @@ mod tests {
     use super::*;
     use crate::mc_memory::MockMemory;
     use crate::instruction_emitter::MockEmitter;
-    use crate::{stream_mock, assert_panic};
+    use crate::{stream_mock};
     use crate::types::InstructionPointer;
 
     #[test]

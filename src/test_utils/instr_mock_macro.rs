@@ -1,3 +1,4 @@
+#[cfg(test)]
 #[macro_export]
 macro_rules! stream_mock {
     ($stream:ident, $($body:tt)*) => {{
@@ -11,10 +12,7 @@ macro_rules! stream_mock {
         emitter.expect_instr_ptr().returning(|| 0 as InstructionPointer);
         emitter.expect_emit().returning(|_| ());
 
-        let mut $stream = InstrStream {
-            mem: &mut mem,
-            emitter,
-        };
+        let mut $stream = InstrStream::new_mocked(&mut mem, emitter);
 
         $($body)*
     }};

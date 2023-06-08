@@ -86,3 +86,19 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
         unsafe { slice::from_raw_parts(ptr, len) }
     }
 }
+
+#[cfg(test)]
+mod mocking_util {
+    use crate::mc_memory::MockMemory;
+    use crate::instruction_emitter::MockEmitter;
+    use crate::instruction_stream::InstrStream;
+
+    impl<'mem> InstrStream<'mem, MockMemory, MockEmitter> {
+        pub fn new_mocked(mem: &'mem mut MockMemory, emitter: MockEmitter) -> Self {
+            InstrStream {
+                mem,
+                emitter,
+            }
+        }
+    }
+}
