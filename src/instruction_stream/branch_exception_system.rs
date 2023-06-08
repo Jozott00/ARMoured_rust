@@ -4,7 +4,9 @@
 //! - [Conditional branch (immediate)](conditional_branch_imm)
 //! - [Exception generation](exception_generation)
 //! - [System instructions with register argument](system_instr_w_register_arg)
+//! - [Barriers](barriers)
 
 pub mod conditional_branch_imm;
 pub mod exception_generation;
 pub mod system_instr_w_register_arg;
+pub mod barriers;

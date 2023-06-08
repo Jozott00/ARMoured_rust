@@ -6,6 +6,7 @@ pub mod instruction;
 pub mod prefetch_memory;
 pub mod encodable;
 pub mod condition;
+pub mod mem_barrier_option;
 
 pub type Instruction = u32;
 pub type InstructionPointer = *mut Instruction;
