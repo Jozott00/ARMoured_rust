@@ -4,6 +4,8 @@ pub mod shifts;
 pub mod bitmask_immediate;
 pub mod instruction;
 pub mod prefetch_memory;
+pub mod encodable;
+pub mod condition;
 
 pub type Instruction = u32;
 pub type InstructionPointer = *mut Instruction;
@@ -11,6 +13,7 @@ pub type InstructionPointer = *mut Instruction;
 pub type Register = u8;
 pub type Imm64 = u64;
 pub type Imm32 = u32;
+pub type Imm19 = i32;
 pub type Imm16 = u16;
 pub type Imm13 = u16;
 pub type Imm12 = u16;
@@ -18,10 +21,12 @@ pub type Imm9 = i16;
 pub type Imm6 = u8;
 pub type Imm5 = u8;
 
+pub type UImm16 = u16;
 pub type UImm12 = u16;
 pub type UImm6 = u8;
 pub type UImm5 = u8;
 pub type UImm4 = u8;
+pub type UImm1 = u8;
 
 pub type Offset32 = i32;
 pub type Offset64 = i64;

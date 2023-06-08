@@ -7,11 +7,11 @@ use std::fs;
 use std::io::Result;
 use crate::types::prefetch_memory::{PrfOp, PrfPolicy, PrfTarget, PrfType};
 
-mod mc_memory;
-mod instruction_emitter;
-mod types;
-mod instruction_stream;
-mod test_utils;
+pub mod mc_memory;
+pub mod instruction_emitter;
+pub mod types;
+pub mod instruction_stream;
+pub mod test_utils;
 
 fn main() {
     let mut mem = McMemory::new_pagesize();

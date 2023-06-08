@@ -11,6 +11,8 @@ use crate::types::instruction::Instr;
 pub mod data_proc_imm;
 pub mod ret;
 pub mod loads_and_stores;
+pub mod branch_exception_system;
+mod utils;
 
 pub type PatchFn<M: Memory, E: Emitter> = fn(&mut InstrStream<M, E>) -> ();
 

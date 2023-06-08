@@ -1,5 +1,5 @@
 mod instruction_emitter;
-mod mc_memory;
-mod types;
-mod instruction_stream;
+pub mod mc_memory;
+pub mod types;
+pub mod instruction_stream;
 mod test_utils;

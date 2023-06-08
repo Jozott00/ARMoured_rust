@@ -1,6 +1,8 @@
 //! # Load Register (literal)
 //!
 //! Implements the following instructions:
+//! - LDRSW \<Xt>, \<imm32> - offset instead of label
+//! - LDRSW \<Xt>, \<imm32> - addr instead of label
 
 use bit_seq::{bseq_32};
 use crate::instruction_emitter::Emitter;
@@ -15,12 +17,14 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
 
     // Helper function -> Actual emits
 
+    /// Encodes and emits an instruction for Load Register(LDR) using its parameters.
     #[inline(always)]
     fn emit_ldr_x(&mut self, opc: u8, V: u8, imm19: u32, rt: Register) -> Instr {
         let r = bseq_32!(opc:2 011 V:1 00 imm19:19 rt:5);
         self.emit(r)
     }
 
+    /// Uses the provided offset to calculate the immediate for the LDR instruction and then calls emit_ldr_x to encode and emit the instruction.
     #[inline(always)]
     fn emit_ldr_x_offset(&mut self, opc: u8, V: u8, offset: Offset32, rt: Register) -> Instr {
         debug_assert!(-(1 << 20) <= offset && offset < (1 << 20), "Offset must be within ±1MB");
@@ -29,6 +33,7 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
         self.emit_ldr_x(opc, V, imm19 as u32, rt)
     }
 
+    /// Calculates the offset from the program counter to the provided address, and then calls emit_ldr_x_offset to encode and emit the instruction.
     #[inline(always)]
     fn emit_ldr_x_addr(&mut self, opc: u8, V: u8, addr: usize, rt: Register) -> Instr {
         debug_assert!(addr % 4 == 0, "Addr must be 4 byte aligned!");
@@ -44,29 +49,41 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
 
     // LDRSW (literal)
 
+    /// Emits an LDRSW (Load Register Signed Word) instruction with a literal from the program counter with a provided offset.
+    #[inline(always)]
     pub fn ldrsw_pc_rel_from_byte_offset(&mut self, xt: Register, offset: Offset32) -> Instr {
         self.emit_ldr_x_offset(0b10, 0, offset, xt)
     }
 
+    /// Emits an LDRSW (Load Register Signed Word) instruction with a literal from the program counter to a provided address.
+    #[inline(always)]
     pub fn ldrsw_pc_rel_from_addr(&mut self, xt: Register, addr: usize) -> Instr {
         self.emit_ldr_x_addr(0b10, 0, addr, xt)
     }
 
     // PRFM (literal)
 
+    /// Emits a PRFM (Prefetch Memory) instruction using a provided prefetch operation and an offset from the program counter.
+    #[inline(always)]
     pub fn prfm_pc_rel_prfop_from_byte_offset(&mut self, prfop: PrfOp, offset: Offset32) -> Instr {
         self.emit_ldr_x_offset(0b11, 0, offset, prfop.encode())
     }
 
+    /// Emits a PRFM (Prefetch Memory) instruction using a provided prefetch operation and an address.
+    #[inline(always)]
     pub fn prfm_pc_rel_prfop_from_addr(&mut self, prfop: PrfOp, addr: usize) -> Instr {
         self.emit_ldr_x_addr(0b11, 0, addr, prfop.encode())
     }
 
+    /// Emits a PRFM (Prefetch Memory) instruction using a custom immediate and an offset from the program counter.
+    #[inline(always)]
     pub fn prfm_pc_rel_custom_from_byte_offset(&mut self, imm5: UImm5, offset: Offset32) -> Instr {
         debug_assert!(imm5 <= 31, "imm5 must be in range 0 to 31, was {}", imm5);
         self.emit_ldr_x_offset(0b11, 0, offset, imm5)
     }
 
+    /// Emits a PRFM (Prefetch Memory) instruction using a custom immediate and an address.
+    #[inline(always)]
     pub fn prfm_pc_rel_custom_from_addr(&mut self, imm5: UImm5, addr: usize) -> Instr {
         debug_assert!(imm5 <= 31, "imm5 must be in range 0 to 31, was {}", imm5);
         self.emit_ldr_x_addr(0b11, 0, addr, imm5)
@@ -74,24 +91,28 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
 
     // LDR (literal) instructions
 
+    /// Emits an LDR (Load Register) 32-bit instruction from a provided offset via pc relative addressing.
     #[inline(always)]
     pub fn ldr_32_pc_rel_from_byte_offset(&mut self, wt: Register, offset: Offset32) -> Instr {
         // LDR (literal)
         self.emit_ldr_x_offset(0b00, 0, offset, wt)
     }
 
+    /// Emits an LDR (Load Register) 64-bit instruction from a provided offset via pc relative addressing.
     #[inline(always)]
     pub fn ldr_64_pc_rel_from_byte_offset(&mut self, xt: Register, offset: Offset32) -> Instr {
         // LDR (literal)
         self.emit_ldr_x_offset(0b01, 0, offset, xt)
     }
 
+    /// Emits an LDR (Load Register) 32-bit instruction from a provided address via pc relative addressing.
     #[inline(always)]
     pub fn ldr_32_pc_rel_from_addr(&mut self, wt: Register, addr: usize) -> Instr {
         // LDR (literal)
         self.emit_ldr_x_addr(0b00, 0, addr, wt)
     }
 
+    /// Emits an LDR (Load Register) 64-bit instruction from a provided address via pc relative addressing.
     #[inline(always)]
     pub fn ldr_64_pc_rel_from_addr(&mut self, xt: Register, addr: usize) -> Instr {
         // LDR (literal)

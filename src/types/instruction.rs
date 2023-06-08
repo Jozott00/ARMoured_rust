@@ -18,7 +18,9 @@ impl Instr {
 
     pub fn to_string(&self) -> String {
         let Ok(decoded) = decode(self.enc, self.ptr as u64) else {
-            return format!("<unknown instruction {:#x} >", self.enc.to_le());
+            let encoding = self.enc.to_le_bytes();
+            let enc_str = encoding.map(|e| format!("{e:02x}")).join(" ");
+            return format!("<unknown instruction: {enc_str}>");
         };
 
         format!("{decoded}")
