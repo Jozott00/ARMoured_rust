@@ -11,3 +11,4 @@ pub mod exception_generation;
 pub mod system_instr_w_register_arg;
 pub mod barriers;
 pub mod pstate;
+pub mod system_instructions;

@@ -8,6 +8,7 @@ pub mod encodable;
 pub mod condition;
 pub mod mem_barrier_option;
 pub mod pstate;
+pub mod sys_ops;
 
 pub type Instruction = u32;
 pub type InstructionPointer = *mut Instruction;
@@ -28,6 +29,7 @@ pub type UImm12 = u16;
 pub type UImm6 = u8;
 pub type UImm5 = u8;
 pub type UImm4 = u8;
+pub type UImm3 = u8;
 pub type UImm1 = u8;
 
 pub type Offset32 = i32;

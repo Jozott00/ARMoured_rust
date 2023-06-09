@@ -25,6 +25,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     }
 
     /// [SVC - Supervisor Call](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SVC--Supervisor-Call-?lang=en)
+    ///
+    /// `SVC #<imm>`
     #[inline(always)]
     pub fn svc(&mut self, imm: UImm16) -> Instr {
         self.emit_exception_gen_x(0b000, imm, 0b000, 0b01)
