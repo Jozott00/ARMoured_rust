@@ -26,43 +26,74 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
         self.emit(i)
     }
 
+    /// [CLREX](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CLREX--Clear-Exclusive-?lang=en)
+    ///
+    /// `CLREX #<imm>`
     pub fn clrex(&mut self, imm: UImm4) -> Instr {
         self.emit_barrier_x(imm, 0b010, 0b11111)
     }
 
+    /// [DSB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/DSB--Data-Synchronization-Barrier-?lang=en)
+    ///
+    /// `DSB <option>`
     pub fn dsb_mem_barrier_option(&mut self, option: MemBarrierOpt) -> Instr {
         self.emit_barrier_x(option.encode(), 0b100, 0b11111)
     }
 
+    /// [DSB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/DSB--Data-Synchronization-Barrier-?lang=en)
+    ///
+    /// `DSB #<imm>`
     pub fn dsb_mem_barrier_imm(&mut self, imm: UImm4) -> Instr {
         self.emit_barrier_x(imm, 0b100, 0b11111)
     }
 
+    /// [DMB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/DMB--Data-Memory-Barrier-?lang=en)
+    ///
+    /// `DMB <option>`
     pub fn dmb_option(&mut self, option: MemBarrierOpt) -> Instr {
         self.emit_barrier_x(option.encode(), 0b101, 0b11111)
     }
 
+    /// [DMB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/DMB--Data-Memory-Barrier-?lang=en)
+    ///
+    /// `DMB #<imm>`
     pub fn dmb_imm(&mut self, imm: UImm4) -> Instr {
         self.emit_barrier_x(imm, 0b101, 0b11111)
     }
 
+    /// [ISB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ISB--Instruction-Synchronization-Barrier-?lang=en)
+    ///
+    /// `ISB sy`
     pub fn isb_sy(&mut self) -> Instr {
         self.emit_barrier_x(MemBarrierOpt::SY.encode(), 0b110, 0b11111)
     }
 
+    /// [ISB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ISB--Instruction-Synchronization-Barrier-?lang=en)
+    ///
+    /// `ISB #<imm>`
     pub fn isb_imm(&mut self, imm: UImm4) -> Instr {
         self.emit_barrier_x(imm, 0b110, 0b11111)
     }
 
+    /// [SB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SB--Speculation-Barrier-?lang=en)
+    ///
+    /// `SB`
     pub fn sb(&mut self) -> Instr {
         self.emit_barrier_x(0, 0b111, 0b11111)
     }
 
+    /// [DSB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/DSB--Data-Synchronization-Barrier-?lang=en)
+    ///
+    /// `DSB <option>nXS`
     pub fn dsb_mem_nxs_barrier_option(&mut self, option: MemNXSBarrierOpt) -> Instr {
         let option = option.encode();
         self.emit_barrier_x(bseq_8!(option:2 10), 0b001, 0b11111)
     }
 
+
+    /// [DSB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/DSB--Data-Synchronization-Barrier-?lang=en)
+    ///
+    /// `DSB nXS<#imm>`
     pub fn dsb_mem_nxs_barrier_imm(&mut self, imm: UImm4) -> Instr {
         debug_assert!([16, 20, 24, 28].contains(&imm), "imm must be one of 16, 20, 24, 28, was {}", imm);
         let imm = imm >> 2;
@@ -71,10 +102,16 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
 
     // aliases
 
+    /// [PSSBB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PSSBB--Physical-Speculative-Store-Bypass-Barrier--an-alias-of-DSB-?lang=en)
+    ///
+    /// `PSSBB`
     pub fn pssbb(&mut self) -> Instr {
         self.dsb_mem_barrier_imm(0b0100)
     }
 
+    /// [SSBB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SSBB--Speculative-Store-Bypass-Barrier--an-alias-of-DSB-?lang=en)
+    ///
+    /// `SSBB`
     pub fn ssbb(&mut self) -> Instr {
         self.dsb_mem_barrier_imm(0b0000)
     }
