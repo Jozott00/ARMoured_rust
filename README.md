@@ -1,9 +1,25 @@
 # ARMoured_rust
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jozott00/armoured_rust/tests.yml?logo=github)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jozott00/armoured_rust/tests.yml?logo=github&label=tests)
 [![codecov](https://codecov.io/gh/Jozott00/ARMoured_rust/branch/main/graph/badge.svg?token=G3ZKEBKPEV)](https://codecov.io/gh/Jozott00/ARMoured_rust)
 
 Provides a convenient API to produce arm64/Aarch64 instructions.
+
+## Instruction Support
+
+The instruction implementations
+are [indexed by Encoding](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding).
+
+| Status | Instruction Types                                                                                                                                                                                          |
+|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ❌      | [SVE encodings](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/SVE-encodings?lang=en)                                                                                           |
+| 🚧     | [Data Processing -- Immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Data-Processing----Immediate?lang=en)                                                             |
+| 🚧     | [Branches, Exception Generating and System instructions](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Branches--Exception-Generating-and-System-instructions?lang=en)         |
+| 🚧     | [Loads and Stores](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Loads-and-Stores?lang=en)                                                                                     |
+| ❌      | [Data Processing -- Register](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Data-Processing----Register?lang=en)                                                               |
+| ❌      | [Data Processing -- Scalar Floating-Point and Advanced SIMD](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Data-Processing----Scalar-Floating-Point-and-Advanced-SIMD?lang=en) |
+
+*Note: Status ❌ means "not yet supported"*
 
 ## Example
 
