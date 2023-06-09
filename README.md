@@ -3,7 +3,7 @@
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jozott00/armoured_rust/tests.yml?logo=github)
 [![codecov](https://codecov.io/gh/Jozott00/ARMoured_rust/branch/main/graph/badge.svg?token=G3ZKEBKPEV)](https://codecov.io/gh/Jozott00/ARMoured_rust)
 
-Provides a convient API to produce arm64/Aarch64 instructions.
+Provides a convenient API to produce arm64/Aarch64 instructions.
 
 ## Example
 
