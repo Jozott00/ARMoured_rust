@@ -30,6 +30,7 @@ pub type UImm6 = u8;
 pub type UImm5 = u8;
 pub type UImm4 = u8;
 pub type UImm3 = u8;
+pub type UImm2 = u8;
 pub type UImm1 = u8;
 
 pub type Offset32 = i32;
