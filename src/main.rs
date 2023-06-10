@@ -6,6 +6,7 @@ use crate::types::{HW, Imm32, Imm64};
 use std::fs;
 use std::io::Result;
 use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
+use crate::instruction_stream::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
 use crate::types::prefetch_memory::{PrfOp, PrfPolicy, PrfTarget, PrfType};
 
 pub mod mc_memory;

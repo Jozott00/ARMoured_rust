@@ -14,6 +14,7 @@
 
 use bit_seq::{bseq_32, bseq_8};
 use crate::instruction_emitter::Emitter;
+use crate::instruction_encoding::InstructionProcessor;
 use crate::instruction_stream::InstrStream;
 use crate::mc_memory::Memory;
 use crate::types::instruction::Instr;
@@ -23,56 +24,64 @@ use crate::types::sys_ops::at_op::AtOp;
 use crate::types::sys_ops::dc_op::DcOp;
 use crate::types::sys_ops::ic_op::IcOp;
 
-impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
-    #[inline(always)]
-    fn emit_uncond_br_reg(&mut self, opc: u8, op2: u8, op3: u8, rn: Register, op4: u8) -> Instr {
-        let i = bseq_32!(1101011 opc:4 op2:5 op3:6 rn:5 op4:5);
-        self.emit(i)
-    }
+#[inline(always)]
+fn emit_uncond_br_reg<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, op2: u8, op3: u8, rn: Register, op4: u8) -> T {
+    let i = bseq_32!(1101011 opc:4 op2:5 op3:6 rn:5 op4:5);
+    proc.emit(i)
+}
 
-    fn emit_br_x(&mut self, z: u8, op: u8, a: u8, m: u8, rn: Register, rm: Register) -> Instr {
-        let opc = bseq_8!(z:1 0 op:2);
-        let op3 = bseq_8!(a:1 m:1);
-        self.emit_uncond_br_reg(opc, 0b11111, op3, rn, rm)
-    }
+#[inline(always)]
+fn emit_br_x<P: InstructionProcessor<T>, T>(proc: &mut P, z: u8, op: u8, a: u8, m: u8, rn: Register, rm: Register) -> T {
+    let opc = bseq_8!(z:1 0 op:2);
+    let op3 = bseq_8!(a:1 m:1);
+    emit_uncond_br_reg(proc, opc, 0b11111, op3, rn, rm)
+}
 
-
+pub trait UnconditionalBranchRegister<T>: InstructionProcessor<T> {
     /// [BR](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BR--Branch-to-Register-?lang=en)
     ///
-    /// `BR <Xn>`
+    /// ```asm
+    /// BR <Xn>
+    /// ```
     #[inline(always)]
-    pub fn br(&mut self, xn: Register) -> Instr {
-        self.emit_br_x(0, 0, 0, 0, xn, 0)
+    fn br(&mut self, xn: Register) -> T {
+        emit_br_x(self, 0, 0, 0, 0, xn, 0)
     }
 
     /// [BRAAZ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BRAA--BRAAZ--BRAB--BRABZ--Branch-to-Register--with-pointer-authentication-?lang=en)
     ///
-    /// `BRAAZ <Xn>`
+    /// ```asm
+    /// BRAAZ <Xn>
+    /// ```
     ///
     /// *Note*: FEAT_PAuth required
     #[inline(always)]
-    pub fn braaz(&mut self, xn: Register) -> Instr {
-        self.emit_br_x(0, 0, 1, 0, xn, 0b11111)
+    fn braaz(&mut self, xn: Register) -> T {
+        emit_br_x(self, 0, 0, 1, 0, xn, 0b11111)
     }
 
     /// [BRAA](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BRAA--BRAAZ--BRAB--BRABZ--Branch-to-Register--with-pointer-authentication-?lang=en)
     ///
-    /// `BRAA <Xn>,<Xm|SP>`
+    /// ```asm
+    /// BRAA <Xn>,<Xm|SP>
+    /// ```
     ///
     /// *Note*: FEAT_PAuth required
     #[inline(always)]
-    pub fn braa(&mut self, xn: Register, xm_sp: Register) -> Instr {
-        self.emit_br_x(1, 0, 1, 0, xn, xm_sp)
+    fn braa(&mut self, xn: Register, xm_sp: Register) -> T {
+        emit_br_x(self, 1, 0, 1, 0, xn, xm_sp)
     }
 
     /// [BRABZ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BRAA--BRAAZ--BRAB--BRABZ--Branch-to-Register--with-pointer-authentication-?lang=en)
     ///
-    /// `BRABZ <Xn>`
+    /// ```asm
+    /// BRABZ <Xn>
+    /// ```
     ///
     /// *Note*: FEAT_PAuth required
     #[inline(always)]
-    pub fn brabz(&mut self, xn: Register) -> Instr {
-        self.emit_br_x(0, 0, 1, 1, xn, 0b11111)
+    fn brabz(&mut self, xn: Register) -> T {
+        emit_br_x(self, 0, 0, 1, 1, xn, 0b11111)
     }
 
     /// [BRAB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BRAA--BRAAZ--BRAB--BRABZ--Branch-to-Register--with-pointer-authentication-?lang=en)
@@ -83,8 +92,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     ///
     /// *Note*: FEAT_PAuth required
     #[inline(always)]
-    pub fn brab(&mut self, xn: Register, xm_sp: Register) -> Instr {
-        self.emit_br_x(1, 0, 1, 1, xn, xm_sp)
+    fn brab(&mut self, xn: Register, xm_sp: Register) -> T {
+        emit_br_x(self, 1, 0, 1, 1, xn, xm_sp)
     }
 
     /// [BLR](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BLR--Branch-with-Link-to-Register-?lang=en)
@@ -93,8 +102,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// BLR <Xn>
     /// ```
     #[inline(always)]
-    pub fn blr(&mut self, xn: Register) -> Instr {
-        self.emit_br_x(0, 1, 0, 0, xn, 0)
+    fn blr(&mut self, xn: Register) -> T {
+        emit_br_x(self, 0, 1, 0, 0, xn, 0)
     }
 
 
@@ -104,8 +113,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// BLRAAZ <Xn>
     /// ```
     #[inline(always)]
-    pub fn blraaz(&mut self, xn: Register) -> Instr {
-        self.emit_br_x(0, 1, 1, 0, xn, 0b11111)
+    fn blraaz(&mut self, xn: Register) -> T {
+        emit_br_x(self, 0, 1, 1, 0, xn, 0b11111)
     }
 
 
@@ -115,8 +124,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// BLRAA <Xn>, <Xm|SP>
     /// ```
     #[inline(always)]
-    pub fn blraa(&mut self, xn: Register, xm_sp: Register) -> Instr {
-        self.emit_br_x(1, 1, 1, 0, xn, xm_sp)
+    fn blraa(&mut self, xn: Register, xm_sp: Register) -> T {
+        emit_br_x(self, 1, 1, 1, 0, xn, xm_sp)
     }
 
 
@@ -126,8 +135,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// BLRABZ <Xn>
     /// ```
     #[inline(always)]
-    pub fn blrabz(&mut self, xn: Register) -> Instr {
-        self.emit_br_x(0, 1, 1, 1, xn, 0b11111)
+    fn blrabz(&mut self, xn: Register) -> T {
+        emit_br_x(self, 0, 1, 1, 1, xn, 0b11111)
     }
 
 
@@ -137,8 +146,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// BLRAB <Xn>, <Xm|SP>
     /// ```
     #[inline(always)]
-    pub fn blrab(&mut self, xn: Register, xm_sp: Register) -> Instr {
-        self.emit_br_x(1, 1, 1, 1, xn, xm_sp)
+    fn blrab(&mut self, xn: Register, xm_sp: Register) -> T {
+        emit_br_x(self, 1, 1, 1, 1, xn, xm_sp)
     }
 
 
@@ -148,8 +157,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// RET <Xn>
     /// ```
     #[inline(always)]
-    pub fn ret_reg(&mut self, xn: Register) -> Instr {
-        self.emit_br_x(0, 0b10, 0, 0, xn, 0)
+    fn ret_reg(&mut self, xn: Register) -> T {
+        emit_br_x(self, 0, 0b10, 0, 0, xn, 0)
     }
 
     /// [RET](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/RET--Return-from-subroutine-?lang=en)
@@ -160,7 +169,7 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// RET
     /// ```
     #[inline(always)]
-    pub fn ret(&mut self) -> Instr {
+    fn ret(&mut self) -> T {
         self.ret_reg(30)
     }
 
@@ -170,8 +179,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// RETAA
     /// ```
     #[inline(always)]
-    pub fn retaa(&mut self) -> Instr {
-        self.emit_br_x(0, 0b10, 1, 0, 0b11111, 0b11111)
+    fn retaa(&mut self) -> T {
+        emit_br_x(self, 0, 0b10, 1, 0, 0b11111, 0b11111)
     }
 
     /// [RETAA](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/RETAA--RETAB--Return-from-subroutine--with-pointer-authentication-?lang=en)
@@ -180,8 +189,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// RETAB
     /// ```
     #[inline(always)]
-    pub fn retab(&mut self) -> Instr {
-        self.emit_br_x(0, 0b10, 1, 1, 0b11111, 0b11111)
+    fn retab(&mut self) -> T {
+        emit_br_x(self, 0, 0b10, 1, 1, 0b11111, 0b11111)
     }
 
     /// [ERET](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ERET--Exception-Return-?lang=en)
@@ -190,8 +199,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// ERET
     /// ```
     #[inline(always)]
-    pub fn eret(&mut self) -> Instr {
-        self.emit_uncond_br_reg(0b0100, 0b11111, 0, 0b11111, 0)
+    fn eret(&mut self) -> T {
+        emit_uncond_br_reg(self, 0b0100, 0b11111, 0, 0b11111, 0)
     }
 
     /// [ERETAA](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ERETAA--ERETAB--Exception-Return--with-pointer-authentication-?lang=en)
@@ -203,8 +212,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// *Info*: `FEAT_PAuth` required \
     /// **Warning**: not tested
     #[inline(always)]
-    pub fn eretaa(&mut self) -> Instr {
-        self.emit_uncond_br_reg(0b0100, 0b11111, 0b10, 0b11111, 0)
+    fn eretaa(&mut self) -> T {
+        emit_uncond_br_reg(self, 0b0100, 0b11111, 0b10, 0b11111, 0)
     }
 
     /// [ERETAB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ERETAA--ERETAB--Exception-Return--with-pointer-authentication-?lang=en)
@@ -216,8 +225,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// *Info*: `FEAT_PAuth` required \
     /// **Warning**: not tested
     #[inline(always)]
-    pub fn eretab(&mut self) -> Instr {
-        self.emit_uncond_br_reg(0b0100, 0b11111, 0b11, 0b11111, 0)
+    fn eretab(&mut self) -> T {
+        emit_uncond_br_reg(self, 0b0100, 0b11111, 0b11, 0b11111, 0)
     }
 
 
@@ -227,8 +236,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// DRPS
     /// ```
     #[inline(always)]
-    pub fn drps(&mut self) -> Instr {
-        self.emit_uncond_br_reg(0b0101, 0b11111, 0, 0b11111, 0)
+    fn drps(&mut self) -> T {
+        emit_uncond_br_reg(self, 0b0101, 0b11111, 0, 0b11111, 0)
     }
 }
 
