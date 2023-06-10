@@ -26,6 +26,7 @@ pub type Imm5 = u8;
 
 pub type UImm16 = u16;
 pub type UImm12 = u16;
+pub type UImm10 = u16;
 pub type UImm6 = u8;
 pub type UImm5 = u8;
 pub type UImm4 = u8;

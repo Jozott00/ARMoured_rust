@@ -15,7 +15,7 @@ use crate::instruction_encoding::InstructionProcessor;
 
 use crate::instruction_stream::InstrStream;
 use crate::mc_memory::Memory;
-use crate::types::{Imm12, Register};
+use crate::types::{Imm12, Register, UImm10, UImm4, UImm6};
 use crate::types::shifts::Shift1;
 
 /// The `add_sub_imm` function is a helper function to generate ADD/SUB instructions
@@ -29,6 +29,13 @@ fn emit_add_sub_imm_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op: u
     let r = bseq_32!(sf:1 op:1 S:1 10001 0 shift:1 imm12:12 rn:5 rd:5);
     proc.emit(r)
 }
+
+#[inline(always)]
+fn emit_add_sub_imm_w_tags_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op: u8, S: u8, o2: u8, uimm6: u8, op3: u8, uimm4: u8, rn: Register, rd: Register) -> T {
+    let r = bseq_32!(sf:1 op:1 S:1 100011 o2:1 uimm6:6 op3:2 uimm4:4 rn:5 rd:5);
+    proc.emit(r)
+}
+
 
 pub trait AddSubtractImmediate<T>: InstructionProcessor<T> {
     /// Generates a 32-bit ADD instruction with immediate value. The immediate value is provided
@@ -149,10 +156,40 @@ pub trait AddSubtractImmediate<T>: InstructionProcessor<T> {
     fn subs_64_imm_lsl(&mut self, rd: Register, rn: Register, imm12: Imm12, lsl: Shift1) -> T {
         emit_add_sub_imm_x(self, 1, 1, 1, lsl.into(), imm12, rn, rd)
     }
+
+
+    // Add/substract (immediate, with tags)
+
+    /// [ADDG](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDG--Add-with-Tag-?lang=en)
+    ///
+    /// ```asm
+    /// ADDG <Xd|SP>, <Xn|SP>, #<uimm6>, #<uimm4>
+    /// ```
+    #[inline(always)]
+    fn addg(&mut self, xd_sp: Register, xn_sp: Register, uimm6: UImm10, uimm4: UImm4) -> T {
+        debug_assert!(uimm6 % 16 == 0, "uimm6 must be a multiply of 16, was {}", uimm6);
+        debug_assert!(uimm6 <= 1008, "uimm6 must be in range 0 to 1008, was {}", uimm6);
+        let uimm6 = uimm6 >> 4;
+        emit_add_sub_imm_w_tags_x(self, 1, 0, 0, 0, uimm6 as u8, 0, uimm4, xn_sp, xd_sp)
+    }
+
+    /// [SUBG](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDG--Add-with-Tag-?lang=en)
+    ///
+    /// ```asm
+    /// SUBG <Xd|SP>, <Xn|SP>, #<uimm6>, #<uimm4>
+    /// ```
+    #[inline(always)]
+    fn subg(&mut self, xd_sp: Register, xn_sp: Register, uimm6: UImm10, uimm4: UImm4) -> T {
+        debug_assert!(uimm6 % 16 == 0, "uimm6 must be a multiply of 16, was {}", uimm6);
+        debug_assert!(uimm6 <= 1008, "uimm6 must be in range 0 to 1008, was {}", uimm6);
+        let uimm6 = uimm6 >> 4;
+        emit_add_sub_imm_w_tags_x(self, 1, 1, 0, 0, uimm6 as u8, 0, uimm4, xn_sp, xd_sp)
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::assert_panic;
     use crate::instruction_producer::InstrProducer;
     use crate::test_utils::test_producer::TestProducer;
     use super::*;
@@ -223,5 +260,19 @@ mod tests {
 
         let instr = prod.subs_64_imm_lsl(0, 1, 0x18, Shift1::LSL12);
         assert_eq!(instr, "subs x0, x1, #0x18, lsl #0xc");
+    }
+
+    #[test]
+    fn test_addg_subg() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.addg(0, 1, 0x10, 0xf);
+        assert_eq!(instr, "addg x0, x1, #0x10, #0xf");
+
+        let instr = prod.subg(0, 1, 0x10, 0xf);
+        assert_eq!(instr, "subg x0, x1, #0x10, #0xf");
+
+        assert_panic!("should panic: not multiply"; prod.addg(0, 1, 0x9, 0xf));
+        assert_panic!("should panic: not multiply"; prod.subg(0, 1, 0x9, 0xf));
     }
 }
