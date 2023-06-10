@@ -8,6 +8,7 @@ use std::io::Result;
 use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
 use crate::instruction_stream::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
 use crate::instruction_stream::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
+use crate::instruction_stream::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
 use crate::types::prefetch_memory::{PrfOp, PrfPolicy, PrfTarget, PrfType};
 
 pub mod mc_memory;
