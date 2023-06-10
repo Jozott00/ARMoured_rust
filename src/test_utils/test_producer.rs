@@ -1,3 +1,4 @@
+use bad64::decode;
 use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
 use crate::instruction_encoding::branch_exception_system::BranchExceptionSystem;
 use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediate;
@@ -6,6 +7,7 @@ use crate::instruction_encoding::branch_exception_system::pstate::PStateInstruct
 use crate::instruction_encoding::branch_exception_system::system_instr_w_register_arg::SystemInstructionsWithRegArg;
 use crate::instruction_encoding::branch_exception_system::system_instructions::SystemInstructions;
 use crate::instruction_encoding::branch_exception_system::system_register_move::SystemRegisterMove;
+use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
 use crate::instruction_encoding::data_proc_imm::add_substract_imm::AddSubtractImmediate;
 use crate::instruction_encoding::data_proc_imm::bitfield::BitfieldInstructions;
@@ -18,70 +20,73 @@ use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::Compar
 use crate::instruction_encoding::loads_and_stores::load_register_literal::LoadRegisterLiteral;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
 use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
+use crate::types::Instruction;
 use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
-use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
-use crate::types::{Instruction, InstructionPointer};
-use crate::types::instruction::Instr;
 
-pub struct InstrProducer {}
+type InstrRes = String;
 
-impl InstrProducer {
+pub struct TestProducer {}
+
+impl TestProducer {
     pub fn new() -> Self {
-        InstrProducer {}
+        TestProducer {}
     }
 }
 
 
-impl InstructionProcessor<Instr> for InstrProducer {
-    fn emit(&mut self, instr: Instruction) -> Instr {
-        Instr::new(instr, 0 as InstructionPointer)
+impl InstructionProcessor<InstrRes> for TestProducer {
+    fn emit(&mut self, instr: Instruction) -> String {
+        let Ok(decoded) = decode(instr, 0u64) else {
+            let encoding = instr.to_le_bytes();
+            let enc_str = encoding.map(|e| format!("{e:02x}")).join(" ");
+            return format!("<unknown instruction: {enc_str}>");
+        };
+
+        format!("{decoded}")
     }
 }
 
 
-impl DataProcessingImmediate<Instr> for InstrProducer {}
+impl DataProcessingImmediate<InstrRes> for TestProducer {}
 
-impl PcRelAddressing<Instr> for InstrProducer {}
+impl PcRelAddressing<InstrRes> for TestProducer {}
 
-impl AddSubtractImmediate<Instr> for InstrProducer {}
+impl AddSubtractImmediate<InstrRes> for TestProducer {}
 
-impl LogicalImmediate<Instr> for InstrProducer {}
+impl LogicalImmediate<InstrRes> for TestProducer {}
 
-impl MovWideImmediate<Instr> for InstrProducer {}
+impl MovWideImmediate<InstrRes> for TestProducer {}
 
-impl BitfieldInstructions<Instr> for InstrProducer {}
+impl BitfieldInstructions<InstrRes> for TestProducer {}
 
-impl ExtractInstructions<Instr> for InstrProducer {}
+impl ExtractInstructions<InstrRes> for TestProducer {}
 
-impl BranchExceptionSystem<Instr> for InstrProducer {}
+impl BranchExceptionSystem<InstrRes> for TestProducer {}
 
-impl ConditionalBranchImmediate<Instr> for InstrProducer {}
+impl ConditionalBranchImmediate<InstrRes> for TestProducer {}
 
-impl ExceptionGeneration<Instr> for InstrProducer {}
+impl ExceptionGeneration<InstrRes> for TestProducer {}
 
-impl SystemInstructionsWithRegArg<Instr> for InstrProducer {}
+impl SystemInstructionsWithRegArg<InstrRes> for TestProducer {}
 
-impl Barriers<Instr> for InstrProducer {}
+impl Barriers<InstrRes> for TestProducer {}
 
-impl PStateInstructions<Instr> for InstrProducer {}
+impl PStateInstructions<InstrRes> for TestProducer {}
 
-impl SystemInstructions<Instr> for InstrProducer {}
+impl SystemInstructions<InstrRes> for TestProducer {}
 
-impl SystemRegisterMove<Instr> for InstrProducer {}
+impl SystemRegisterMove<InstrRes> for TestProducer {}
 
-impl UnconditionalBranchRegister<Instr> for InstrProducer {}
+impl UnconditionalBranchRegister<InstrRes> for TestProducer {}
 
-impl UnconditionalBranchImmediate<Instr> for InstrProducer {}
+impl UnconditionalBranchImmediate<InstrRes> for TestProducer {}
 
-impl LoadsAndStores<Instr> for InstrProducer {}
+impl LoadsAndStores<InstrRes> for TestProducer {}
 
-impl CompareAndSwapPair<Instr> for InstrProducer {}
+impl CompareAndSwapPair<InstrRes> for TestProducer {}
 
-impl LoadStoreRegUImm<Instr> for InstrProducer {}
+impl LoadStoreRegUImm<InstrRes> for TestProducer {}
 
-impl LoadRegisterLiteral<Instr> for InstrProducer {}
+impl LoadRegisterLiteral<InstrRes> for TestProducer {}
 
-impl InstructionSet<Instr> for InstrProducer {}
-
-
-
+impl InstructionSet<InstrRes> for TestProducer {}

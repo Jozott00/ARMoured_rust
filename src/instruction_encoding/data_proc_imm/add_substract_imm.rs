@@ -84,7 +84,7 @@ pub trait AddSubtractImmediate<T>: InstructionProcessor<T> {
     /// by an amount specified in the `lsl` parameter.
     #[inline(always)]
     fn sub_64_imm_lsl(&mut self, rd: Register, rn: Register, imm12: Imm12, lsl: Shift1) -> T {
-        emit_add_sub_imm_x(self, 1, 1, 1, lsl.into(), imm12, rn, rd)
+        emit_add_sub_imm_x(self, 1, 1, 0, lsl.into(), imm12, rn, rd)
     }
 
     // The following functions are analogous to the above, but instead generating the
@@ -148,5 +148,80 @@ pub trait AddSubtractImmediate<T>: InstructionProcessor<T> {
     #[inline(always)]
     fn subs_64_imm_lsl(&mut self, rd: Register, rn: Register, imm12: Imm12, lsl: Shift1) -> T {
         emit_add_sub_imm_x(self, 1, 1, 1, lsl.into(), imm12, rn, rd)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::instruction_producer::InstrProducer;
+    use crate::test_utils::test_producer::TestProducer;
+    use super::*;
+
+    #[test]
+    fn test_add_x() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.add_32_imm(0, 1, 0x18);
+        assert_eq!(instr, "add w0, w1, #0x18");
+
+        let instr = prod.add_32_imm_lsl(0, 1, 0x18, Shift1::LSL12);
+        assert_eq!(instr, "add w0, w1, #0x18, lsl #0xc");
+
+        let instr = prod.add_64_imm(0, 1, 0x18);
+        assert_eq!(instr, "add x0, x1, #0x18");
+
+        let instr = prod.add_64_imm_lsl(0, 1, 0x18, Shift1::LSL12);
+        assert_eq!(instr, "add x0, x1, #0x18, lsl #0xc");
+    }
+
+    #[test]
+    fn test_sub_x() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.sub_32_imm(0, 1, 0x18);
+        assert_eq!(instr, "sub w0, w1, #0x18");
+
+        let instr = prod.sub_32_imm_lsl(0, 1, 0x18, Shift1::LSL12);
+        assert_eq!(instr, "sub w0, w1, #0x18, lsl #0xc");
+
+        let instr = prod.sub_64_imm(0, 1, 0x18);
+        assert_eq!(instr, "sub x0, x1, #0x18");
+
+        let instr = prod.sub_64_imm_lsl(0, 1, 0x18, Shift1::LSL12);
+        assert_eq!(instr, "sub x0, x1, #0x18, lsl #0xc");
+    }
+
+    #[test]
+    fn test_adds_x() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.adds_32_imm(0, 1, 0x18);
+        assert_eq!(instr, "adds w0, w1, #0x18");
+
+        let instr = prod.adds_32_imm_lsl(0, 1, 0x18, Shift1::LSL12);
+        assert_eq!(instr, "adds w0, w1, #0x18, lsl #0xc");
+
+        let instr = prod.adds_64_imm(0, 1, 0x18);
+        assert_eq!(instr, "adds x0, x1, #0x18");
+
+        let instr = prod.adds_64_imm_lsl(0, 1, 0x18, Shift1::LSL12);
+        assert_eq!(instr, "adds x0, x1, #0x18, lsl #0xc");
+    }
+
+    #[test]
+    fn test_subs_x() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.subs_32_imm(0, 1, 0x18);
+        assert_eq!(instr, "subs w0, w1, #0x18");
+
+        let instr = prod.subs_32_imm_lsl(0, 1, 0x18, Shift1::LSL12);
+        assert_eq!(instr, "subs w0, w1, #0x18, lsl #0xc");
+
+        let instr = prod.subs_64_imm(0, 1, 0x18);
+        assert_eq!(instr, "subs x0, x1, #0x18");
+
+        let instr = prod.subs_64_imm_lsl(0, 1, 0x18, Shift1::LSL12);
+        assert_eq!(instr, "subs x0, x1, #0x18, lsl #0xc");
     }
 }
