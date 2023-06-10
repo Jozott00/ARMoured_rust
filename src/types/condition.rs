@@ -54,7 +54,7 @@ mod tests {
     use crate::{stream_mock};
     use crate::types::InstructionPointer;
     use crate::instruction_stream::InstrStream;
-    use crate::instruction_stream::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediateWithAddress;
+    use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediateWithAddress;
 
     #[test]
     fn test_condition_encodings() {

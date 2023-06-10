@@ -1,5 +1,5 @@
 use crate::instruction_encoding::InstructionProcessor;
-use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
+use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
 use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
 

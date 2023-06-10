@@ -135,7 +135,7 @@ pub trait MovWideImmediate<T>: InstructionProcessor<T> {
     fn movk_64_imm_lsl(&mut self, d: Register, imm: Imm16, lsl: HW) -> T {
         self.movk_imm(true, d, imm, lsl)
     }
-    
+
     /// An alias of the `MOVZ` 32 bit instruction
     #[inline(always)]
     fn mov_32_imm(&mut self, d: Register, imm: Imm16) -> T {

@@ -1,28 +1,28 @@
 use bad64::{decode, disasm};
 
-use crate::instruction_stream::InstrStream;
 use crate::mc_memory::{McMemory, Memory};
 use crate::types::{HW, Imm32, Imm64};
 use std::fs;
 use std::io::Result;
-use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
-use crate::instruction_stream::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
-use crate::instruction_stream::data_proc_imm::add_substract_imm::AddSubtractImmediate;
-use crate::instruction_stream::data_proc_imm::bitfield::BitfieldInstructions;
-use crate::instruction_stream::data_proc_imm::logical_imm::LogicalImmediate;
-use crate::instruction_stream::data_proc_imm::mov_wide_imm::MovWideImmediate;
-use crate::instruction_stream::data_proc_imm::pc_rel_addr::{PcRelAddressing, PcRelAddressingWithAddress};
-use crate::instruction_stream::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
-use crate::instruction_stream::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
+use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
+use crate::instruction_encoding::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
+use crate::instruction_encoding::data_proc_imm::add_substract_imm::AddSubtractImmediate;
+use crate::instruction_encoding::data_proc_imm::bitfield::BitfieldInstructions;
+use crate::instruction_encoding::data_proc_imm::logical_imm::LogicalImmediate;
+use crate::instruction_encoding::data_proc_imm::mov_wide_imm::MovWideImmediate;
+use crate::instruction_encoding::data_proc_imm::pc_rel_addr::{PcRelAddressing, PcRelAddressingWithAddress};
+use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
+use crate::instruction_stream::InstrStream;
 use crate::types::prefetch_memory::{PrfOp, PrfPolicy, PrfTarget, PrfType};
 
 pub mod mc_memory;
 pub mod instruction_emitter;
 pub mod types;
-pub mod instruction_stream;
+pub mod instruction_encoding;
 pub mod test_utils;
 pub mod instruction_producer;
-pub mod instruction_encoding;
+pub mod instruction_stream;
 
 fn main() {
     let mut mem = McMemory::new_pagesize();

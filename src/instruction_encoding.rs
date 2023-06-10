@@ -1,8 +1,11 @@
-use crate::instruction_stream::loads_and_stores::{LoadsAndStores, LoadsAndStoresWithAddress};
-use crate::instruction_stream::branch_exception_system::BranchExceptionSystem;
-use crate::instruction_stream::branch_exception_system::BranchExceptionSystemWithAddress;
-use crate::instruction_stream::data_proc_imm::{DataProcessingImmediate, DataProcessingImmediateWithAddress};
+pub mod branch_exception_system;
+pub mod data_proc_imm;
+pub mod loads_and_stores;
 
+
+use crate::instruction_encoding::branch_exception_system::{BranchExceptionSystem, BranchExceptionSystemWithAddress};
+use crate::instruction_encoding::data_proc_imm::{DataProcessingImmediate, DataProcessingImmediateWithAddress};
+use crate::instruction_encoding::loads_and_stores::{LoadsAndStores, LoadsAndStoresWithAddress};
 use crate::types::{Instruction, Offset32};
 
 pub trait InstructionProcessor<T>: Sized {

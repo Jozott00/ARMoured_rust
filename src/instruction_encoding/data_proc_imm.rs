@@ -8,13 +8,13 @@
 //! - Move wide (immediate)
 //! - PC rel. addressing
 
-use crate::instruction_stream::data_proc_imm::add_substract_imm::AddSubtractImmediate;
-use crate::instruction_stream::data_proc_imm::bitfield::BitfieldInstructions;
-use crate::instruction_stream::data_proc_imm::extract::ExtractInstructions;
-use crate::instruction_stream::data_proc_imm::logical_imm::LogicalImmediate;
-use crate::instruction_stream::data_proc_imm::pc_rel_addr::PcRelAddressingWithAddress;
-use crate::instruction_stream::data_proc_imm::mov_wide_imm::MovWideImmediate;
-use crate::instruction_stream::data_proc_imm::pc_rel_addr::PcRelAddressing;
+use crate::instruction_encoding::data_proc_imm::add_substract_imm::AddSubtractImmediate;
+use crate::instruction_encoding::data_proc_imm::bitfield::BitfieldInstructions;
+use crate::instruction_encoding::data_proc_imm::extract::ExtractInstructions;
+use crate::instruction_encoding::data_proc_imm::logical_imm::LogicalImmediate;
+use crate::instruction_encoding::data_proc_imm::pc_rel_addr::PcRelAddressingWithAddress;
+use crate::instruction_encoding::data_proc_imm::mov_wide_imm::MovWideImmediate;
+use crate::instruction_encoding::data_proc_imm::pc_rel_addr::PcRelAddressing;
 
 pub mod add_substract_imm;
 pub mod bitfield;

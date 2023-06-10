@@ -19,7 +19,6 @@ fn emit_system_register_move<P: InstructionProcessor<T>, T>(proc: &mut P, l: u8,
 }
 
 pub trait SystemRegisterMove<T>: InstructionProcessor<T> {
-
     /// [MRS](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MRS--Move-System-Register-?lang=en)
     ///
     /// As we currently do not provide system registers as type, please read the [arm64 docs](https://developer.arm.com/documentation/ddi0595/2021-12/AArch64-Registers)

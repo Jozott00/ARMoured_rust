@@ -6,9 +6,9 @@
 //! - [Load/store register (unsigned immediate)](load_store_reg_uimm)
 
 
-use crate::instruction_stream::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
-use crate::instruction_stream::loads_and_stores::load_register_literal::{LoadRegisterLiteral, LoadRegisterLiteralWithAddress};
-use crate::instruction_stream::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
+use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
+use crate::instruction_encoding::loads_and_stores::load_register_literal::{LoadRegisterLiteral, LoadRegisterLiteralWithAddress};
+use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
 
 pub mod compare_and_swap_pair;
 pub mod load_store_reg_uimm;

@@ -10,15 +10,15 @@
 //! - [System register move](system_register_move)
 //! - [Unconditional branch (register)](unconditional_branch_register)
 
-use crate::instruction_stream::branch_exception_system::pstate::PStateInstructions;
-use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::{UnconditionalBranchImmediate, UnconditionalBranchImmediateWithAddress};
-use crate::instruction_stream::branch_exception_system::barriers::Barriers;
-use crate::instruction_stream::branch_exception_system::conditional_branch_imm::{ConditionalBranchImmediate, ConditionalBranchImmediateWithAddress};
-use crate::instruction_stream::branch_exception_system::exception_generation::ExceptionGeneration;
-use crate::instruction_stream::branch_exception_system::system_instr_w_register_arg::SystemInstructionsWithRegArg;
-use crate::instruction_stream::branch_exception_system::system_instructions::SystemInstructions;
-use crate::instruction_stream::branch_exception_system::system_register_move::SystemRegisterMove;
-use crate::instruction_stream::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
+use crate::instruction_encoding::branch_exception_system::pstate::PStateInstructions;
+use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::{UnconditionalBranchImmediate, UnconditionalBranchImmediateWithAddress};
+use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
+use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::{ConditionalBranchImmediate, ConditionalBranchImmediateWithAddress};
+use crate::instruction_encoding::branch_exception_system::exception_generation::ExceptionGeneration;
+use crate::instruction_encoding::branch_exception_system::system_instr_w_register_arg::SystemInstructionsWithRegArg;
+use crate::instruction_encoding::branch_exception_system::system_instructions::SystemInstructions;
+use crate::instruction_encoding::branch_exception_system::system_register_move::SystemRegisterMove;
+use crate::instruction_encoding::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
 
 pub mod conditional_branch_imm;
 pub mod exception_generation;
