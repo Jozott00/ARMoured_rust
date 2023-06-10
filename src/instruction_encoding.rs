@@ -1,3 +1,4 @@
+use crate::instruction_stream::loads_and_stores::LoadsAndStores;
 use crate::instruction_stream::branch_exception_system::BranchExceptionSystem;
 use crate::instruction_stream::branch_exception_system::BranchExceptionSystemWithAddress;
 
@@ -21,8 +22,10 @@ pub trait AddressableInstructionProcessor<T>: InstructionProcessor<T> {
 
 /// Bundles all instructions of the Arm64 instruction set
 /// but does not contain pc relative instruction.
-pub trait InstructionSet<T>: BranchExceptionSystem<T> {}
+pub trait InstructionSet<T>: LoadsAndStores<T> +
+BranchExceptionSystem<T> {}
 
 /// Bundles all instruction of Arm64 instruction set
 /// and does provide pc relative functionality for some instructions.
-pub trait InstructionSetWithAddress<T>: BranchExceptionSystemWithAddress<T> {}
+pub trait InstructionSetWithAddress<T>: InstructionSet<T>
++ BranchExceptionSystemWithAddress<T> {}

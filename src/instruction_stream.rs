@@ -2,6 +2,8 @@ use std::{mem, slice};
 
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+use crate::instruction_stream::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
+use crate::instruction_stream::loads_and_stores::LoadsAndStores;
 use crate::instruction_stream::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
 use crate::instruction_stream::branch_exception_system::system_register_move::SystemRegisterMove;
 use crate::instruction_stream::branch_exception_system::system_instructions::SystemInstructions;
@@ -96,6 +98,12 @@ impl<'mem, M: Memory, E: Emitter> ExceptionGeneration<Instr> for InstrStream<'me
 impl<'mem, M: Memory, E: Emitter> BranchExceptionSystemWithAddress<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> Barriers<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> InstructionSet<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> LoadsAndStores<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> CompareAndSwapPair<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> InstructionSetWithAddress<Instr> for InstrStream<'mem, M, E> {}
 

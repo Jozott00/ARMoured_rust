@@ -12,42 +12,42 @@
 
 use bit_seq::bseq_32;
 use crate::instruction_emitter::Emitter;
+use crate::instruction_encoding::InstructionProcessor;
 use crate::instruction_stream::InstrStream;
 use crate::mc_memory::Memory;
 use crate::types::instruction::Instr;
 use crate::types::Register;
 
-impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
-    /// Helper method that emits the Compare and Swap Pair instruction for the supplied parameters.
-    ///
-    /// # Arguments
-    ///
-    /// * `sz` - Size flag. Determines if instruction is 32 or 64 bits wide.
-    /// * `L` - Sequential or atomic access flag.
-    /// * `rs` - Source register pair.
-    /// * `o0` - Load/Store order specifier.
-    /// * `rn` - Base register. The memory address to be used for the operation is in this register.
-    /// * `rt` - Target register pair.
-    #[inline(always)]
-    fn emit_casp_x(&mut self, sz: u8, L: u8, rs: Register, o0: u8, rn: Register, rt: Register) -> Instr {
-        let r = bseq_32!(0 sz:1 0010000 L:1 1 rs:5 o0:1 !0:5 rn:5 rt:5);
-        self.emit(r)
-    }
+/// Helper method that emits the Compare and Swap Pair instruction for the supplied parameters.
+///
+/// # Arguments
+///
+/// * `sz` - Size flag. Determines if instruction is 32 or 64 bits wide.
+/// * `L` - Sequential or atomic access flag.
+/// * `rs` - Source register pair.
+/// * `o0` - Load/Store order specifier.
+/// * `rn` - Base register. The memory address to be used for the operation is in this register.
+/// * `rt` - Target register pair.
+#[inline(always)]
+fn emit_casp_x<P: InstructionProcessor<T>, T>(proc: &mut P, sz: u8, L: u8, rs: Register, o0: u8, rn: Register, rt: Register) -> T {
+    let r = bseq_32!(0 sz:1 0010000 L:1 1 rs:5 o0:1 !0:5 rn:5 rt:5);
+    proc.emit(r)
+}
 
-
+pub trait CompareAndSwapPair<T>: InstructionProcessor<T> {
     /// Emits a 32-bit wide Compare and Swap Pair (CASP) instruction. This instruction atomically loads a pair of
     /// words from memory, compares them with a pair of registers (ws1 and ws2), and if they are the same,
     /// stores a new pair of words from another register pair (wt1 and wt2) to memory.
     ///
     /// The method asserts that ws1 and wt1 registers are even and that ws2 and wt2 are the consecutive registers of ws1 and wt1.
     #[inline(always)]
-    pub fn casp_32(&mut self, ws1: Register, ws2: Register, wt1: Register, wt2: Register, xn: Register) -> Instr {
+   fn casp_32(&mut self, ws1: Register, ws2: Register, wt1: Register, wt2: Register, xn: Register) -> T {
         debug_assert!(ws1 % 2 == 0, "ws1 must be even");
         debug_assert!(ws2 == ws1 + 1, "ws2 must be the consecutive register of ws1");
         debug_assert!(wt1 % 2 == 0, "wt1 must be even");
         debug_assert!(wt2 == wt1 + 1, "wt2 must be the consecutive register of wt1");
 
-        self.emit_casp_x(0, 0, ws1, 0, xn, wt1)
+        emit_casp_x(self, 0, 0, ws1, 0, xn, wt1)
     }
 
     /// Emits a 64-bit wide Compare and Swap Pair (CASP) instruction. This instruction atomically loads a pair of
@@ -56,49 +56,49 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     ///
     /// The method asserts that xs1 and xt1 registers are even and that xs2 and xt2 are the consecutive registers of xs1 and xt1.
     #[inline(always)]
-    pub fn casp_64(&mut self, xs1: Register, xs2: Register, xt1: Register, xt2: Register, xn: Register) -> Instr {
+   fn casp_64(&mut self, xs1: Register, xs2: Register, xt1: Register, xt2: Register, xn: Register) -> T {
         debug_assert!(xs1 % 2 == 0, "xs1 must be even");
         debug_assert!(xs2 == xs1 + 1, "xs2 must be the consecutive register of xs1");
         debug_assert!(xt1 % 2 == 0, "xt1 must be even");
         debug_assert!(xt2 == xt1 + 1, "xt2 must be the consecutive register of xt1");
 
-        self.emit_casp_x(1, 0, xs1, 0, xn, xt1)
+        emit_casp_x(self, 1, 0, xs1, 0, xn, xt1)
     }
 
     /// Emits a 32-bit wide Compare and Swap Pair Acquire (CASPA) instruction. The instruction provides a combining load/store operation
     /// that provides the necessary acquire semantics for synchronisation primitives.
     #[inline(always)]
-    pub fn caspa_32(&mut self, ws1: Register, ws2: Register, wt1: Register, wt2: Register, xn: Register) -> Instr {
+   fn caspa_32(&mut self, ws1: Register, ws2: Register, wt1: Register, wt2: Register, xn: Register) -> T {
         debug_assert!(ws1 % 2 == 0, "ws1 must be even");
         debug_assert!(ws2 == ws1 + 1, "ws2 must be the consecutive register of ws1");
         debug_assert!(wt1 % 2 == 0, "wt1 must be even");
         debug_assert!(wt2 == wt1 + 1, "wt2 must be the consecutive register of wt1");
 
-        self.emit_casp_x(0, 1, ws1, 0, xn, wt1)
+        emit_casp_x(self, 0, 1, ws1, 0, xn, wt1)
     }
 
     /// Emits a 64-bit wide Compare and Swap Pair Acquire (CASPA) instruction. The instruction provides a combining load/store operation
     /// that provides the necessary acquire semantics for synchronisation primitives.
     #[inline(always)]
-    pub fn caspa_64(&mut self, xs1: Register, xs2: Register, xt1: Register, xt2: Register, xn: Register) -> Instr {
+   fn caspa_64(&mut self, xs1: Register, xs2: Register, xt1: Register, xt2: Register, xn: Register) -> T {
         debug_assert!(xs1 % 2 == 0, "xs1 must be even");
         debug_assert!(xs2 == xs1 + 1, "xs2 must be the consecutive register of xs1");
         debug_assert!(xt1 % 2 == 0, "xt1 must be even");
         debug_assert!(xt2 == xt1 + 1, "xt2 must be the consecutive register of xt1");
 
-        self.emit_casp_x(1, 1, xs1, 0, xn, xt1)
+        emit_casp_x(self, 1, 1, xs1, 0, xn, xt1)
     }
 
     /// Emits a 32-bit wide Compare and Swap Pair Acquire, release (CASPAL) instruction. The instruction provides a combining load/store operation
     /// that provides the necessary acquire, release semantics for synchronisation primitives.
     #[inline(always)]
-    pub fn caspal_32(&mut self, ws1: Register, ws2: Register, wt1: Register, wt2: Register, xn: Register) -> Instr {
+   fn caspal_32(&mut self, ws1: Register, ws2: Register, wt1: Register, wt2: Register, xn: Register) -> T {
         debug_assert!(ws1 % 2 == 0, "ws1 must be even");
         debug_assert!(ws2 == ws1 + 1, "ws2 must be the consecutive register of ws1");
         debug_assert!(wt1 % 2 == 0, "wt1 must be even");
         debug_assert!(wt2 == wt1 + 1, "wt2 must be the consecutive register of wt1");
 
-        self.emit_casp_x(0, 1, ws1, 1, xn, wt1)
+        emit_casp_x(self, 0, 1, ws1, 1, xn, wt1)
     }
 
     /// Emits a 64-bit wide Compare and Swap Pair Acquire and Release (CASPAL) instruction. The instruction provides a combining load/store operation
@@ -120,13 +120,13 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// - Both source register pairs (xs1 and xs2, xt1 and xt2) should be consecutive and even-numbered.
     /// - The base register (xn) should contain a valid memory address.
     #[inline(always)]
-    pub fn caspal_64(&mut self, xs1: Register, xs2: Register, xt1: Register, xt2: Register, xn: Register) -> Instr {
+   fn caspal_64(&mut self, xs1: Register, xs2: Register, xt1: Register, xt2: Register, xn: Register) -> T {
         debug_assert!(xs1 % 2 == 0, "xs1 must be even");
         debug_assert!(xs2 == xs1 + 1, "xs2 must be the consecutive register of xs1");
         debug_assert!(xt1 % 2 == 0, "xt1 must be even");
         debug_assert!(xt2 == xt1 + 1, "xt2 must be the consecutive register of xt1");
 
-        self.emit_casp_x(1, 1, xs1, 1, xn, xt1)
+        emit_casp_x(self, 1, 1, xs1, 1, xn, xt1)
     }
 
     /// Emits a 32-bit wide Compare and Swap Pair and Link (CASPL) instruction. The instruction provides a combining load/store operation
@@ -135,13 +135,13 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// CASPL is intended for use in constructing higher-level synchronization primitives and operations such as semaphore
     /// acquire and release, and monitor enter and exit operations in a multiprocessor system.
     #[inline(always)]
-    pub fn caspl_32(&mut self, ws1: Register, ws2: Register, wt1: Register, wt2: Register, xn: Register) -> Instr {
+   fn caspl_32(&mut self, ws1: Register, ws2: Register, wt1: Register, wt2: Register, xn: Register) -> T {
         debug_assert!(ws1 % 2 == 0, "ws1 must be even");
         debug_assert!(ws2 == ws1 + 1, "ws2 must be the consecutive register of ws1");
         debug_assert!(wt1 % 2 == 0, "wt1 must be even");
         debug_assert!(wt2 == wt1 + 1, "wt2 must be the consecutive register of wt1");
 
-        self.emit_casp_x(0, 0, ws1, 1, xn, wt1)
+        emit_casp_x(self, 0, 0, ws1, 1, xn, wt1)
     }
 
     /// Emits a 64-bit wide Compare and Swap Pair and Link (CASPL) instruction. The instruction provides a combining load/store operation
@@ -150,13 +150,13 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     /// CASPL is intended for use in constructing higher-level synchronization primitives and operations such as semaphore
     /// acquire and release, and monitor enter and exit operations in a multiprocessor system.
     #[inline(always)]
-    pub fn caspl_64(&mut self, xs1: Register, xs2: Register, xt1: Register, xt2: Register, xn: Register) -> Instr {
+   fn caspl_64(&mut self, xs1: Register, xs2: Register, xt1: Register, xt2: Register, xn: Register) -> T {
         debug_assert!(xs1 % 2 == 0, "xs1 must be even");
         debug_assert!(xs2 == xs1 + 1, "xs2 must be the consecutive register of xs1");
         debug_assert!(xt1 % 2 == 0, "xt1 must be even");
         debug_assert!(xt2 == xt1 + 1, "xt2 must be the consecutive register of xt1");
 
-        self.emit_casp_x(1, 0, xs1, 1, xn, xt1)
+        emit_casp_x(self, 1, 0, xs1, 1, xn, xt1)
     }
 }
 
