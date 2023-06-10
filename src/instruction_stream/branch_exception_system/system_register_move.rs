@@ -4,16 +4,12 @@
 //! - [MSR (register)](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MSR--register---Move-general-purpose-register-to-System-Register-?lang=en)
 //! - [MRS](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MRS--Move-System-Register-?lang=en)
 
-use bit_seq::{bseq_32, bseq_8};
+use bit_seq::{bseq_32};
 use crate::instruction_emitter::Emitter;
 use crate::instruction_stream::InstrStream;
 use crate::mc_memory::Memory;
 use crate::types::instruction::Instr;
-use crate::types::{Register, UImm16, UImm2, UImm3, UImm4};
-use crate::types::encodable::Encodable;
-use crate::types::sys_ops::at_op::AtOp;
-use crate::types::sys_ops::dc_op::DcOp;
-use crate::types::sys_ops::ic_op::IcOp;
+use crate::types::{Register, UImm2, UImm3, UImm4};
 
 impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     #[inline(always)]

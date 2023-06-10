@@ -5,6 +5,10 @@
 //! - [Exception generation](exception_generation)
 //! - [System instructions with register argument](system_instr_w_register_arg)
 //! - [Barriers](barriers)
+//! - [PSTATE](pstate)
+//! - [System Instructions](system_instructions)
+//! - [System register move](system_register_move)
+//! - [Unconditional branch (register)](unconditional_branch_register)
 
 pub mod conditional_branch_imm;
 pub mod exception_generation;
@@ -13,3 +17,4 @@ pub mod barriers;
 pub mod pstate;
 pub mod system_instructions;
 pub mod system_register_move;
+pub mod unconditional_branch_register;
