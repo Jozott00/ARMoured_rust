@@ -10,6 +10,7 @@
 //! - [System register move](system_register_move)
 //! - [Unconditional branch (register)](unconditional_branch_register)
 
+use crate::instruction_stream::branch_exception_system::pstate::PStateInstructions;
 use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::{UnconditionalBranchImmediate, UnconditionalBranchImmediateWithAddress};
 use crate::instruction_stream::branch_exception_system::barriers::Barriers;
 use crate::instruction_stream::branch_exception_system::conditional_branch_imm::{ConditionalBranchImmediate, ConditionalBranchImmediateWithAddress};
@@ -26,6 +27,6 @@ pub mod system_register_move;
 pub mod unconditional_branch_register;
 pub mod unconditional_branch_immediate;
 
-pub trait BranchExceptionSystem<T>: ConditionalBranchImmediate<T> + ExceptionGeneration<T> + SystemInstructionsWithRegArg<T> + Barriers<T> + UnconditionalBranchImmediate<T> {}
+pub trait BranchExceptionSystem<T>: ConditionalBranchImmediate<T> + ExceptionGeneration<T> + SystemInstructionsWithRegArg<T> + Barriers<T> + PStateInstructions<T> + UnconditionalBranchImmediate<T> {}
 
 pub trait BranchExceptionSystemWithAddress<T>: BranchExceptionSystem<T> + ConditionalBranchImmediateWithAddress<T> + UnconditionalBranchImmediateWithAddress<T> {}

@@ -48,6 +48,7 @@ mod tests {
     use crate::{stream_mock};
     use crate::types::InstructionPointer;
     use crate::instruction_stream::InstrStream;
+    use crate::instruction_stream::branch_exception_system::pstate::PStateInstructions;
 
     #[test]
     fn test_condition_encodings() {
