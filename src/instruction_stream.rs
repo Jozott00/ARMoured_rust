@@ -2,6 +2,7 @@ use std::{mem, slice};
 
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+use crate::instruction_stream::branch_exception_system::system_instr_w_register_arg::SystemInstructionsWithRegArg;
 use crate::instruction_stream::branch_exception_system::BranchExceptionSystem;
 use crate::instruction_stream::branch_exception_system::exception_generation::ExceptionGeneration;
 use crate::instruction_stream::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediate;
@@ -73,6 +74,8 @@ impl<'mem, M: Memory, E: Emitter> UnconditionalBranchImmediateWithAddress<Instr>
 impl<'mem, M: Memory, E: Emitter> ConditionalBranchImmediate<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> ConditionalBranchImmediateWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> SystemInstructionsWithRegArg<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> BranchExceptionSystem<Instr> for InstrStream<'mem, M, E> {}
 

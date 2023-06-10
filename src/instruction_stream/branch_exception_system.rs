@@ -14,6 +14,7 @@ use crate::instruction_stream::branch_exception_system::unconditional_branch_imm
 use crate::instruction_stream::branch_exception_system::barriers::Barriers;
 use crate::instruction_stream::branch_exception_system::conditional_branch_imm::{ConditionalBranchImmediate, ConditionalBranchImmediateWithAddress};
 use crate::instruction_stream::branch_exception_system::exception_generation::ExceptionGeneration;
+use crate::instruction_stream::branch_exception_system::system_instr_w_register_arg::SystemInstructionsWithRegArg;
 
 pub mod conditional_branch_imm;
 pub mod exception_generation;
@@ -25,6 +26,6 @@ pub mod system_register_move;
 pub mod unconditional_branch_register;
 pub mod unconditional_branch_immediate;
 
-pub trait BranchExceptionSystem<T>: ConditionalBranchImmediate<T> + ExceptionGeneration<T> + Barriers<T> + UnconditionalBranchImmediate<T> {}
+pub trait BranchExceptionSystem<T>: ConditionalBranchImmediate<T> + ExceptionGeneration<T> + SystemInstructionsWithRegArg<T> + Barriers<T> + UnconditionalBranchImmediate<T> {}
 
 pub trait BranchExceptionSystemWithAddress<T>: BranchExceptionSystem<T> + ConditionalBranchImmediateWithAddress<T> + UnconditionalBranchImmediateWithAddress<T> {}
