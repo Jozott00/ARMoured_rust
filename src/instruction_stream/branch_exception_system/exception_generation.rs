@@ -12,66 +12,67 @@
 
 use bit_seq::bseq_32;
 use crate::instruction_emitter::Emitter;
+use crate::instruction_encoding::InstructionProcessor;
 use crate::instruction_stream::InstrStream;
 use crate::mc_memory::Memory;
 use crate::types::instruction::Instr;
 use crate::types::UImm16;
 
-impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
-    #[inline(always)]
-    fn emit_exception_gen_x(&mut self, opc: u8, imm16: u16, op2: u8, LL: u8) -> Instr {
-        let i = bseq_32!(11010100 opc:3 imm16:16 op2:3 LL:2);
-        self.emit(i)
-    }
+#[inline(always)]
+fn emit_exception_gen_x<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, imm16: u16, op2: u8, LL: u8) -> T {
+    let i = bseq_32!(11010100 opc:3 imm16:16 op2:3 LL:2);
+    proc.emit(i)
+}
 
+pub trait ExceptionGeneration<T>: InstructionProcessor<T> {
     /// [SVC - Supervisor Call](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SVC--Supervisor-Call-?lang=en)
     ///
     /// `SVC #<imm>`
     #[inline(always)]
-    pub fn svc(&mut self, imm: UImm16) -> Instr {
-        self.emit_exception_gen_x(0b000, imm, 0b000, 0b01)
+    fn svc(&mut self, imm: UImm16) -> T {
+        emit_exception_gen_x(self, 0b000, imm, 0b000, 0b01)
     }
 
     /// [HVC - Hypervisor Call](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/HVC--Hypervisor-Call-?lang=en)
     #[inline(always)]
-    pub fn hvc(&mut self, imm: UImm16) -> Instr {
-        self.emit_exception_gen_x(0b000, imm, 0b000, 0b10)
+    fn hvc(&mut self, imm: UImm16) -> T {
+        emit_exception_gen_x(self, 0b000, imm, 0b000, 0b10)
     }
 
     /// [SMC - Secure Monitor Call](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SMC--Secure-Monitor-Call-?lang=en)
     #[inline(always)]
-    pub fn smc(&mut self, imm: UImm16) -> Instr {
-        self.emit_exception_gen_x(0b000, imm, 0b000, 0b11)
+    fn smc(&mut self, imm: UImm16) -> T {
+        emit_exception_gen_x(self, 0b000, imm, 0b000, 0b11)
     }
 
     /// [BRK - Breakpoint instruction](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BRK--Breakpoint-instruction-?lang=en)
     #[inline(always)]
-    pub fn brk(&mut self, imm: UImm16) -> Instr {
-        self.emit_exception_gen_x(0b001, imm, 0b000, 0b00)
+    fn brk(&mut self, imm: UImm16) -> T {
+        emit_exception_gen_x(self, 0b001, imm, 0b000, 0b00)
     }
 
     /// [HLT - Halt instruction](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/HLT--Halt-instruction-?lang=en)
     #[inline(always)]
-    pub fn hlt(&mut self, imm: UImm16) -> Instr {
-        self.emit_exception_gen_x(0b010, imm, 0b000, 0b00)
+    fn hlt(&mut self, imm: UImm16) -> T {
+        emit_exception_gen_x(self, 0b010, imm, 0b000, 0b00)
     }
 
     /// [DCPS1](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/DCPS1--Debug-Change-PE-State-to-EL1--?lang=en)
     #[inline(always)]
-    pub fn dcps1(&mut self, imm: UImm16) -> Instr {
-        self.emit_exception_gen_x(0b101, imm, 0b000, 0b01)
+    fn dcps1(&mut self, imm: UImm16) -> T {
+        emit_exception_gen_x(self, 0b101, imm, 0b000, 0b01)
     }
 
     /// [DCPS2](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/DCPS2--Debug-Change-PE-State-to-EL2--?lang=en)
     #[inline(always)]
-    pub fn dcps2(&mut self, imm: UImm16) -> Instr {
-        self.emit_exception_gen_x(0b101, imm, 0b000, 0b10)
+    fn dcps2(&mut self, imm: UImm16) -> T {
+        emit_exception_gen_x(self, 0b101, imm, 0b000, 0b10)
     }
 
     /// [DCPS3](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/DCPS3--Debug-Change-PE-State-to-EL3-?lang=en)
     #[inline(always)]
-    pub fn dcps3(&mut self, imm: UImm16) -> Instr {
-        self.emit_exception_gen_x(0b001, imm, 0b000, 0b11)
+    fn dcps3(&mut self, imm: UImm16) -> T {
+        emit_exception_gen_x(self, 0b001, imm, 0b000, 0b11)
     }
 }
 
