@@ -1,5 +1,5 @@
 use crate::instruction_encoding::InstructionProcessor;
-use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediateGenerator;
+use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
 use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
 
@@ -18,4 +18,4 @@ impl InstructionProcessor<Instr> for InstrProducer {
     }
 }
 
-impl UnconditionalBranchImmediateGenerator<Instr> for InstrProducer {}
+impl UnconditionalBranchImmediate<Instr> for InstrProducer {}

@@ -10,25 +10,26 @@ use crate::types::Offset32;
 use crate::types::Offset64;
 
 #[inline(always)]
-fn emit_uncond_br_imm<P: InstructionProcessor<T>, T>(prod: &mut P, op: u8, imm26: u32) -> T {
+fn emit_uncond_br_imm<P: InstructionProcessor<T>, T>(proc: &mut P, op: u8, imm26: u32) -> T {
     let i = bseq_32!(op:1 00101 imm26:26);
-    prod.emit(i)
+    proc.emit(i)
 }
 
 #[inline(always)]
-fn emit_uncond_br_imm_offset<P: InstructionProcessor<T>, T>(prod: &mut P, op: u8, offset: Offset32) -> T {
+fn emit_uncond_br_imm_offset<P: InstructionProcessor<T>, T>(proc: &mut P, op: u8, offset: Offset32) -> T {
     debug_assert!(-(128 << 20) <= offset && offset < (128 << 20), "Offset must be within ±1MB");
     debug_assert!(offset % 4 == 0, "Offset must be a multiply of 4!");
     let offset = offset / 4;
-    emit_uncond_br_imm(prod, op, offset as u32)
+    emit_uncond_br_imm(proc, op, offset as u32)
 }
 
-// #[inline(always)]
-// fn emit_uncond_br_imm_addr<P: InstructionProcessor<T>, T>(prod: &mut P, op: u8, addr: usize) -> T {
-//
-// }
 
-pub trait UnconditionalBranchImmediateGenerator<T>: InstructionProcessor<T> {
+/// Implements the unconditional branch (immediate) instruction.
+///
+/// Does only support branching by specifying the offset.
+/// The [`UnconditionalBranchImmediateWithAddress`] trait also allows
+/// branching by specifying the address.
+pub trait UnconditionalBranchImmediate<T>: InstructionProcessor<T> {
     /// [B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/B--Branch-?lang=en)
     ///
     /// ```asm
@@ -50,7 +51,12 @@ pub trait UnconditionalBranchImmediateGenerator<T>: InstructionProcessor<T> {
     }
 }
 
-pub trait UnconditionalBranchImmediateGeneratorWithAddress<T>: UnconditionalBranchImmediateGenerator<T> + AddressableInstructionProcessor<T> {
+/// Implements the unconditional branch (immediate) instruction.
+///
+/// As [`UnconditionalBranchImmediate`] but also allows to
+/// specify the addr you want to branch to, instead of calculating the offset
+/// by yourself.
+pub trait UnconditionalBranchImmediateWithAddress<T>: UnconditionalBranchImmediate<T> + AddressableInstructionProcessor<T> {
     /// [B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/B--Branch-?lang=en)
     ///
     /// Not real assembly:

@@ -2,12 +2,15 @@ use std::{mem, slice};
 
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+use crate::instruction_encoding::InstructionSetWithAddress;
+use crate::instruction_stream::branch_exception_system::barriers::Barriers;
+use crate::instruction_stream::branch_exception_system::BranchExceptionSystemWithAddress;
 use crate::instruction_encoding::AddressableInstructionProcessor;
 use crate::types::Offset32;
-use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::{UnconditionalBranchImmediateGenerator, UnconditionalBranchImmediateGeneratorWithAddress};
+use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::{UnconditionalBranchImmediate, UnconditionalBranchImmediateWithAddress};
 
 use crate::instruction_emitter::{Emitter, InstrEmitter};
-use crate::instruction_encoding::{InstructionProcessor, Instructions};
+use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
 use crate::mc_memory::{McMemory, Memory};
 use crate::types::{Instruction, InstructionPointer, Register};
 use crate::types::instruction::Instr;
@@ -47,7 +50,7 @@ impl<'mem, M: Memory, E: Emitter> InstructionProcessor<Instr> for InstrStream<'m
     }
 }
 
-impl<'mem, M: Memory, E: Emitter> UnconditionalBranchImmediateGenerator<Instr> for InstrStream<'mem, M, E> {}
+impl<'mem, M: Memory, E: Emitter> UnconditionalBranchImmediate<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> AddressableInstructionProcessor<Instr> for InstrStream<'mem, M, E> {
     fn intr_ptr_offset_to(&self, addr: usize) -> Offset32 {
@@ -61,9 +64,13 @@ impl<'mem, M: Memory, E: Emitter> AddressableInstructionProcessor<Instr> for Ins
     }
 }
 
-impl<'mem, M: Memory, E: Emitter> UnconditionalBranchImmediateGeneratorWithAddress<Instr> for InstrStream<'mem, M, E> {}
+impl<'mem, M: Memory, E: Emitter> UnconditionalBranchImmediateWithAddress<Instr> for InstrStream<'mem, M, E> {}
 
-impl<'mem, M: Memory, E: Emitter> Instructions<Instr> for InstrStream<'mem, M, E> {}
+impl<'mem, M: Memory, E: Emitter> BranchExceptionSystemWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> Barriers<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> InstructionSetWithAddress<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     pub fn patch_at(&mut self, intr_ptr: InstructionPointer, patch: PatchFn<M, E>) {

@@ -5,7 +5,7 @@ use crate::mc_memory::{McMemory, Memory};
 use crate::types::{HW, Imm32, Imm64};
 use std::fs;
 use std::io::Result;
-use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediateGenerator;
+use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
 use crate::types::prefetch_memory::{PrfOp, PrfPolicy, PrfTarget, PrfType};
 
 pub mod mc_memory;
