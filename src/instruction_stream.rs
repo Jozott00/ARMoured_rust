@@ -2,6 +2,7 @@ use std::{mem, slice};
 
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+use crate::instruction_stream::branch_exception_system::system_register_move::SystemRegisterMove;
 use crate::instruction_stream::branch_exception_system::system_instructions::SystemInstructions;
 use crate::instruction_stream::branch_exception_system::pstate::PStateInstructions;
 use crate::instruction_stream::branch_exception_system::system_instr_w_register_arg::SystemInstructionsWithRegArg;
@@ -82,6 +83,8 @@ impl<'mem, M: Memory, E: Emitter> SystemInstructionsWithRegArg<Instr> for InstrS
 impl<'mem, M: Memory, E: Emitter> PStateInstructions<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> SystemInstructions<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> SystemRegisterMove<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> BranchExceptionSystem<Instr> for InstrStream<'mem, M, E> {}
 

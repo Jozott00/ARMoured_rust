@@ -17,6 +17,7 @@ use crate::instruction_stream::branch_exception_system::conditional_branch_imm::
 use crate::instruction_stream::branch_exception_system::exception_generation::ExceptionGeneration;
 use crate::instruction_stream::branch_exception_system::system_instr_w_register_arg::SystemInstructionsWithRegArg;
 use crate::instruction_stream::branch_exception_system::system_instructions::SystemInstructions;
+use crate::instruction_stream::branch_exception_system::system_register_move::SystemRegisterMove;
 
 pub mod conditional_branch_imm;
 pub mod exception_generation;
@@ -34,6 +35,7 @@ pub trait BranchExceptionSystem<T>: ConditionalBranchImmediate<T>
 + Barriers<T>
 + PStateInstructions<T>
 + SystemInstructions<T>
++ SystemRegisterMove<T>
 + UnconditionalBranchImmediate<T>
 {}
 
