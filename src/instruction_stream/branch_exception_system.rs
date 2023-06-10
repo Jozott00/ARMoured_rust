@@ -18,3 +18,4 @@ pub mod pstate;
 pub mod system_instructions;
 pub mod system_register_move;
 pub mod unconditional_branch_register;
+pub mod unconditional_branch_immediate;

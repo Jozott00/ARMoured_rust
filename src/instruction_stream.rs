@@ -2,8 +2,12 @@ use std::{mem, slice};
 
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+use crate::instruction_encoding::AddressableInstructionProcessor;
+use crate::types::Offset32;
+use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::{UnconditionalBranchImmediateGenerator, UnconditionalBranchImmediateGeneratorWithAddress};
 
 use crate::instruction_emitter::{Emitter, InstrEmitter};
+use crate::instruction_encoding::{InstructionProcessor, Instructions};
 use crate::mc_memory::{McMemory, Memory};
 use crate::types::{Instruction, InstructionPointer, Register};
 use crate::types::instruction::Instr;
@@ -31,6 +35,36 @@ impl<'mem> InstrStream<'mem, McMemory, InstrEmitter> {
     }
 }
 
+
+impl<'mem, M: Memory, E: Emitter> InstructionProcessor<Instr> for InstrStream<'mem, M, E> {
+    fn emit(&mut self, instr: Instruction) -> Instr {
+        debug_assert!(!self.mem.is_executable(), "Cannot emit instruction while memory is in execution mode");
+
+        let iptr = self.emitter.instr_ptr();
+        self.emitter.emit(instr);
+
+        Instr::new(instr, iptr)
+    }
+}
+
+impl<'mem, M: Memory, E: Emitter> UnconditionalBranchImmediateGenerator<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> AddressableInstructionProcessor<Instr> for InstrStream<'mem, M, E> {
+    fn intr_ptr_offset_to(&self, addr: usize) -> Offset32 {
+        let pc = self.emitter.instr_ptr() as usize;
+        let offset_abs = pc.checked_sub(addr)
+            .unwrap_or_else(|| addr.checked_sub(pc).unwrap());
+
+        debug_assert!(offset_abs <= i32::MAX as usize, "Offset to address is to large (exceeds maximum of {:x})", i32::MAX);
+
+        if addr >= pc { offset_abs as i32 } else { -(offset_abs as i32) }
+    }
+}
+
+impl<'mem, M: Memory, E: Emitter> UnconditionalBranchImmediateGeneratorWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> Instructions<Instr> for InstrStream<'mem, M, E> {}
+
 impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     pub fn patch_at(&mut self, intr_ptr: InstructionPointer, patch: PatchFn<M, E>) {
         // save instruction pointer
@@ -49,16 +83,6 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     #[inline(always)]
     pub fn base_ptr(&self) -> InstructionPointer {
         self.emitter.base_ptr()
-    }
-
-    #[inline(always)]
-    fn emit(&mut self, instr: Instruction) -> Instr {
-        debug_assert!(!self.mem.is_executable(), "Cannot emit instruction while memory is in execution mode");
-
-        let iptr = self.emitter.instr_ptr();
-        self.emitter.emit(instr);
-
-        Instr::new(instr, iptr)
     }
 
     pub fn print_disasm(&self) {
@@ -83,6 +107,15 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
         assert!(self.mem.len() >= len, "Requested length exceeds memory map!");
 
         unsafe { slice::from_raw_parts(ptr, len) }
+    }
+
+    fn emit(&mut self, instr: Instruction) -> Instr {
+        debug_assert!(!self.mem.is_executable(), "Cannot emit instruction while memory is in execution mode");
+
+        let iptr = self.emitter.instr_ptr();
+        self.emitter.emit(instr);
+
+        Instr::new(instr, iptr)
     }
 }
 

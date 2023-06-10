@@ -5,6 +5,7 @@ use crate::mc_memory::{McMemory, Memory};
 use crate::types::{HW, Imm32, Imm64};
 use std::fs;
 use std::io::Result;
+use crate::instruction_stream::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediateGenerator;
 use crate::types::prefetch_memory::{PrfOp, PrfPolicy, PrfTarget, PrfType};
 
 pub mod mc_memory;
@@ -12,6 +13,8 @@ pub mod instruction_emitter;
 pub mod types;
 pub mod instruction_stream;
 pub mod test_utils;
+pub mod instruction_producer;
+pub mod instruction_encoding;
 
 fn main() {
     let mut mem = McMemory::new_pagesize();
@@ -38,6 +41,7 @@ fn main() {
     stream.caspl_64(0, 1, 4, 5, 0);
     stream.strb_pre_index(0, 3, -256);
     stream.prfm_imm_prfop(PrfOp(PrfType::PLD, PrfTarget::L1, PrfPolicy::KEEP), 0, 0x0);
+    stream.b_from_byte_offset(0);
 
     stream.patch_at(stream.base_ptr(), |s| {
         s.movn_64_imm(1, 4);

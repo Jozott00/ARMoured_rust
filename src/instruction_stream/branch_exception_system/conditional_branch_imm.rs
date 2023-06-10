@@ -6,6 +6,7 @@
 
 use bit_seq::{bseq_16, bseq_32};
 use crate::instruction_emitter::Emitter;
+use crate::instruction_encoding::AddressableInstructionProcessor;
 use crate::instruction_stream::InstrStream;
 use crate::mc_memory::Memory;
 use crate::types::instruction::Instr;
