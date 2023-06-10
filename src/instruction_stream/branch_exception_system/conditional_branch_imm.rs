@@ -6,7 +6,7 @@
 
 use bit_seq::{bseq_16, bseq_32};
 use crate::instruction_emitter::Emitter;
-use crate::instruction_encoding::AddressableInstructionProcessor;
+use crate::instruction_encoding::{AddressableInstructionProcessor, InstructionProcessor};
 use crate::instruction_stream::InstrStream;
 use crate::mc_memory::Memory;
 use crate::types::instruction::Instr;
@@ -15,28 +15,29 @@ use crate::types::condition::Condition;
 use crate::types::encodable::Encodable;
 use crate::types::prefetch_memory::PrfOp;
 
+#[inline(always)]
+fn emit_cond_branch_imm<P: InstructionProcessor<T>, T>(proc: &mut P, o1: UImm1, imm19: Imm19, o0: UImm1, cond: UImm4) -> T {
+    let i = bseq_32!(0101010 o1:1 imm19:19 o0:1 cond:4 );
+    proc.emit(i)
+}
+
+#[inline(always)]
+fn emit_cond_branch_x_offset<P: InstructionProcessor<T>, T>(proc: &mut P, o1: UImm1, offset: Offset32, o0: UImm1, cond: UImm4) -> T {
+    debug_assert!(-(1 << 20) <= offset && offset < (1 << 20), "Offset must be within ±1MB");
+    debug_assert!(offset % 4 == 0, "Offset must be a multiply of 4!");
+    let imm19 = offset / 4;
+    emit_cond_branch_imm(proc, o1, imm19, o0, cond)
+}
+
+#[inline(always)]
+fn emit_cond_branch_x_addr<P: AddressableInstructionProcessor<T>, T>(proc: &mut P, o1: UImm1, addr: usize, o0: UImm1, cond: UImm4) -> T {
+    debug_assert!(addr % 4 == 0, "Addr must be 4 byte aligned!");
+    let offset = proc.intr_ptr_offset_to(addr);
+    emit_cond_branch_x_offset(proc, o1, offset, o0, cond)
+}
+
 // TODO: Implement with label as soon as labels are supported
-impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
-    #[inline(always)]
-    fn emit_cond_branch_imm(&mut self, o1: UImm1, imm19: Imm19, o0: UImm1, cond: UImm4) -> Instr {
-        let i = bseq_32!(0101010 o1:1 imm19:19 o0:1 cond:4 );
-        self.emit(i)
-    }
-
-    #[inline(always)]
-    fn emit_cond_branch_x_offset(&mut self, o1: UImm1, offset: Offset32, o0: UImm1, cond: UImm4) -> Instr {
-        debug_assert!(-(1 << 20) <= offset && offset < (1 << 20), "Offset must be within ±1MB");
-        debug_assert!(offset % 4 == 0, "Offset must be a multiply of 4!");
-        let imm19 = offset / 4;
-        self.emit_cond_branch_imm(o1, imm19, o0, cond)
-    }
-
-    #[inline(always)]
-    fn emit_cond_branch_x_addr(&mut self, o1: UImm1, addr: usize, o0: UImm1, cond: UImm4) -> Instr {
-        debug_assert!(addr % 4 == 0, "Addr must be 4 byte aligned!");
-        let offset = self.intr_ptr_offset_to(addr);
-        self.emit_cond_branch_x_offset(o1, offset, o0, cond)
-    }
+pub trait ConditionalBranchImmediate<T>: InstructionProcessor<T> {
 
     // B.cond instruction
 
@@ -44,16 +45,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     ///
     /// Uses specified `offset` instead of label.
     #[inline(always)]
-    pub fn b_cond_from_byte_offset(&mut self, cond: Condition, offset: Offset32) -> Instr {
-        self.emit_cond_branch_x_offset(0, offset, 0, cond.encode())
-    }
-
-    /// [B.cond](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/B-cond--Branch-conditionally-?lang=en) instruction
-    ///
-    /// Uses specified `addr` instead of label.
-    #[inline(always)]
-    pub fn b_cond_to_addr(&mut self, cond: Condition, addr: usize) -> Instr {
-        self.emit_cond_branch_x_addr(0, addr, 0, cond.encode())
+    fn b_cond_from_byte_offset(&mut self, cond: Condition, offset: Offset32) -> T {
+        emit_cond_branch_x_offset(self, 0, offset, 0, cond.encode())
     }
 
     // BC.cond instruction
@@ -64,8 +57,18 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     ///
     /// **Note**: FEAT_HBC required
     #[inline(always)]
-    pub fn bc_cond_from_byte_offset(&mut self, cond: Condition, offset: Offset32) -> Instr {
-        self.emit_cond_branch_x_offset(0, offset, 1, cond.encode())
+    fn bc_cond_from_byte_offset(&mut self, cond: Condition, offset: Offset32) -> T {
+        emit_cond_branch_x_offset(self, 0, offset, 1, cond.encode())
+    }
+}
+
+pub trait ConditionalBranchImmediateWithAddress<T>: AddressableInstructionProcessor<T> + ConditionalBranchImmediate<T> {
+    /// [B.cond](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/B-cond--Branch-conditionally-?lang=en) instruction
+    ///
+    /// Uses specified `addr` instead of label.
+    #[inline(always)]
+    fn b_cond_to_addr(&mut self, cond: Condition, addr: usize) -> T {
+        emit_cond_branch_x_addr(self, 0, addr, 0, cond.encode())
     }
 
     /// [BC.cond](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BC-cond--Branch-Consistent-conditionally-?lang=en) instruction
@@ -74,8 +77,8 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     ///
     /// **Note**: FEAT_HBC required
     #[inline(always)]
-    pub fn bc_cond_to_addr(&mut self, cond: Condition, addr: usize) -> Instr {
-        self.emit_cond_branch_x_addr(0, addr, 1, cond.encode())
+    fn bc_cond_to_addr(&mut self, cond: Condition, addr: usize) -> T {
+        emit_cond_branch_x_addr(self, 0, addr, 1, cond.encode())
     }
 }
 
