@@ -7,6 +7,7 @@
 
 
 use crate::instruction_stream::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
+use crate::instruction_stream::loads_and_stores::load_register_literal::{LoadRegisterLiteral, LoadRegisterLiteralWithAddress};
 use crate::instruction_stream::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
 
 pub mod compare_and_swap_pair;
@@ -16,4 +17,9 @@ pub mod load_register_literal;
 
 pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
 + LoadStoreRegUImm<T>
++ LoadRegisterLiteral<T>
+{}
+
+pub trait LoadsAndStoresWithAddress<T>: LoadsAndStores<T>
++ LoadRegisterLiteralWithAddress<T>
 {}

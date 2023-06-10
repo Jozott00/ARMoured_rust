@@ -1,4 +1,4 @@
-use crate::instruction_stream::loads_and_stores::LoadsAndStores;
+use crate::instruction_stream::loads_and_stores::{LoadsAndStores, LoadsAndStoresWithAddress};
 use crate::instruction_stream::branch_exception_system::BranchExceptionSystem;
 use crate::instruction_stream::branch_exception_system::BranchExceptionSystemWithAddress;
 
@@ -28,4 +28,5 @@ BranchExceptionSystem<T> {}
 /// Bundles all instruction of Arm64 instruction set
 /// and does provide pc relative functionality for some instructions.
 pub trait InstructionSetWithAddress<T>: InstructionSet<T>
++ LoadsAndStoresWithAddress<T>
 + BranchExceptionSystemWithAddress<T> {}

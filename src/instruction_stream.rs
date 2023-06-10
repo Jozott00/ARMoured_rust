@@ -2,6 +2,8 @@ use std::{mem, slice};
 
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+use crate::instruction_stream::loads_and_stores::load_register_literal::{LoadRegisterLiteral, LoadRegisterLiteralWithAddress};
+use crate::instruction_stream::loads_and_stores::LoadsAndStoresWithAddress;
 use crate::instruction_stream::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
 use crate::instruction_stream::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
 use crate::instruction_stream::loads_and_stores::LoadsAndStores;
@@ -104,9 +106,15 @@ impl<'mem, M: Memory, E: Emitter> InstructionSet<Instr> for InstrStream<'mem, M,
 
 impl<'mem, M: Memory, E: Emitter> LoadStoreRegUImm<Instr> for InstrStream<'mem, M, E> {}
 
+impl<'mem, M: Memory, E: Emitter> LoadRegisterLiteral<Instr> for InstrStream<'mem, M, E> {}
+
 impl<'mem, M: Memory, E: Emitter> LoadsAndStores<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> CompareAndSwapPair<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> LoadsAndStoresWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> LoadRegisterLiteralWithAddress<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> InstructionSetWithAddress<Instr> for InstrStream<'mem, M, E> {}
 
