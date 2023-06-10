@@ -1,6 +1,7 @@
 use crate::instruction_stream::loads_and_stores::{LoadsAndStores, LoadsAndStoresWithAddress};
 use crate::instruction_stream::branch_exception_system::BranchExceptionSystem;
 use crate::instruction_stream::branch_exception_system::BranchExceptionSystemWithAddress;
+use crate::instruction_stream::data_proc_imm::{DataProcessingImmediate, DataProcessingImmediateWithAddress};
 
 use crate::types::{Instruction, Offset32};
 
@@ -22,11 +23,15 @@ pub trait AddressableInstructionProcessor<T>: InstructionProcessor<T> {
 
 /// Bundles all instructions of the Arm64 instruction set
 /// but does not contain pc relative instruction.
-pub trait InstructionSet<T>: LoadsAndStores<T> +
-BranchExceptionSystem<T> {}
+pub trait InstructionSet<T>: DataProcessingImmediate<T>
++ BranchExceptionSystem<T>
++ LoadsAndStores<T>
+{}
 
 /// Bundles all instruction of Arm64 instruction set
 /// and does provide pc relative functionality for some instructions.
 pub trait InstructionSetWithAddress<T>: InstructionSet<T>
++ DataProcessingImmediateWithAddress<T>
++ BranchExceptionSystemWithAddress<T>
 + LoadsAndStoresWithAddress<T>
-+ BranchExceptionSystemWithAddress<T> {}
+{}

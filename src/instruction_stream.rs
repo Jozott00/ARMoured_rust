@@ -2,6 +2,13 @@ use std::{mem, slice};
 
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+use crate::instruction_stream::data_proc_imm::extract::ExtractInstructions;
+use crate::instruction_stream::data_proc_imm::bitfield::BitfieldInstructions;
+use crate::instruction_stream::data_proc_imm::add_substract_imm::AddSubtractImmediate;
+use crate::instruction_stream::data_proc_imm::logical_imm::LogicalImmediate;
+use crate::instruction_stream::data_proc_imm::{DataProcessingImmediate, DataProcessingImmediateWithAddress};
+use crate::instruction_stream::data_proc_imm::mov_wide_imm::MovWideImmediate;
+use crate::instruction_stream::data_proc_imm::pc_rel_addr::{PcRelAddressing, PcRelAddressingWithAddress};
 use crate::instruction_stream::loads_and_stores::load_register_literal::{LoadRegisterLiteral, LoadRegisterLiteralWithAddress};
 use crate::instruction_stream::loads_and_stores::LoadsAndStoresWithAddress;
 use crate::instruction_stream::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
@@ -32,7 +39,6 @@ use crate::types::instruction::Instr;
 pub mod data_proc_imm;
 pub mod loads_and_stores;
 pub mod branch_exception_system;
-mod utils;
 
 pub type PatchFn<M: Memory, E: Emitter> = fn(&mut InstrStream<M, E>) -> ();
 
@@ -102,6 +108,20 @@ impl<'mem, M: Memory, E: Emitter> BranchExceptionSystemWithAddress<Instr> for In
 
 impl<'mem, M: Memory, E: Emitter> Barriers<Instr> for InstrStream<'mem, M, E> {}
 
+impl<'mem, M: Memory, E: Emitter> LogicalImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> AddSubtractImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> BitfieldInstructions<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> ExtractInstructions<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> DataProcessingImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> MovWideImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> PcRelAddressing<Instr> for InstrStream<'mem, M, E> {}
+
 impl<'mem, M: Memory, E: Emitter> InstructionSet<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadStoreRegUImm<Instr> for InstrStream<'mem, M, E> {}
@@ -115,6 +135,10 @@ impl<'mem, M: Memory, E: Emitter> CompareAndSwapPair<Instr> for InstrStream<'mem
 impl<'mem, M: Memory, E: Emitter> LoadsAndStoresWithAddress<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadRegisterLiteralWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> DataProcessingImmediateWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> PcRelAddressingWithAddress<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> InstructionSetWithAddress<Instr> for InstrStream<'mem, M, E> {}
 

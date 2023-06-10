@@ -10,14 +10,14 @@ Provides a convenient and performant API to produce arm64/Aarch64 instructions.
 The instruction implementations
 are [indexed by Encoding](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding).
 
-| Status | Instruction Types                                                                                                                                                                                          | Notes |
-|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------|
-| ❌      | [SVE encodings](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/SVE-encodings?lang=en)                                                                                           | -     |
-| 🚧     | [Data Processing -- Immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Data-Processing----Immediate?lang=en)                                                             | -     |
-| 🚧     | [Branches, Exception Generating and System instructions](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Branches--Exception-Generating-and-System-instructions?lang=en)         | -     |
-| 🚧     | [Loads and Stores](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Loads-and-Stores?lang=en)                                                                                     | -     |
-| ❌      | [Data Processing -- Register](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Data-Processing----Register?lang=en)                                                               | -     |
-| ❌      | [Data Processing -- Scalar Floating-Point and Advanced SIMD](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Data-Processing----Scalar-Floating-Point-and-Advanced-SIMD?lang=en) | -     |
+| Status | Instruction Types                                                                                                                                                                                          | Notes                               |
+|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------|
+| ❌      | [SVE encodings](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/SVE-encodings?lang=en)                                                                                           | -                                   |
+| 🚧     | [Data Processing -- Immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Data-Processing----Immediate?lang=en)                                                             | `add/substract (imm, w tags)` missing |
+| 🚧     | [Branches, Exception Generating and System instructions](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Branches--Exception-Generating-and-System-instructions?lang=en)         | -                                   |
+| 🚧     | [Loads and Stores](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Loads-and-Stores?lang=en)                                                                                     | -                                   |
+| ❌      | [Data Processing -- Register](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Data-Processing----Register?lang=en)                                                               | -                                   |
+| ❌      | [Data Processing -- Scalar Floating-Point and Advanced SIMD](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Data-Processing----Scalar-Floating-Point-and-Advanced-SIMD?lang=en) | -                                   |
 
 *Note: Status ❌ means "not yet supported"*
 
