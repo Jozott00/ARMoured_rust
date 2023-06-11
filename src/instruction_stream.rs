@@ -2,16 +2,39 @@ use std::{mem, slice};
 
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+use crate::instruction_encoding::data_proc_imm::extract::ExtractInstructions;
+use crate::instruction_encoding::data_proc_imm::bitfield::BitfieldInstructions;
+use crate::instruction_encoding::data_proc_imm::add_substract_imm::AddSubtractImmediate;
+use crate::instruction_encoding::data_proc_imm::logical_imm::LogicalImmediate;
+use crate::instruction_encoding::data_proc_imm::{DataProcessingImmediate, DataProcessingImmediateWithAddress};
+use crate::instruction_encoding::data_proc_imm::mov_wide_imm::MovWideImmediate;
+use crate::instruction_encoding::data_proc_imm::pc_rel_addr::{PcRelAddressing, PcRelAddressingWithAddress};
+use crate::instruction_encoding::loads_and_stores::load_register_literal::{LoadRegisterLiteral, LoadRegisterLiteralWithAddress};
+use crate::instruction_encoding::loads_and_stores::LoadsAndStoresWithAddress;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
+use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
+use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
+use crate::instruction_encoding::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
+use crate::instruction_encoding::branch_exception_system::system_register_move::SystemRegisterMove;
+use crate::instruction_encoding::branch_exception_system::system_instructions::SystemInstructions;
+use crate::instruction_encoding::branch_exception_system::pstate::PStateInstructions;
+use crate::instruction_encoding::branch_exception_system::system_instr_w_register_arg::SystemInstructionsWithRegArg;
+use crate::instruction_encoding::branch_exception_system::BranchExceptionSystem;
+use crate::instruction_encoding::branch_exception_system::exception_generation::ExceptionGeneration;
+use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediate;
+use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediateWithAddress;
+use crate::instruction_encoding::InstructionSetWithAddress;
+use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
+use crate::instruction_encoding::branch_exception_system::BranchExceptionSystemWithAddress;
+use crate::instruction_encoding::AddressableInstructionProcessor;
+use crate::types::Offset32;
+use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::{UnconditionalBranchImmediate, UnconditionalBranchImmediateWithAddress};
 
 use crate::instruction_emitter::{Emitter, InstrEmitter};
+use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
 use crate::mc_memory::{McMemory, Memory};
 use crate::types::{Instruction, InstructionPointer, Register};
 use crate::types::instruction::Instr;
-
-pub mod data_proc_imm;
-pub mod loads_and_stores;
-pub mod branch_exception_system;
-mod utils;
 
 pub type PatchFn<M: Memory, E: Emitter> = fn(&mut InstrStream<M, E>) -> ();
 
@@ -31,6 +54,90 @@ impl<'mem> InstrStream<'mem, McMemory, InstrEmitter> {
     }
 }
 
+
+impl<'mem, M: Memory, E: Emitter> InstructionProcessor<Instr> for InstrStream<'mem, M, E> {
+    fn emit(&mut self, instr: Instruction) -> Instr {
+        debug_assert!(!self.mem.is_executable(), "Cannot emit instruction while memory is in execution mode");
+
+        let iptr = self.emitter.instr_ptr();
+        self.emitter.emit(instr);
+
+        Instr::new(instr, iptr)
+    }
+}
+
+impl<'mem, M: Memory, E: Emitter> UnconditionalBranchImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> AddressableInstructionProcessor<Instr> for InstrStream<'mem, M, E> {
+    fn intr_ptr_offset_to(&self, addr: usize) -> Offset32 {
+        let pc = self.emitter.instr_ptr() as usize;
+        let offset_abs = pc.checked_sub(addr)
+            .unwrap_or_else(|| addr.checked_sub(pc).unwrap());
+
+        debug_assert!(offset_abs <= i32::MAX as usize, "Offset to address is to large (exceeds maximum of {:x})", i32::MAX);
+
+        if addr >= pc { offset_abs as i32 } else { -(offset_abs as i32) }
+    }
+}
+
+impl<'mem, M: Memory, E: Emitter> UnconditionalBranchImmediateWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> ConditionalBranchImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> ConditionalBranchImmediateWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> SystemInstructionsWithRegArg<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> PStateInstructions<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> SystemInstructions<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> SystemRegisterMove<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> UnconditionalBranchRegister<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> BranchExceptionSystem<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> ExceptionGeneration<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> BranchExceptionSystemWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> Barriers<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> LogicalImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> AddSubtractImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> BitfieldInstructions<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> ExtractInstructions<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> DataProcessingImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> MovWideImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> PcRelAddressing<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> InstructionSet<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> LoadStoreRegUImm<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> LoadRegisterLiteral<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> LoadsAndStores<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> CompareAndSwapPair<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> LoadsAndStoresWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> LoadRegisterLiteralWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> DataProcessingImmediateWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> PcRelAddressingWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> InstructionSetWithAddress<Instr> for InstrStream<'mem, M, E> {}
+
 impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     pub fn patch_at(&mut self, intr_ptr: InstructionPointer, patch: PatchFn<M, E>) {
         // save instruction pointer
@@ -49,16 +156,6 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
     #[inline(always)]
     pub fn base_ptr(&self) -> InstructionPointer {
         self.emitter.base_ptr()
-    }
-
-    #[inline(always)]
-    fn emit(&mut self, instr: Instruction) -> Instr {
-        debug_assert!(!self.mem.is_executable(), "Cannot emit instruction while memory is in execution mode");
-
-        let iptr = self.emitter.instr_ptr();
-        self.emitter.emit(instr);
-
-        Instr::new(instr, iptr)
     }
 
     pub fn print_disasm(&self) {
@@ -83,6 +180,15 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
         assert!(self.mem.len() >= len, "Requested length exceeds memory map!");
 
         unsafe { slice::from_raw_parts(ptr, len) }
+    }
+
+    fn emit(&mut self, instr: Instruction) -> Instr {
+        debug_assert!(!self.mem.is_executable(), "Cannot emit instruction while memory is in execution mode");
+
+        let iptr = self.emitter.instr_ptr();
+        self.emitter.emit(instr);
+
+        Instr::new(instr, iptr)
     }
 }
 

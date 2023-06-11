@@ -16,472 +16,473 @@
 
 use bit_seq::{bseq_16, bseq_32};
 use crate::instruction_emitter::Emitter;
+use crate::instruction_encoding::InstructionProcessor;
 use crate::instruction_stream::InstrStream;
 use crate::mc_memory::Memory;
 use crate::types::instruction::Instr;
 use crate::types::{Imm6, Imm9, Register, UImm12, UImm5};
 use crate::types::prefetch_memory::PrfOp;
 
-impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
+// Helper functions -> Actual emits
 
-    // Helper functions -> Actual emits
+#[inline(always)]
+fn emit_load_store_offset<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, V: u8, opc: u8, pimm: u16, rn: Register, rt: Register) -> T {
+    debug_assert!(0 <= pimm && pimm <= 4095, "pimm must be in range 0 to 4095");
+    let r = bseq_32!(size:2 111 V:1 01 opc:2 pimm:12 rn:5 rt:5);
+    proc.emit(r)
+}
 
-    #[inline(always)]
-    fn emit_load_store_offset(&mut self, size: u8, V: u8, opc: u8, pimm: u16, rn: Register, rt: Register) -> Instr {
-        debug_assert!(0 <= pimm && pimm <= 4095, "pimm must be in range 0 to 4095");
-        let r = bseq_32!(size:2 111 V:1 01 opc:2 pimm:12 rn:5 rt:5);
-        self.emit(r)
-    }
+/// # Arguments
+/// - mode: if pre (`0b11`) or post (`0b01`) index. Between `imm9` and `Rn` in encoding.
+#[inline(always)]
+fn emit_load_store_pre_post<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, V: u8, opc: u8, simm: Imm9, mode: u8, wt: Register, xn_sp: Register) -> T {
+    debug_assert!(-256 <= simm && simm <= 255, "simm must be in range -256 to 255");
+    let r = bseq_32!(size:2 111 V:1 00 opc:2 0 simm:9 mode:2 xn_sp:5 wt:5);
+    proc.emit(r)
+}
 
-    /// # Arguments
-    /// - mode: if pre (`0b11`) or post (`0b01`) index. Between `imm9` and `Rn` in encoding.
-    #[inline(always)]
-    fn emit_load_store_pre_post(&mut self, size: u8, V: u8, opc: u8, simm: Imm9, mode: u8, wt: Register, xn_sp: Register) -> Instr {
-        debug_assert!(-256 <= simm && simm <= 255, "simm must be in range -256 to 255");
-        let r = bseq_32!(size:2 111 V:1 00 opc:2 0 simm:9 mode:2 xn_sp:5 wt:5);
-        self.emit(r)
-    }
+pub trait LoadStoreRegUImm<T>: InstructionProcessor<T> {
 
     // API methods
 
     // STRB instructions
 
     #[inline(always)]
-    pub fn strb_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0, 0, 0, simm, 0b01, wt, xn_sp)
+    fn strb_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0, 0, 0, simm, 0b01, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn strb_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0, 0, 0, simm, 0b11, wt, xn_sp)
+    fn strb_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0, 0, 0, simm, 0b11, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn strb_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
-        self.emit_load_store_offset(0, 0, 0, pimm, xn_sp, wt)
+    fn strb_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
+        emit_load_store_offset(self, 0, 0, 0, pimm, xn_sp, wt)
     }
 
     // LDRB instructions
 
     #[inline(always)]
-    pub fn ldrb_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0, 0, 0b01, simm, 0b01, wt, xn_sp)
+    fn ldrb_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0, 0, 0b01, simm, 0b01, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrb_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0, 0, 0b01, simm, 0b11, wt, xn_sp)
+    fn ldrb_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0, 0, 0b01, simm, 0b11, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrb_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
-        self.emit_load_store_offset(0, 0, 0b01, pimm, xn_sp, wt)
+    fn ldrb_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
+        emit_load_store_offset(self, 0, 0, 0b01, pimm, xn_sp, wt)
     }
 
 
     // LDRSB instructions
 
     #[inline(always)]
-    pub fn ldrsb_32_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0, 0, 0b11, simm, 0b01, wt, xn_sp)
+    fn ldrsb_32_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0, 0, 0b11, simm, 0b01, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrsb_32_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0, 0, 0b11, simm, 0b11, wt, xn_sp)
+    fn ldrsb_32_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0, 0, 0b11, simm, 0b11, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrsb_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
-        self.emit_load_store_offset(0, 0, 0b11, pimm, xn_sp, wt)
+    fn ldrsb_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
+        emit_load_store_offset(self, 0, 0, 0b11, pimm, xn_sp, wt)
     }
 
     #[inline(always)]
-    pub fn ldrsb_64_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0, 0, 0b10, simm, 0b01, xt, xn_sp)
+    fn ldrsb_64_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0, 0, 0b10, simm, 0b01, xt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrsb_64_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0, 0, 0b10, simm, 0b11, xt, xn_sp)
+    fn ldrsb_64_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0, 0, 0b10, simm, 0b11, xt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrsb_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
-        self.emit_load_store_offset(0, 0, 0b10, pimm, xn_sp, xt)
+    fn ldrsb_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> T {
+        emit_load_store_offset(self, 0, 0, 0b10, pimm, xn_sp, xt)
     }
 
     // STRH Imm instructions
 
     #[inline(always)]
-    pub fn strh_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b01, 0, 0, simm, 0b01, wt, xn_sp)
+    fn strh_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b01, 0, 0, simm, 0b01, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn strh_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b01, 0, 0, simm, 0b11, wt, xn_sp)
+    fn strh_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b01, 0, 0, simm, 0b11, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn strh_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn strh_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
         debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 2;
-        self.emit_load_store_offset(0b01, 0, 0, pimm, xn_sp, wt)
+        emit_load_store_offset(self, 0b01, 0, 0, pimm, xn_sp, wt)
     }
 
     // LDRH Imm instructions
 
     #[inline(always)]
-    pub fn ldrh_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b01, 0, 0b01, simm, 0b01, wt, xn_sp)
+    fn ldrh_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b01, 0, 0b01, simm, 0b01, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrh_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b01, 0, 0b01, simm, 0b11, wt, xn_sp)
+    fn ldrh_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b01, 0, 0b01, simm, 0b11, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrh_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn ldrh_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
         debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 2;
-        self.emit_load_store_offset(0b01, 0, 0b01, pimm, xn_sp, wt)
+        emit_load_store_offset(self, 0b01, 0, 0b01, pimm, xn_sp, wt)
     }
 
     // LDRH Imm instructions
 
     #[inline(always)]
-    pub fn ldrsh_32_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b01, 0, 0b11, simm, 0b01, xt, xn_sp)
+    fn ldrsh_32_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b01, 0, 0b11, simm, 0b01, xt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrsh_32_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b01, 0, 0b11, simm, 0b11, wt, xn_sp)
+    fn ldrsh_32_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b01, 0, 0b11, simm, 0b11, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrsh_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn ldrsh_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
         debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 2;
-        self.emit_load_store_offset(0b01, 0, 0b11, pimm, xn_sp, wt)
+        emit_load_store_offset(self, 0b01, 0, 0b11, pimm, xn_sp, wt)
     }
 
     #[inline(always)]
-    pub fn ldrsh_64_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b01, 0, 0b10, simm, 0b01, xt, xn_sp)
+    fn ldrsh_64_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b01, 0, 0b10, simm, 0b01, xt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrsh_64_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b01, 0, 0b10, simm, 0b11, xt, xn_sp)
+    fn ldrsh_64_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b01, 0, 0b10, simm, 0b11, xt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrsh_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn ldrsh_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
         debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 2;
-        self.emit_load_store_offset(0b01, 0, 0b10, pimm, xn_sp, xt)
+        emit_load_store_offset(self, 0b01, 0, 0b10, pimm, xn_sp, xt)
     }
 
     // STR Imm instructions
 
     #[inline(always)]
-    pub fn str_32_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b10, 0, 0b00, simm, 0b01, wt, xn_sp)
+    fn str_32_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b10, 0, 0b00, simm, 0b01, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_32_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b10, 0, 0b00, simm, 0b11, wt, xn_sp)
+    fn str_32_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b10, 0, 0b00, simm, 0b11, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn str_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 16380, "pimm must be in range 0 to 16380, was {}", pimm);
         debug_assert!(pimm % 4 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 4;
-        self.emit_load_store_offset(0b10, 0, 0b00, pimm, xn_sp, wt)
+        emit_load_store_offset(self, 0b10, 0, 0b00, pimm, xn_sp, wt)
     }
 
     #[inline(always)]
-    pub fn str_64_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b11, 0, 0b00, simm, 0b01, xt, xn_sp)
+    fn str_64_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b11, 0, 0b00, simm, 0b01, xt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_64_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b11, 0, 0b00, simm, 0b11, xt, xn_sp)
+    fn str_64_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b11, 0, 0b00, simm, 0b11, xt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn str_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
         debug_assert!(pimm % 8 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 8;
-        self.emit_load_store_offset(0b11, 0, 0b00, pimm, xn_sp, xt)
+        emit_load_store_offset(self, 0b11, 0, 0b00, pimm, xn_sp, xt)
     }
 
     // LDR Imm instructions
 
     #[inline(always)]
-    pub fn ldr_32_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b10, 0, 0b01, simm, 0b01, wt, xn_sp)
+    fn ldr_32_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b10, 0, 0b01, simm, 0b01, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_32_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b10, 0, 0b01, simm, 0b11, wt, xn_sp)
+    fn ldr_32_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b10, 0, 0b01, simm, 0b11, wt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn ldr_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 16380, "pimm must be in range 0 to 16380, was {}", pimm);
         debug_assert!(pimm % 4 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 4;
-        self.emit_load_store_offset(0b10, 0, 0b01, pimm, xn_sp, wt)
+        emit_load_store_offset(self, 0b10, 0, 0b01, pimm, xn_sp, wt)
     }
 
     #[inline(always)]
-    pub fn ldr_64_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b11, 0, 0b01, simm, 0b01, xt, xn_sp)
+    fn ldr_64_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b11, 0, 0b01, simm, 0b01, xt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_64_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b11, 0, 0b01, simm, 0b11, xt, xn_sp)
+    fn ldr_64_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b11, 0, 0b01, simm, 0b11, xt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn ldr_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
         debug_assert!(pimm % 8 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 8;
-        self.emit_load_store_offset(0b11, 0, 0b01, pimm, xn_sp, xt)
+        emit_load_store_offset(self, 0b11, 0, 0b01, pimm, xn_sp, xt)
     }
 
     // LDRSW Imm instructions
 
     #[inline(always)]
-    pub fn ldrsw_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b10, 0, 0b10, simm, 0b01, xt, xn_sp)
+    fn ldrsw_imm_post_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b10, 0, 0b10, simm, 0b01, xt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrsw_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b10, 0, 0b10, simm, 0b11, xt, xn_sp)
+    fn ldrsw_imm_pre_index(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b10, 0, 0b10, simm, 0b11, xt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldrsw_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn ldrsw_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 16380, "pimm must be in range 0 to 16380, was {}", pimm);
         debug_assert!(pimm % 4 == 0, "pimm must be multiply of 4, was {}", pimm);
         let pimm = pimm / 4;
-        self.emit_load_store_offset(0b10, 0, 0b10, pimm, xn_sp, xt)
+        emit_load_store_offset(self, 0b10, 0, 0b10, pimm, xn_sp, xt)
     }
 
     // PFRM Imm instructions
 
     #[inline(always)]
-    pub fn prfm_imm_prfop(&mut self, prfop: PrfOp, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn prfm_imm_prfop(&mut self, prfop: PrfOp, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
         debug_assert!(pimm % 8 == 0, "pimm must be multiply of 8, was {}", pimm);
         let pimm = pimm / 8;
-        self.emit_load_store_offset(0b11, 0, 0b10, pimm, xn_sp, prfop.encode())
+        emit_load_store_offset(self, 0b11, 0, 0b10, pimm, xn_sp, prfop.encode())
     }
 
     #[inline(always)]
-    pub fn prfm_imm_custom(&mut self, imm5: UImm5, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn prfm_imm_custom(&mut self, imm5: UImm5, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(imm5 <= 31, "imm5 must be in range 0 to 31, was {}", imm5);
         debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
         debug_assert!(pimm % 8 == 0, "pimm must be multiply of 8, was {}", pimm);
         let pimm = pimm / 8;
-        self.emit_load_store_offset(0b11, 0, 0b10, pimm, xn_sp, imm5)
+        emit_load_store_offset(self, 0b11, 0, 0b10, pimm, xn_sp, imm5)
     }
 
 
     // STR Imm SIMD&FP instructions
 
     #[inline(always)]
-    pub fn str_8_imm_simd_post_index(&mut self, bt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b00, 1, 0b00, simm, 0b01, bt, xn_sp)
+    fn str_8_imm_simd_post_index(&mut self, bt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b00, 1, 0b00, simm, 0b01, bt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_8_imm_simd_pre_index(&mut self, bt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b00, 1, 0b00, simm, 0b11, bt, xn_sp)
+    fn str_8_imm_simd_pre_index(&mut self, bt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b00, 1, 0b00, simm, 0b11, bt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_8_imm_simd_unsigned_offset(&mut self, bt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
-        self.emit_load_store_offset(0b00, 1, 0b00, pimm, xn_sp, bt)
+    fn str_8_imm_simd_unsigned_offset(&mut self, bt: Register, xn_sp: Register, pimm: UImm12) -> T {
+        emit_load_store_offset(self, 0b00, 1, 0b00, pimm, xn_sp, bt)
     }
 
     #[inline(always)]
-    pub fn str_16_imm_simd_post_index(&mut self, ht: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b01, 1, 0b00, simm, 0b01, ht, xn_sp)
+    fn str_16_imm_simd_post_index(&mut self, ht: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b01, 1, 0b00, simm, 0b01, ht, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_16_imm_simd_pre_index(&mut self, ht: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b01, 1, 0b00, simm, 0b11, ht, xn_sp)
+    fn str_16_imm_simd_pre_index(&mut self, ht: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b01, 1, 0b00, simm, 0b11, ht, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_16_imm_simd_unsigned_offset(&mut self, ht: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn str_16_imm_simd_unsigned_offset(&mut self, ht: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
         debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 2;
-        self.emit_load_store_offset(0b01, 1, 0b00, pimm, xn_sp, ht)
+        emit_load_store_offset(self, 0b01, 1, 0b00, pimm, xn_sp, ht)
     }
 
     #[inline(always)]
-    pub fn str_32_imm_simd_post_index(&mut self, st: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b10, 1, 0b00, simm, 0b01, st, xn_sp)
+    fn str_32_imm_simd_post_index(&mut self, st: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b10, 1, 0b00, simm, 0b01, st, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_32_imm_simd_pre_index(&mut self, st: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b10, 1, 0b00, simm, 0b11, st, xn_sp)
+    fn str_32_imm_simd_pre_index(&mut self, st: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b10, 1, 0b00, simm, 0b11, st, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_32_imm_simd_unsigned_offset(&mut self, st: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn str_32_imm_simd_unsigned_offset(&mut self, st: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 16380, "pimm must be in range 0 to 16380, was {}", pimm);
         debug_assert!(pimm % 4 == 0, "pimm must be multiply of 4, was {}", pimm);
         let pimm = pimm / 4;
-        self.emit_load_store_offset(0b10, 1, 0b00, pimm, xn_sp, st)
+        emit_load_store_offset(self, 0b10, 1, 0b00, pimm, xn_sp, st)
     }
 
     #[inline(always)]
-    pub fn str_64_imm_simd_post_index(&mut self, dt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b11, 1, 0b00, simm, 0b01, dt, xn_sp)
+    fn str_64_imm_simd_post_index(&mut self, dt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b11, 1, 0b00, simm, 0b01, dt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_64_imm_simd_pre_index(&mut self, dt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b11, 1, 0b00, simm, 0b11, dt, xn_sp)
+    fn str_64_imm_simd_pre_index(&mut self, dt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b11, 1, 0b00, simm, 0b11, dt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_64_imm_simd_unsigned_offset(&mut self, dt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn str_64_imm_simd_unsigned_offset(&mut self, dt: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
         debug_assert!(pimm % 8 == 0, "pimm must be multiply of 8, was {}", pimm);
         let pimm = pimm / 8;
-        self.emit_load_store_offset(0b11, 1, 0b00, pimm, xn_sp, dt)
+        emit_load_store_offset(self, 0b11, 1, 0b00, pimm, xn_sp, dt)
     }
 
     #[inline(always)]
-    pub fn str_128_imm_simd_post_index(&mut self, qt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b00, 1, 0b10, simm, 0b01, qt, xn_sp)
+    fn str_128_imm_simd_post_index(&mut self, qt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b00, 1, 0b10, simm, 0b01, qt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_128_imm_simd_pre_index(&mut self, qt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b00, 1, 0b10, simm, 0b11, qt, xn_sp)
+    fn str_128_imm_simd_pre_index(&mut self, qt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b00, 1, 0b10, simm, 0b11, qt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn str_128_imm_simd_unsigned_offset(&mut self, qt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn str_128_imm_simd_unsigned_offset(&mut self, qt: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 65520, "pimm must be in range 0 to 65520, was {}", pimm);
         debug_assert!(pimm % 16 == 0, "pimm must be multiply of 16, was {}", pimm);
         let pimm = pimm / 16;
-        self.emit_load_store_offset(0b00, 1, 0b10, pimm, xn_sp, qt)
+        emit_load_store_offset(self, 0b00, 1, 0b10, pimm, xn_sp, qt)
     }
 
 
     // LDR Imm SIMD&FP instructions
 
     #[inline(always)]
-    pub fn ldr_8_imm_simd_post_index(&mut self, bt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b00, 1, 0b01, simm, 0b01, bt, xn_sp)
+    fn ldr_8_imm_simd_post_index(&mut self, bt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b00, 1, 0b01, simm, 0b01, bt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_8_imm_simd_pre_index(&mut self, bt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b00, 1, 0b01, simm, 0b11, bt, xn_sp)
+    fn ldr_8_imm_simd_pre_index(&mut self, bt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b00, 1, 0b01, simm, 0b11, bt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_8_imm_simd_unsigned_offset(&mut self, bt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
-        self.emit_load_store_offset(0b00, 1, 0b01, pimm, xn_sp, bt)
+    fn ldr_8_imm_simd_unsigned_offset(&mut self, bt: Register, xn_sp: Register, pimm: UImm12) -> T {
+        emit_load_store_offset(self, 0b00, 1, 0b01, pimm, xn_sp, bt)
     }
 
     #[inline(always)]
-    pub fn ldr_16_imm_simd_post_index(&mut self, ht: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b01, 1, 0b01, simm, 0b01, ht, xn_sp)
+    fn ldr_16_imm_simd_post_index(&mut self, ht: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b01, 1, 0b01, simm, 0b01, ht, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_16_imm_simd_pre_index(&mut self, ht: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b01, 1, 0b01, simm, 0b11, ht, xn_sp)
+    fn ldr_16_imm_simd_pre_index(&mut self, ht: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b01, 1, 0b01, simm, 0b11, ht, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_16_imm_simd_unsigned_offset(&mut self, ht: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn ldr_16_imm_simd_unsigned_offset(&mut self, ht: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
         debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 2;
-        self.emit_load_store_offset(0b01, 1, 0b01, pimm, xn_sp, ht)
+        emit_load_store_offset(self, 0b01, 1, 0b01, pimm, xn_sp, ht)
     }
 
     #[inline(always)]
-    pub fn ldr_32_imm_simd_post_index(&mut self, st: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b10, 1, 0b01, simm, 0b01, st, xn_sp)
+    fn ldr_32_imm_simd_post_index(&mut self, st: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b10, 1, 0b01, simm, 0b01, st, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_32_imm_simd_pre_index(&mut self, st: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b10, 1, 0b01, simm, 0b11, st, xn_sp)
+    fn ldr_32_imm_simd_pre_index(&mut self, st: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b10, 1, 0b01, simm, 0b11, st, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_32_imm_simd_unsigned_offset(&mut self, st: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn ldr_32_imm_simd_unsigned_offset(&mut self, st: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 16380, "pimm must be in range 0 to 16380, was {}", pimm);
         debug_assert!(pimm % 4 == 0, "pimm must be multiply of 4, was {}", pimm);
         let pimm = pimm / 4;
-        self.emit_load_store_offset(0b10, 1, 0b01, pimm, xn_sp, st)
+        emit_load_store_offset(self, 0b10, 1, 0b01, pimm, xn_sp, st)
     }
 
     #[inline(always)]
-    pub fn ldr_64_imm_simd_post_index(&mut self, dt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b11, 1, 0b01, simm, 0b01, dt, xn_sp)
+    fn ldr_64_imm_simd_post_index(&mut self, dt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b11, 1, 0b01, simm, 0b01, dt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_64_imm_simd_pre_index(&mut self, dt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b11, 1, 0b01, simm, 0b11, dt, xn_sp)
+    fn ldr_64_imm_simd_pre_index(&mut self, dt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b11, 1, 0b01, simm, 0b11, dt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_64_imm_simd_unsigned_offset(&mut self, dt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn ldr_64_imm_simd_unsigned_offset(&mut self, dt: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
         debug_assert!(pimm % 8 == 0, "pimm must be multiply of 8, was {}", pimm);
         let pimm = pimm / 8;
-        self.emit_load_store_offset(0b11, 1, 0b01, pimm, xn_sp, dt)
+        emit_load_store_offset(self, 0b11, 1, 0b01, pimm, xn_sp, dt)
     }
 
     #[inline(always)]
-    pub fn ldr_128_imm_simd_post_index(&mut self, qt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b00, 1, 0b11, simm, 0b01, qt, xn_sp)
+    fn ldr_128_imm_simd_post_index(&mut self, qt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b00, 1, 0b11, simm, 0b01, qt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_128_imm_simd_pre_index(&mut self, qt: Register, xn_sp: Register, simm: Imm9) -> Instr {
-        self.emit_load_store_pre_post(0b00, 1, 0b11, simm, 0b11, qt, xn_sp)
+    fn ldr_128_imm_simd_pre_index(&mut self, qt: Register, xn_sp: Register, simm: Imm9) -> T {
+        emit_load_store_pre_post(self, 0b00, 1, 0b11, simm, 0b11, qt, xn_sp)
     }
 
     #[inline(always)]
-    pub fn ldr_128_imm_simd_unsigned_offset(&mut self, qt: Register, xn_sp: Register, pimm: UImm12) -> Instr {
+    fn ldr_128_imm_simd_unsigned_offset(&mut self, qt: Register, xn_sp: Register, pimm: UImm12) -> T {
         debug_assert!(pimm <= 65520, "pimm must be in range 0 to 65520, was {}", pimm);
         debug_assert!(pimm % 16 == 0, "pimm must be multiply of 16, was {}", pimm);
         let pimm = pimm / 16;
-        self.emit_load_store_offset(0b00, 1, 0b11, pimm, xn_sp, qt)
+        emit_load_store_offset(self, 0b00, 1, 0b11, pimm, xn_sp, qt)
     }
 }
 

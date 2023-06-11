@@ -73,6 +73,7 @@ mod tests {
     use crate::{stream_mock};
     use crate::types::InstructionPointer;
     use crate::instruction_stream::InstrStream;
+    use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
 
     #[test]
     fn test_mem_barrier_opts() {
