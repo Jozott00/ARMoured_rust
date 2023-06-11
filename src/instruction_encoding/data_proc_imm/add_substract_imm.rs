@@ -190,7 +190,6 @@ pub trait AddSubtractImmediate<T>: InstructionProcessor<T> {
 #[cfg(test)]
 mod tests {
     use crate::assert_panic;
-    use crate::instruction_producer::InstrProducer;
     use crate::test_utils::test_producer::TestProducer;
     use super::*;
 

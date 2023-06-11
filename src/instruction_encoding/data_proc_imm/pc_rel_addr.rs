@@ -42,7 +42,6 @@ pub trait PcRelAddressing<T>: InstructionProcessor<T> {
     fn adr_from_byte_offset(&mut self, rd: Register, offset: Offset32) -> T {
         // check if offset is in range of +-1MB and a multiply of 4
         debug_assert!(-(1 << 20) <= offset && offset < (1 << 20), "Offset must be within ±1MB");
-        debug_assert!(offset % 4 == 0, "Offset must be a multiply of 4!");
         let immlo = offset & 0b11;
         let immhi = offset >> 2;
         emit_pc_rel_addr(self, 0, immlo as u8, immhi as u32, rd)
@@ -84,13 +83,35 @@ pub trait PcRelAddressingWithAddress<T>: AddressableInstructionProcessor<T> {
     /// * `addr` - The absolute address. It must be 4-byte aligned.
     #[inline(always)]
     fn adr_from_addr(&mut self, rd: Register, addr: usize) -> T {
-        debug_assert!(addr % 4 == 0, "Address must be 4 byte aligned!");
-
         let offset = self.intr_ptr_offset_to(addr);
         debug_assert!(-(1 << 20) <= offset && offset < (1 << 20), "Offset must be within ±1MB");
 
         let immlo = offset & 0b11;
         let immhi = offset >> 2;
         emit_pc_rel_addr(self, 0, immlo as u8, immhi as u32, rd)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::mc_memory::MockMemory;
+    use crate::instruction_emitter::MockEmitter;
+    use crate::{assert_panic, stream_mock};
+    use crate::types::InstructionPointer;
+    use crate::instruction_stream::InstrStream;
+
+    #[test]
+    fn test_addr_x() {
+        stream_mock!(stream, {
+            let instr = stream.adr_from_byte_offset(1, -(1 << 20));
+            assert_eq!(instr.to_string(), "adr x1, 0xfffffffffff00000");
+
+            let instr = stream.adr_from_addr(1, (1 << 20) - 1 as usize);
+            assert_eq!(instr.to_string(), "adr x1, 0xfffff");
+
+            assert_panic!("Should panic: offset out of bounds"; stream.adr_from_byte_offset(1, (1 << 20)));
+            assert_panic!("Should panic: offset out of bounds"; stream.adr_from_addr(1, (1 << 20) as usize));
+        })
     }
 }

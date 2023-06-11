@@ -14,6 +14,7 @@ pub type Instruction = u32;
 pub type InstructionPointer = *mut Instruction;
 
 pub type Register = u8;
+
 pub type Imm64 = u64;
 pub type Imm32 = u32;
 pub type Imm19 = i32;
@@ -24,6 +25,8 @@ pub type Imm9 = i16;
 pub type Imm6 = u8;
 pub type Imm5 = u8;
 
+pub type UImm64 = u64;
+pub type UImm32 = u32;
 pub type UImm16 = u16;
 pub type UImm12 = u16;
 pub type UImm10 = u16;

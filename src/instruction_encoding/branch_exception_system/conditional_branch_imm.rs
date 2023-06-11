@@ -53,6 +53,10 @@ pub trait ConditionalBranchImmediate<T>: InstructionProcessor<T> {
 
     /// [BC.cond](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BC-cond--Branch-Consistent-conditionally-?lang=en) instruction
     ///
+    /// ```asm
+    /// BC.cond <imm>
+    /// ```
+    ///
     /// Uses specified `offset` instead of label.
     ///
     /// **Note**: FEAT_HBC required
