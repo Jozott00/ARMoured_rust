@@ -27,7 +27,7 @@ use crate::types::sys_ops::ic_op::IcOp;
 #[inline(always)]
 fn emit_uncond_br_reg<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, op2: u8, op3: u8, rn: Register, op4: u8) -> T {
     let i = bseq_32!(1101011 opc:4 op2:5 op3:6 rn:5 op4:5);
-    proc.emit(i)
+    proc.process(i)
 }
 
 #[inline(always)]

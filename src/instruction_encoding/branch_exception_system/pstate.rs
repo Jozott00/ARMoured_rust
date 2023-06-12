@@ -19,7 +19,7 @@ use crate::types::pstate::PStateField;
 #[inline(always)]
 fn emit_pstate<P: InstructionProcessor<T>, T>(proc: &mut P, op1: u8, crm: UImm4, op2: u8, rt: u8) -> T {
     let i = bseq_32!(11010101 0:5 op1:3 0100 crm:4 op2:3 rt:5);
-    proc.emit(i)
+    proc.process(i)
 }
 
 pub trait PStateInstructions<T>: InstructionProcessor<T> {

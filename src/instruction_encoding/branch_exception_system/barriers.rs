@@ -23,7 +23,7 @@ use crate::types::mem_barrier_option::{MemBarrierOpt, MemNXSBarrierOpt};
 #[inline(always)]
 fn emit_barrier_x<P: InstructionProcessor<T>, T>(proc: &mut P, crm: u8, op2: u8, rt: Register) -> T {
     let i = bseq_32!(11010101 0:6 110011 crm:4 op2:3 rt:5);
-    proc.emit(i)
+    proc.process(i)
 }
 
 /// # Exception Generation

@@ -33,7 +33,7 @@ impl InstrProducer {
 
 
 impl InstructionProcessor<Instr> for InstrProducer {
-    fn emit(&mut self, instr: Instruction) -> Instr {
+    fn process(&mut self, instr: Instruction) -> Instr {
         Instr::new(instr, 0 as InstructionPointer)
     }
 }

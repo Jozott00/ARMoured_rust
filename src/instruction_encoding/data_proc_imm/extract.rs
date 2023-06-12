@@ -16,7 +16,7 @@ use crate::types::{Register, UImm5, UImm6};
 #[inline(always)]
 fn emit_extr_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op21: u8, N: u8, o0: u8, rm: Register, imms: u8, rn: Register, rd: Register) -> T {
     let r = bseq_32!(sf:1 op21:2 100111 N:1 o0:1 rm:5 imms:6 rn:5 rd:5);
-    proc.emit(r)
+    proc.process(r)
 }
 
 

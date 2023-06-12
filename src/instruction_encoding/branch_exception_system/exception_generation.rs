@@ -21,7 +21,7 @@ use crate::types::UImm16;
 #[inline(always)]
 fn emit_exception_gen_x<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, imm16: u16, op2: u8, LL: u8) -> T {
     let i = bseq_32!(11010100 opc:3 imm16:16 op2:3 LL:2);
-    proc.emit(i)
+    proc.process(i)
 }
 
 pub trait ExceptionGeneration<T>: InstructionProcessor<T> {

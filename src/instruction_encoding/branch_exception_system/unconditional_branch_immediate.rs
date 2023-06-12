@@ -12,7 +12,7 @@ use crate::types::Offset64;
 #[inline(always)]
 fn emit_uncond_br_imm<P: InstructionProcessor<T>, T>(proc: &mut P, op: u8, imm26: u32) -> T {
     let i = bseq_32!(op:1 00101 imm26:26);
-    proc.emit(i)
+    proc.process(i)
 }
 
 #[inline(always)]

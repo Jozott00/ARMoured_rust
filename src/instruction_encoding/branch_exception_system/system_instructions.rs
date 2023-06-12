@@ -28,7 +28,7 @@ use crate::types::sys_ops::ic_op::IcOp;
 #[inline(always)]
 fn emit_system_instruction<P: InstructionProcessor<T>, T>(proc: &mut P, l: u8, op1: u8, crn: u8, crm: u8, op2: u8, rt: Register) -> T {
     let i = bseq_32!(1101010100 l:1 01 op1:3 crn:4 crm:4 op2:3 rt:5);
-    proc.emit(i)
+    proc.process(i)
 }
 
 pub trait SystemInstructions<T>: InstructionProcessor<T> {
