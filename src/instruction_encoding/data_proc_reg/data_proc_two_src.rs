@@ -26,7 +26,7 @@ use crate::types::Register;
 
 fn emit_data_proc_two<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, s: u8, rm: Register, opcode: u8, rn: Register, rd: Register) -> T {
     let i = bseq_32!(sf:1 0 s:1 11010110 rm:5 opcode:6 rn:5 rd:5);
-    proc.emit(i)
+    proc.process(i)
 }
 
 /// # Data-processing (2 source)
