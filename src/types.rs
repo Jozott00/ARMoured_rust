@@ -18,6 +18,7 @@ pub type Register = u8;
 pub type Imm64 = u64;
 pub type Imm32 = u32;
 pub type Imm19 = i32;
+pub type Imm18 = i32;
 pub type Imm16 = u16;
 pub type Imm13 = u16;
 pub type Imm12 = u16;
@@ -41,6 +42,7 @@ pub type Offset32 = i32;
 pub type Offset64 = i64;
 
 // halfworld of instruction like movz, movn, ...
+#[derive(PartialEq)]
 pub enum HW {
     LSL0,
     LSL16,

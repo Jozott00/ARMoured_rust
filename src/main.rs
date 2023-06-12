@@ -26,13 +26,9 @@ pub mod instruction_producer;
 pub mod instruction_stream;
 
 fn main() {
-    let mut prod = InstrProducer::new();
-    let eret = prod.eret();
-
-
     let mut mem = McMemory::new_pagesize();
     let mut stream = InstrStream::new(&mut mem);
-    stream.mov_64_imm(1, 0x23);
+    stream.movz_64_imm(1, 0x23);
     stream.add_64_imm(0, 1, 4);
     stream.adr_from_addr(0, stream.base_ptr() as usize);
     stream.adrp_from_byte_offset(0, 0x1000);
@@ -57,6 +53,7 @@ fn main() {
     stream.prfm_imm_prfop(PrfOp(PrfType::PLD, PrfTarget::L1, PrfPolicy::KEEP), 0, 0x0);
     stream.b_from_byte_offset(0);
     stream.sbfm_64(1, 2, 0x8, 0x3);
+    stream.movk_64_imm(2, 0xffff);
 
     stream.patch_at(stream.base_ptr(), |s| {
         s.movn_64_imm(1, 4);
