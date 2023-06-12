@@ -1,7 +1,8 @@
 //! # PC-rel. addressing
 //!
-//! - ADR
-//! - ADRP
+//! Implements the following instructions:
+//! - [ADR](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADR--Form-PC-relative-address-?lang=en)
+//! - [ADRP](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADRP--Form-PC-relative-address-to-4KB-page-?lang=en)
 
 pub use bit_seq::{bseq_32, bseq_8};
 use num::Signed;
@@ -27,12 +28,22 @@ fn emit_pc_rel_addr<P: InstructionProcessor<T>, T>(proc: &mut P, op: u8, immlo: 
     proc.emit(r)
 }
 
+/// # PC-rel. addressing
+///
+/// Implements the following instructions:
+/// - [ADR](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADR--Form-PC-relative-address-?lang=en)
+/// - [ADRP](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADRP--Form-PC-relative-address-to-4KB-page-?lang=en)
 // TODO: Add ADR with label as soon as labels exists
 pub trait PcRelAddressing<T>: InstructionProcessor<T> {
+    /// [ADR](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADR--Form-PC-relative-address-?lang=en)\
     /// Emit an `ADR` instruction.
     ///
     /// This function generates an `ADR` instruction that forms a PC-relative address
     /// using an offset in bytes.
+    ///
+    /// ```asm
+    /// ADR <Xd>, <offset>
+    /// ```
     ///
     /// # Arguments
     ///
@@ -47,10 +58,15 @@ pub trait PcRelAddressing<T>: InstructionProcessor<T> {
         emit_pc_rel_addr(self, 0, immlo as u8, immhi as u32, rd)
     }
 
+    /// [ADRP](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADRP--Form-PC-relative-address-to-4KB-page-?lang=en)\
     /// Emit an `ADRP` instruction.
     ///
     /// This function generates an `ADRP` instruction that forms a PC-relative address
     /// to a 4KB page, using an offset in bytes.
+    ///
+    /// ```asm
+    /// ADRP <Xd>, <offset>
+    /// ```
     ///
     /// # Arguments
     ///
@@ -72,10 +88,15 @@ pub trait PcRelAddressing<T>: InstructionProcessor<T> {
 }
 
 pub trait PcRelAddressingWithAddress<T>: AddressableInstructionProcessor<T> {
+    /// [ADR](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADR--Form-PC-relative-address-?lang=en)\
     /// Emit an `ADR` instruction.
     ///
     /// This function generates an `ADR` instruction that forms a PC-relative address
     /// from a given address.
+    ///
+    /// ```asm
+    /// ADR <Xd>, <addr>
+    /// ```
     ///
     /// # Arguments
     ///
@@ -102,7 +123,7 @@ mod tests {
     use crate::instruction_stream::InstrStream;
 
     #[test]
-    fn test_addr_x() {
+    fn test_adr_x() {
         stream_mock!(stream, {
             let instr = stream.adr_from_byte_offset(1, -(1 << 20));
             assert_eq!(instr.to_string(), "adr x1, 0xfffffffffff00000");
@@ -111,7 +132,17 @@ mod tests {
             assert_eq!(instr.to_string(), "adr x1, 0xfffff");
 
             assert_panic!("Should panic: offset out of bounds"; stream.adr_from_byte_offset(1, (1 << 20)));
-            assert_panic!("Should panic: offset out of bounds"; stream.adr_from_addr(1, (1 << 20) as usize));
+            assert_panic!("Should panic: offset out of bounds"; stream.adr_from_addr(1, 1 << 30));
+        })
+    }
+
+    #[test]
+    fn test_adrp_x() {
+        stream_mock!(stream, {
+            let instr = stream.adrp_from_byte_offset(1, -(1 << 20));
+            assert_eq!(instr.to_string(), "adrp x1, 0xfffffffffff00000");
+
+            assert_panic!("Should panic: offset out of bounds"; stream.adrp_from_byte_offset(1, (1 << 20)));
         })
     }
 }
