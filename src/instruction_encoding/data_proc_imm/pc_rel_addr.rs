@@ -132,7 +132,7 @@ mod tests {
             assert_eq!(instr.to_string(), "adr x1, 0xfffff");
 
             assert_panic!("Should panic: offset out of bounds"; stream.adr_from_byte_offset(1, (1 << 20)));
-            assert_panic!("Should panic: offset out of bounds"; stream.adr_from_addr(1, 1 << 30));
+            assert_panic!("Should panic: offset out of bounds"; stream.adr_from_addr(1, 1 << 20));
         })
     }
 
@@ -142,7 +142,7 @@ mod tests {
             let instr = stream.adrp_from_byte_offset(1, -(1 << 20));
             assert_eq!(instr.to_string(), "adrp x1, 0xfffffffffff00000");
 
-            assert_panic!("Should panic: offset out of bounds"; stream.adrp_from_byte_offset(1, (1 << 20)));
+            assert_panic!("Should panic: offset out of bounds"; stream.adrp_from_byte_offset(1, (1 << 30) * 4));
         })
     }
 }
