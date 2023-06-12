@@ -28,7 +28,7 @@ use crate::types::bitmask_immediate::BitmaskImmediate;
 fn emit_logical_imm<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, opc: u8, bit_mask: &BitmaskImmediate, rn: Register, rd: Register) -> T {
     let nrs_mask = bit_mask.as_u16();
     let r = bseq_32!(sf:1 opc:2 100100 nrs_mask:13 rn:5 rd:5);
-    proc.emit(r)
+    proc.process(r)
 }
 
 pub trait LogicalImmediate<T>: InstructionProcessor<T> {

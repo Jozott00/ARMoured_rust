@@ -58,7 +58,7 @@ impl<'mem> InstrStream<'mem, McMemory, InstrEmitter> {
 
 
 impl<'mem, M: Memory, E: Emitter> InstructionProcessor<Instr> for InstrStream<'mem, M, E> {
-    fn emit(&mut self, instr: Instruction) -> Instr {
+    fn process(&mut self, instr: Instruction) -> Instr {
         debug_assert!(!self.mem.is_executable(), "Cannot emit instruction while memory is in execution mode");
 
         let iptr = self.emitter.instr_ptr();

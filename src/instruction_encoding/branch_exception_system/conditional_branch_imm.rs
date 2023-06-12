@@ -18,7 +18,7 @@ use crate::types::prefetch_memory::PrfOp;
 #[inline(always)]
 fn emit_cond_branch_imm<P: InstructionProcessor<T>, T>(proc: &mut P, o1: UImm1, imm19: Imm19, o0: UImm1, cond: UImm4) -> T {
     let i = bseq_32!(0101010 o1:1 imm19:19 o0:1 cond:4 );
-    proc.emit(i)
+    proc.process(i)
 }
 
 #[inline(always)]

@@ -15,7 +15,7 @@ pub trait InstructionProcessor<T>: Sized {
     ///
     /// The implementation and meaning of this function can vary
     /// depending on the purpose of the.
-    fn emit(&mut self, instr: Instruction) -> T;
+    fn process(&mut self, instr: Instruction) -> T;
 }
 
 pub trait AddressableInstructionProcessor<T>: InstructionProcessor<T> {

@@ -31,7 +31,7 @@ use crate::types::Register;
 #[inline(always)]
 fn emit_casp_x<P: InstructionProcessor<T>, T>(proc: &mut P, sz: u8, L: u8, rs: Register, o0: u8, rn: Register, rt: Register) -> T {
     let r = bseq_32!(0 sz:1 0010000 L:1 1 rs:5 o0:1 !0:5 rn:5 rt:5);
-    proc.emit(r)
+    proc.process(r)
 }
 
 pub trait CompareAndSwapPair<T>: InstructionProcessor<T> {

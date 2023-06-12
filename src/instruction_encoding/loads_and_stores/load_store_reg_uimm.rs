@@ -29,7 +29,7 @@ use crate::types::prefetch_memory::PrfOp;
 fn emit_load_store_offset<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, V: u8, opc: u8, pimm: u16, rn: Register, rt: Register) -> T {
     debug_assert!(0 <= pimm && pimm <= 4095, "pimm must be in range 0 to 4095");
     let r = bseq_32!(size:2 111 V:1 01 opc:2 pimm:12 rn:5 rt:5);
-    proc.emit(r)
+    proc.process(r)
 }
 
 /// # Arguments
@@ -38,7 +38,7 @@ fn emit_load_store_offset<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8,
 fn emit_load_store_pre_post<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, V: u8, opc: u8, simm: Imm9, mode: u8, wt: Register, xn_sp: Register) -> T {
     debug_assert!(-256 <= simm && simm <= 255, "simm must be in range -256 to 255");
     let r = bseq_32!(size:2 111 V:1 00 opc:2 0 simm:9 mode:2 xn_sp:5 wt:5);
-    proc.emit(r)
+    proc.process(r)
 }
 
 pub trait LoadStoreRegUImm<T>: InstructionProcessor<T> {

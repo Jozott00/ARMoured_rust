@@ -37,7 +37,7 @@ impl TestProducer {
 
 
 impl InstructionProcessor<InstrRes> for TestProducer {
-    fn emit(&mut self, instr: Instruction) -> String {
+    fn process(&mut self, instr: Instruction) -> String {
         let Ok(decoded) = decode(instr, 0u64) else {
             let encoding = instr.to_le_bytes();
             let enc_str = encoding.map(|e| format!("{e:02x}")).join(" ");

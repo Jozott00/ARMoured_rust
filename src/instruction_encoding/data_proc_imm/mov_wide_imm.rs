@@ -23,7 +23,7 @@ use crate::types::{HW, Imm16, Imm32, Register, UImm16};
 #[inline(always)]
 fn emit_mov_imm_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, opc: u8, hw: u8, d: u8, imm: u16) -> T {
     let r = bseq_32!(sf:1 opc:2 100101 hw:2 imm:16 d:5);
-    proc.emit(r)
+    proc.process(r)
 }
 
 /// Generates a `MOVN` (Move Not) instruction. The `sf` parameter indicates whether it's a 32-bit (`false`) or 64-bit (`true`) operation.
