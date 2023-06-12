@@ -24,13 +24,13 @@ use crate::types::shifts::Shift1;
 #[inline(always)]
 fn emit_add_sub_imm_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op: u8, S: u8, shift: u8, imm12: u16, rn: Register, rd: Register) -> T {
     let r = bseq_32!(sf:1 op:1 S:1 10001 0 shift:1 imm12:12 rn:5 rd:5);
-    proc.emit(r)
+    proc.process(r)
 }
 
 #[inline(always)]
 fn emit_add_sub_imm_w_tags_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op: u8, S: u8, o2: u8, uimm6: u8, op3: u8, uimm4: u8, rn: Register, rd: Register) -> T {
     let r = bseq_32!(sf:1 op:1 S:1 100011 o2:1 uimm6:6 op3:2 uimm4:4 rn:5 rd:5);
-    proc.emit(r)
+    proc.process(r)
 }
 
 

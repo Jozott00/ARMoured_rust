@@ -20,7 +20,7 @@ use crate::types::prefetch_memory::PrfOp;
 #[inline(always)]
 fn emit_ldr_x<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, V: u8, imm19: u32, rt: Register) -> T {
     let r = bseq_32!(opc:2 011 V:1 00 imm19:19 rt:5);
-    proc.emit(r)
+    proc.process(r)
 }
 
 /// Uses the provided offset to calculate the immediate for the LDR instruction and then calls emit_ldr_x to encode and emit the instruction.

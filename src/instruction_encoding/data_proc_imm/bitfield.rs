@@ -27,7 +27,7 @@ fn emit_bitfield<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, opc: u8, N
     }
 
     let r = bseq_32!(sf:1 opc:2 100110 N:1 immr:6 imms:6 rn:5 rd:5);
-    proc.emit(r)
+    proc.process(r)
 }
 
 /// # Bitfield

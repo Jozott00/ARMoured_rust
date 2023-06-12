@@ -25,7 +25,7 @@ use crate::types::instruction::Instr;
 #[inline(always)]
 fn emit_pc_rel_addr<P: InstructionProcessor<T>, T>(proc: &mut P, op: u8, immlo: u8, immhi: u32, rd: Register) -> T {
     let r = bseq_32!(op:1 immlo:2 10000 immhi:19 rd:5);
-    proc.emit(r)
+    proc.process(r)
 }
 
 /// # PC-rel. addressing
