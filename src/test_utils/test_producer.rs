@@ -1,4 +1,6 @@
 use bad64::decode;
+use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
+use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
 use crate::instruction_encoding::branch_exception_system::BranchExceptionSystem;
 use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediate;
@@ -88,5 +90,9 @@ impl CompareAndSwapPair<InstrRes> for TestProducer {}
 impl LoadStoreRegUImm<InstrRes> for TestProducer {}
 
 impl LoadRegisterLiteral<InstrRes> for TestProducer {}
+
+impl DataProcessingRegister<InstrRes> for TestProducer {}
+
+impl DataProcessingTwoSource<InstrRes> for TestProducer {}
 
 impl InstructionSet<InstrRes> for TestProducer {}
