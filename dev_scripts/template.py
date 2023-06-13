@@ -1,3 +1,9 @@
+#!/bin/sh python
+
+# This script takes a valid instruction type link such as
+# https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Data-Processing----Register?lang=en#log_shift
+# and generates a new template for this instruction type, where the docs are already done for you
+
 import sys
 
 import requests
@@ -12,6 +18,7 @@ dev_base_url = 'https://developer.arm.com'
 
 doc_prefix = "/// "
 mod_doc_prefix = "//! "
+
 
 def main():
     if len(sys.argv) != 2:
@@ -76,8 +83,6 @@ Implements the following instructions:
     print(final_str)
 
 
-
-
 def create_meth_def(obj, var):
     str = f"""
 [{obj['name']}]({dev_base_url + obj['url']})
@@ -90,10 +95,12 @@ def create_meth_def(obj, var):
 """.strip()
     return prepend_per_line(str, doc_prefix)
 
+
 def prepend_per_line(str, prefix):
     lines = str.splitlines()
     lines = [prefix + line for line in lines]
     return '\n'.join(lines)
+
 
 def construct_instruction_definition(instr):
     url = instr.get('href')
@@ -103,6 +110,7 @@ def construct_instruction_definition(instr):
     full_name = last_path.replace('--', 'PLACEHOLDER').rstrip('-').replace('-', ' ').replace('PLACEHOLDER', ' - ')
     info_variants = extract_info_and_variants(url)
     return {'name': full_name, 'url': url, 'info': info_variants['info'], 'variants': info_variants['variants']}
+
 
 def extract_name_from_url(url):
     # Extract the last path in URL before the query parameters start
@@ -125,18 +133,21 @@ def extract_info_and_variants(url):
 
     return {'info': info, 'variants': variants}
 
+
 def get_content(url):
     content = html.fromstring(get_raw_html(url))
     return content
+
+
 def get_raw_html(url):
     url = f"{doc_base_url}{url}"
     page = requests.get(url)
     json = page.json()
     return base64.b64decode(json['content'])
 
+
 if __name__ == '__main__':
     main()
-
 
     # print(get_raw_html('/documentation/ddi0596/2021-12/Base-Instructions/CRC32B--CRC32H--CRC32W--CRC32X--CRC32-checksum-?lang=en').decode('utf-8'))
     print()
