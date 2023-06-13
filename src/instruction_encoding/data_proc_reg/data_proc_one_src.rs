@@ -19,7 +19,19 @@
 
 
 
+use bit_seq::{bseq_32, bseq_8};
 use crate::instruction_encoding::InstructionProcessor;
+use crate::types::Register;
+
+fn emit_data_proc_one<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, s: u8, opcode2: u8, opcode: u8, rn: Register, rd: Register) -> T {
+    let i = bseq_32!(sf:1 1 s:1 11010110 opcode2:5 opcode:6 rn:5 rd:5);
+    proc.process(i)
+}
+
+fn emit_sys_instrs<P: InstructionProcessor<T>, T>(proc: &mut P, crm: u8, op2: u8) -> T {
+    let i = bseq_32!(110 10101 0:6 110010 crm:4 op2:3 !0:5);
+    proc.process(i)
+}
 
 /// # Data Processing (Register)
 ///
@@ -47,8 +59,8 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// RBIT <Wd>, <Wn>
     /// ```
-    fn f0(&mut self) -> T {
-        todo!()
+    fn rbit_32(&mut self, wd: Register, wn: Register) -> T {
+        emit_data_proc_one(self, 0, 0, 0, 0, wn, wd)
     }
 
 
@@ -59,8 +71,8 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// RBIT <Xd>, <Xn>
     /// ```
-    fn f1(&mut self) -> T {
-        todo!()
+    fn rbit_64(&mut self, xd: Register, xn: Register) -> T {
+        emit_data_proc_one(self, 1, 0, 0, 0, xn, xd)
     }
 
 
@@ -71,8 +83,8 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// REV16 <Wd>, <Wn>
     /// ```
-    fn f2(&mut self) -> T {
-        todo!()
+    fn rev16_32(&mut self, wd: Register, wn: Register) -> T {
+        emit_data_proc_one(self, 0, 0, 0, 1, wn, wd)
     }
 
 
@@ -83,8 +95,8 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// REV16 <Xd>, <Xn>
     /// ```
-    fn f3(&mut self) -> T {
-        todo!()
+    fn rev16_64(&mut self, xd: Register, xn: Register) -> T {
+        emit_data_proc_one(self, 1, 0, 0, 1, xn, xd)
     }
 
 
@@ -97,8 +109,8 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// REV <Wd>, <Wn>
     /// ```
-    fn f4(&mut self) -> T {
-        todo!()
+    fn rev_32(&mut self, wd: Register, wn: Register) -> T {
+        emit_data_proc_one(self, 0, 0, 0, 0b10, wn, wd)
     }
 
 
@@ -111,8 +123,8 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// REV <Xd>, <Xn>
     /// ```
-    fn f5(&mut self) -> T {
-        todo!()
+    fn rev_64(&mut self, xd: Register, xn: Register) -> T {
+        emit_data_proc_one(self, 1, 0, 0, 0b11, xn, xd)
     }
 
 
@@ -123,8 +135,8 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CLZ <Wd>, <Wn>
     /// ```
-    fn f6(&mut self) -> T {
-        todo!()
+    fn clz_32(&mut self, wd: Register, wn: Register) -> T {
+        emit_data_proc_one(self, 0, 0, 0, 0b100, wn, wd)
     }
 
 
@@ -135,8 +147,8 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CLZ <Xd>, <Xn>
     /// ```
-    fn f7(&mut self) -> T {
-        todo!()
+    fn clz_64(&mut self, xd: Register, xn: Register) -> T {
+        emit_data_proc_one(self, 1, 0, 0, 0b100, xn, xd)
     }
 
 
@@ -147,8 +159,8 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CLS <Wd>, <Wn>
     /// ```
-    fn f8(&mut self) -> T {
-        todo!()
+    fn cls_32(&mut self, wd: Register, wn: Register) -> T {
+        emit_data_proc_one(self, 0, 0, 0, 0b101, wn, wd)
     }
 
 
@@ -159,8 +171,8 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CLS <Xd>, <Xn>
     /// ```
-    fn f9(&mut self) -> T {
-        todo!()
+    fn cls_64(&mut self, xd: Register, xn: Register) -> T {
+        emit_data_proc_one(self, 1, 0, 0, 0b101, xn, xd)
     }
 
 
@@ -171,64 +183,58 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// REV32 <Xd>, <Xn>
     /// ```
-    fn f10(&mut self) -> T {
-        todo!()
+    fn rev32(&mut self, xd: Register, xn: Register) -> T {
+        emit_data_proc_one(self, 1, 0, 0, 0b10, xn, xd)
     }
 
 
     /// [PACIA - PACIA1716 - PACIASP - PACIAZ - PACIZA - Pointer Authentication Code for Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIA--PACIA1716--PACIASP--PACIAZ--PACIZA--Pointer-Authentication-Code-for-Instruction-address--using-key-A-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key A. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key A.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// PACIA <Xd>, <Xn|SP>
     /// ```
-    fn f11(&mut self) -> T {
-        todo!()
+    fn pacia(&mut self, xd: Register, xn_sp: Register) -> T {
+        let z = 0;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 000), xn_sp, xd)
     }
 
 
     /// [PACIA - PACIA1716 - PACIASP - PACIAZ - PACIZA - Pointer Authentication Code for Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIA--PACIA1716--PACIASP--PACIAZ--PACIZA--Pointer-Authentication-Code-for-Instruction-address--using-key-A-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key A. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key A.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// PACIZA <Xd>
     /// ```
-    fn f12(&mut self) -> T {
-        todo!()
+    fn paciza(&mut self, xd: Register) -> T {
+        let z = 1;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 000), 0b11111, xd)
     }
 
 
     /// [PACIA - PACIA1716 - PACIASP - PACIAZ - PACIZA - Pointer Authentication Code for Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIA--PACIA1716--PACIASP--PACIAZ--PACIZA--Pointer-Authentication-Code-for-Instruction-address--using-key-A-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key A. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key A.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// PACIA1716
     /// ```
-    fn f13(&mut self) -> T {
-        todo!()
+    fn pacia1716(&mut self) -> T {
+        emit_sys_instrs(self, 1, 0)
     }
 
 
     /// [PACIA - PACIA1716 - PACIASP - PACIAZ - PACIZA - Pointer Authentication Code for Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIA--PACIA1716--PACIASP--PACIAZ--PACIZA--Pointer-Authentication-Code-for-Instruction-address--using-key-A-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key A. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key A.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// PACIASP
     /// ```
-    fn f14(&mut self) -> T {
-        todo!()
+    fn paciasp(&mut self) -> T {
+        emit_sys_instrs(self, 0b11, 1)
     }
 
 
@@ -236,69 +242,61 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     ///
     /// Pointer Authentication Code for Instruction address, using key A. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key A.
     ///
-    /// The address is:
-    ///
     /// ```asm
     /// PACIAZ
     /// ```
-    fn f15(&mut self) -> T {
-        todo!()
+    fn paciaz(&mut self) -> T {
+        emit_sys_instrs(self, 0b11, 0)
     }
 
 
     /// [PACIB - PACIB1716 - PACIBSP - PACIBZ - PACIZB - Pointer Authentication Code for Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIB--PACIB1716--PACIBSP--PACIBZ--PACIZB--Pointer-Authentication-Code-for-Instruction-address--using-key-B-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key B. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key B.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// PACIB <Xd>, <Xn|SP>
     /// ```
-    fn f16(&mut self) -> T {
-        todo!()
+    fn pacib(&mut self, xd: Register, xn_sp: Register) -> T {
+        let z = 0;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 001), xn_sp, xd)
     }
 
 
     /// [PACIB - PACIB1716 - PACIBSP - PACIBZ - PACIZB - Pointer Authentication Code for Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIB--PACIB1716--PACIBSP--PACIBZ--PACIZB--Pointer-Authentication-Code-for-Instruction-address--using-key-B-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key B. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key B.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// PACIZB <Xd>
     /// ```
-    fn f17(&mut self) -> T {
-        todo!()
+    fn pacizb(&mut self, xd: Register) -> T {
+        let z = 1;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 001), 0b11111, xd)
     }
 
 
     /// [PACIB - PACIB1716 - PACIBSP - PACIBZ - PACIZB - Pointer Authentication Code for Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIB--PACIB1716--PACIBSP--PACIBZ--PACIZB--Pointer-Authentication-Code-for-Instruction-address--using-key-B-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key B. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key B.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// PACIB1716
     /// ```
-    fn f18(&mut self) -> T {
-        todo!()
+    fn pacib1716(&mut self) -> T {
+        emit_sys_instrs(self, 1, 0b10)
     }
 
 
     /// [PACIB - PACIB1716 - PACIBSP - PACIBZ - PACIZB - Pointer Authentication Code for Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIB--PACIB1716--PACIBSP--PACIBZ--PACIZB--Pointer-Authentication-Code-for-Instruction-address--using-key-B-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key B. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key B.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// PACIBSP
     /// ```
-    fn f19(&mut self) -> T {
-        todo!()
+    fn pacibsp(&mut self) -> T {
+        emit_sys_instrs(self, 0b11, 0b11)
     }
 
 
@@ -306,13 +304,11 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     ///
     /// Pointer Authentication Code for Instruction address, using key B. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key B.
     ///
-    /// The address is:
-    ///
     /// ```asm
     /// PACIBZ
     /// ```
-    fn f20(&mut self) -> T {
-        todo!()
+    fn pacibz(&mut self) -> T {
+        emit_sys_instrs(self, 0b11, 0b10)
     }
 
 
@@ -325,8 +321,9 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACDA <Xd>, <Xn|SP>
     /// ```
-    fn f21(&mut self) -> T {
-        todo!()
+    fn pacda(&mut self, xd: Register, xn_sp: Register) -> T {
+        let z = 0;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 010), xn_sp, xd)
     }
 
 
@@ -339,8 +336,9 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACDZA <Xd>
     /// ```
-    fn f22(&mut self) -> T {
-        todo!()
+    fn pacdza(&mut self, xd: Register) -> T {
+        let z = 1;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 010), 0b11111, xd)
     }
 
 
@@ -353,8 +351,9 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACDB <Xd>, <Xn|SP>
     /// ```
-    fn f23(&mut self) -> T {
-        todo!()
+    fn pacdb(&mut self, xd: Register, xn_sp: Register) -> T {
+        let z = 0;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 011), xn_sp, xd)
     }
 
 
@@ -367,64 +366,59 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACDZB <Xd>
     /// ```
-    fn f24(&mut self) -> T {
-        todo!()
+    fn pacdzb(&mut self, xd: Register) -> T {
+        let z = 1;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 011), 0b11111, xd)
     }
 
 
     /// [AUTIA - AUTIA1716 - AUTIASP - AUTIAZ - AUTIZA - Authenticate Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIA--AUTIA1716--AUTIASP--AUTIAZ--AUTIZA--Authenticate-Instruction-address--using-key-A-?lang=en)
     ///
     /// Authenticate Instruction address, using key A. This instruction authenticates an instruction address, using a modifier and key A.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// AUTIA <Xd>, <Xn|SP>
     /// ```
-    fn f25(&mut self) -> T {
-        todo!()
+    fn autia(&mut self, xd: Register, xn_sp: Register) -> T {
+        let z = 0;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 100), xn_sp, xd)
     }
 
 
     /// [AUTIA - AUTIA1716 - AUTIASP - AUTIAZ - AUTIZA - Authenticate Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIA--AUTIA1716--AUTIASP--AUTIAZ--AUTIZA--Authenticate-Instruction-address--using-key-A-?lang=en)
     ///
     /// Authenticate Instruction address, using key A. This instruction authenticates an instruction address, using a modifier and key A.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// AUTIZA <Xd>
     /// ```
-    fn f26(&mut self) -> T {
-        todo!()
+    fn autiza(&mut self, xd: Register) -> T {
+        let z = 1;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 100), 0b11111, xd)
     }
 
 
     /// [AUTIA - AUTIA1716 - AUTIASP - AUTIAZ - AUTIZA - Authenticate Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIA--AUTIA1716--AUTIASP--AUTIAZ--AUTIZA--Authenticate-Instruction-address--using-key-A-?lang=en)
     ///
     /// Authenticate Instruction address, using key A. This instruction authenticates an instruction address, using a modifier and key A.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// AUTIA1716
     /// ```
-    fn f27(&mut self) -> T {
-        todo!()
+    fn autia1716(&mut self) -> T {
+        emit_sys_instrs(self, 1, 0b100)
     }
 
 
     /// [AUTIA - AUTIA1716 - AUTIASP - AUTIAZ - AUTIZA - Authenticate Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIA--AUTIA1716--AUTIASP--AUTIAZ--AUTIZA--Authenticate-Instruction-address--using-key-A-?lang=en)
     ///
     /// Authenticate Instruction address, using key A. This instruction authenticates an instruction address, using a modifier and key A.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// AUTIASP
     /// ```
-    fn f28(&mut self) -> T {
-        todo!()
+    fn autiasp(&mut self) -> T {
+        emit_sys_instrs(self, 0b11, 0b101)
     }
 
 
@@ -432,69 +426,61 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     ///
     /// Authenticate Instruction address, using key A. This instruction authenticates an instruction address, using a modifier and key A.
     ///
-    /// The address is:
-    ///
     /// ```asm
     /// AUTIAZ
     /// ```
-    fn f29(&mut self) -> T {
-        todo!()
+    fn autiaz(&mut self) -> T {
+        emit_sys_instrs(self, 0b11, 0b100)
     }
 
 
     /// [AUTIB - AUTIB1716 - AUTIBSP - AUTIBZ - AUTIZB - Authenticate Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIB--AUTIB1716--AUTIBSP--AUTIBZ--AUTIZB--Authenticate-Instruction-address--using-key-B-?lang=en)
     ///
     /// Authenticate Instruction address, using key B. This instruction authenticates an instruction address, using a modifier and key B.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// AUTIB <Xd>, <Xn|SP>
     /// ```
-    fn f30(&mut self) -> T {
-        todo!()
+    fn autib(&mut self, xd: Register, xn_sp: Register) -> T {
+        let z = 0;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 101), xn_sp, xd)
     }
 
 
     /// [AUTIB - AUTIB1716 - AUTIBSP - AUTIBZ - AUTIZB - Authenticate Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIB--AUTIB1716--AUTIBSP--AUTIBZ--AUTIZB--Authenticate-Instruction-address--using-key-B-?lang=en)
     ///
     /// Authenticate Instruction address, using key B. This instruction authenticates an instruction address, using a modifier and key B.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// AUTIZB <Xd>
     /// ```
-    fn f31(&mut self) -> T {
-        todo!()
+    fn autizb(&mut self, xd: Register) -> T {
+        let z = 1;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 101), 0b11111, xd)
     }
 
 
     /// [AUTIB - AUTIB1716 - AUTIBSP - AUTIBZ - AUTIZB - Authenticate Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIB--AUTIB1716--AUTIBSP--AUTIBZ--AUTIZB--Authenticate-Instruction-address--using-key-B-?lang=en)
     ///
     /// Authenticate Instruction address, using key B. This instruction authenticates an instruction address, using a modifier and key B.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// AUTIB1716
     /// ```
-    fn f32(&mut self) -> T {
-        todo!()
+    fn autib1716(&mut self) -> T {
+        emit_sys_instrs(self, 0b1, 0b110)
     }
 
 
     /// [AUTIB - AUTIB1716 - AUTIBSP - AUTIBZ - AUTIZB - Authenticate Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIB--AUTIB1716--AUTIBSP--AUTIBZ--AUTIZB--Authenticate-Instruction-address--using-key-B-?lang=en)
     ///
     /// Authenticate Instruction address, using key B. This instruction authenticates an instruction address, using a modifier and key B.
-    ///
-    /// The address is:
     ///
     /// ```asm
     /// AUTIBSP
     /// ```
-    fn f33(&mut self) -> T {
-        todo!()
+    fn autibsp(&mut self) -> T {
+        emit_sys_instrs(self, 0b11, 0b111)
     }
 
 
@@ -502,13 +488,11 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     ///
     /// Authenticate Instruction address, using key B. This instruction authenticates an instruction address, using a modifier and key B.
     ///
-    /// The address is:
-    ///
     /// ```asm
     /// AUTIBZ
     /// ```
-    fn f34(&mut self) -> T {
-        todo!()
+    fn autibz(&mut self) -> T {
+        emit_sys_instrs(self, 0b11, 0b110)
     }
 
 
@@ -521,8 +505,9 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTDA <Xd>, <Xn|SP>
     /// ```
-    fn f35(&mut self) -> T {
-        todo!()
+    fn autda(&mut self, xd: Register, xn_sp: Register) -> T {
+        let z = 0;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 110), xn_sp, xd)
     }
 
 
@@ -535,8 +520,9 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTDZA <Xd>
     /// ```
-    fn f36(&mut self) -> T {
-        todo!()
+    fn autdza(&mut self, xd: Register) -> T {
+        let z = 1;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 110), 0b11111, xd)
     }
 
 
@@ -549,8 +535,9 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTDB <Xd>, <Xn|SP>
     /// ```
-    fn f37(&mut self) -> T {
-        todo!()
+    fn autdb(&mut self, xd: Register, xn_sp: Register) -> T {
+        let z = 0;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 111), xn_sp, xd)
     }
 
 
@@ -563,8 +550,9 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTDZB <Xd>
     /// ```
-    fn f38(&mut self) -> T {
-        todo!()
+    fn autdzb(&mut self, xd: Register) -> T {
+        let z = 1;
+        emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 111), 0b11111, xd)
     }
 
 
@@ -577,8 +565,8 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// XPACD <Xd>
     /// ```
-    fn f39(&mut self) -> T {
-        todo!()
+    fn xpacd(&mut self, xd: Register) -> T {
+        emit_data_proc_one(self, 1, 0, 1, 0b10001, 0b11111, xd)
     }
 
 
@@ -591,8 +579,8 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// XPACI <Xd>
     /// ```
-    fn f40(&mut self) -> T {
-        todo!()
+    fn xpaci(&mut self, xd: Register) -> T {
+        emit_data_proc_one(self, 1, 0, 1, 0b10000, 0b11111, xd)
     }
 
 
@@ -605,7 +593,213 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// XPACLRI
     /// ```
-    fn f41(&mut self) -> T {
-        todo!()
+    fn xpaclri(&mut self) -> T {
+        emit_sys_instrs(self, 0, 0b111)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::test_utils::test_producer::TestProducer;
+    use super::*;
+
+    #[test]
+    fn test_rbit() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.rbit_32(3, 4);
+        assert_eq!(instr, "rbit w3, w4");
+
+        let instr = prod.rbit_64(3, 4);
+        assert_eq!(instr, "rbit x3, x4");
+    }
+
+    #[test]
+    fn test_rev16() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.rev16_32(3, 4);
+        assert_eq!(instr, "rev16 w3, w4");
+
+        let instr = prod.rev16_64(3, 4);
+        assert_eq!(instr, "rev16 x3, x4");
+    }
+
+    #[test]
+    fn test_rev() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.rev_32(3, 4);
+        assert_eq!(instr, "rev w3, w4");
+
+        let instr = prod.rev_64(3, 4);
+        assert_eq!(instr, "rev x3, x4");
+    }
+
+    #[test]
+    fn test_clz() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.clz_32(3, 4);
+        assert_eq!(instr, "clz w3, w4");
+
+        let instr = prod.clz_64(3, 4);
+        assert_eq!(instr, "clz x3, x4");
+    }
+
+    #[test]
+    fn test_cls() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.cls_32(3, 4);
+        assert_eq!(instr, "cls w3, w4");
+
+        let instr = prod.cls_64(3, 4);
+        assert_eq!(instr, "cls x3, x4");
+    }
+
+    #[test]
+    fn test_rev32() {
+        let mut prod = TestProducer::new();
+        let instr = prod.rev32(3, 4);
+        assert_eq!(instr, "rev32 x3, x4");
+    }
+
+    #[test]
+    fn test_pacia() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.pacia(3, 4);
+        assert_eq!(instr, "pacia x3, x4");
+
+        let instr = prod.paciza(3);
+        assert_eq!(instr, "paciza x3");
+
+        let instr = prod.pacia1716();
+        assert_eq!(instr, "pacia1716");
+
+        let instr = prod.paciasp();
+        assert_eq!(instr, "paciasp");
+
+        let instr = prod.paciaz();
+        assert_eq!(instr, "paciaz");
+    }
+
+    #[test]
+    fn test_pacib() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.pacib(3, 4);
+        assert_eq!(instr, "pacib x3, x4");
+
+        let instr = prod.pacizb(3);
+        assert_eq!(instr, "pacizb x3");
+
+        let instr = prod.pacib1716();
+        assert_eq!(instr, "pacib1716");
+
+        let instr = prod.pacibsp();
+        assert_eq!(instr, "pacibsp");
+
+        let instr = prod.pacibz();
+        assert_eq!(instr, "pacibz");
+    }
+
+    #[test]
+    fn test_pacda() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.pacda(3, 4);
+        assert_eq!(instr, "pacda x3, x4");
+
+        let instr = prod.pacdza(3);
+        assert_eq!(instr, "pacdza x3");
+    }
+
+    #[test]
+    fn test_pacdb() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.pacdb(3, 4);
+        assert_eq!(instr, "pacdb x3, x4");
+
+        let instr = prod.pacdzb(3);
+        assert_eq!(instr, "pacdzb x3");
+    }
+
+    #[test]
+    fn test_autia() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.autia(3, 4);
+        assert_eq!(instr, "autia x3, x4");
+
+        let instr = prod.autiza(3);
+        assert_eq!(instr, "autiza x3");
+
+        let instr = prod.autia1716();
+        assert_eq!(instr, "autia1716");
+
+        let instr = prod.autiasp();
+        assert_eq!(instr, "autiasp");
+
+        let instr = prod.autiaz();
+        assert_eq!(instr, "autiaz");
+    }
+
+    #[test]
+    fn test_autib() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.autib(3, 4);
+        assert_eq!(instr, "autib x3, x4");
+
+        let instr = prod.autizb(3);
+        assert_eq!(instr, "autizb x3");
+
+        let instr = prod.autib1716();
+        assert_eq!(instr, "autib1716");
+
+        let instr = prod.autibsp();
+        assert_eq!(instr, "autibsp");
+
+        let instr = prod.autibz();
+        assert_eq!(instr, "autibz");
+    }
+
+    #[test]
+    fn test_autda() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.autda(3, 4);
+        assert_eq!(instr, "autda x3, x4");
+
+        let instr = prod.autdza(3);
+        assert_eq!(instr, "autdza x3");
+    }
+
+    #[test]
+    fn test_autdb() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.autdb(3, 4);
+        assert_eq!(instr, "autdb x3, x4");
+
+        let instr = prod.autdzb(3);
+        assert_eq!(instr, "autdzb x3");
+    }
+
+    #[test]
+    fn test_xpac() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.xpacd(3);
+        assert_eq!(instr, "xpacd x3");
+
+        let instr = prod.xpaci(3);
+        assert_eq!(instr, "xpaci x3");
+
+        let instr = prod.xpaclri();
+        assert_eq!(instr, "xpaclri");
     }
 }

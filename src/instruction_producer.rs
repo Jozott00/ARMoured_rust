@@ -1,3 +1,4 @@
+use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
 use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
@@ -82,6 +83,8 @@ impl CompareAndSwapPair<Instr> for InstrProducer {}
 impl LoadStoreRegUImm<Instr> for InstrProducer {}
 
 impl LoadRegisterLiteral<Instr> for InstrProducer {}
+
+impl DataProcessingOneSource<Instr> for InstrProducer {}
 
 impl DataProcessingRegister<Instr> for InstrProducer {}
 

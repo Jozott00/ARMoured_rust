@@ -2,6 +2,7 @@ use std::{mem, slice};
 
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
 use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::data_proc_imm::extract::ExtractInstructions;
@@ -119,6 +120,8 @@ impl<'mem, M: Memory, E: Emitter> DataProcessingImmediate<Instr> for InstrStream
 impl<'mem, M: Memory, E: Emitter> MovWideImmediate<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> PcRelAddressing<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> DataProcessingOneSource<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> DataProcessingRegister<Instr> for InstrStream<'mem, M, E> {}
 
