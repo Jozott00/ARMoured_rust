@@ -1,3 +1,4 @@
+use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
 use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
 use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
@@ -85,6 +86,8 @@ impl LoadStoreRegUImm<Instr> for InstrProducer {}
 impl LoadRegisterLiteral<Instr> for InstrProducer {}
 
 impl DataProcessingOneSource<Instr> for InstrProducer {}
+
+impl LogicalShiftRegister<Instr> for InstrProducer {}
 
 impl DataProcessingRegister<Instr> for InstrProducer {}
 

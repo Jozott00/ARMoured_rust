@@ -1,4 +1,4 @@
-//! # Data Processing (Register)
+//! # Data-processing (1 source)
 //!
 //! Implements the following instructions:
 //!  - [RBIT - Reverse Bits](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/RBIT--Reverse-Bits-?lang=en)
@@ -33,7 +33,7 @@ fn emit_sys_instrs<P: InstructionProcessor<T>, T>(proc: &mut P, crm: u8, op2: u8
     proc.process(i)
 }
 
-/// # Data Processing (Register)
+/// # Data-processing (1 source)
 ///
 /// Implements the following instructions:
 ///  - [RBIT - Reverse Bits](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/RBIT--Reverse-Bits-?lang=en)

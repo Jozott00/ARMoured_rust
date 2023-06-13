@@ -15,10 +15,13 @@
 
 use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
+use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
 
 pub mod data_proc_two_src;
 pub mod data_proc_one_src;
+pub mod logical_shift_reg;
 
 pub trait DataProcessingRegister<T>: DataProcessingTwoSource<T>
 + DataProcessingOneSource<T>
++ LogicalShiftRegister<T>
 {}
