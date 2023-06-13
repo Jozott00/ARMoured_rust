@@ -37,32 +37,61 @@ create_shift!(Shift1, [(LSL0, 0), (LSL12, 1)]);
 
 
 #[derive(Debug)]
-pub enum Shift<T> {
+pub enum Shift4<T> {
     LSL(T),
     LSR(T),
     ASR(T),
     ROR(T),
 }
 
-impl<T> From<(u8, T)> for Shift<T> {
+impl<T> From<(u8, T)> for Shift4<T> {
     fn from((i, n): (u8, T)) -> Self {
         match i {
-            0b00 => Shift::LSL(n),
-            0b01 => Shift::LSR(n),
-            0b10 => Shift::ASR(n),
-            0b11 => Shift::ROR(n),
+            0b00 => Shift4::LSL(n),
+            0b01 => Shift4::LSR(n),
+            0b10 => Shift4::ASR(n),
+            0b11 => Shift4::ROR(n),
             _ => panic!("shift options in range of 0b00 - 0b11"),
         }
     }
 }
 
-impl<T> From<Shift<T>> for (u8, T) {
-    fn from(value: Shift<T>) -> Self {
+impl<T> From<Shift4<T>> for (u8, T) {
+    fn from(value: Shift4<T>) -> Self {
         match value {
-            Shift::LSL(n) => (0b00, n),
-            Shift::LSR(n) => (0b01, n),
-            Shift::ASR(n) => (0b10, n),
-            Shift::ROR(n) => (0b11, n),
+            Shift4::LSL(n) => (0b00, n),
+            Shift4::LSR(n) => (0b01, n),
+            Shift4::ASR(n) => (0b10, n),
+            Shift4::ROR(n) => (0b11, n),
+        }
+    }
+}
+
+
+#[derive(Debug)]
+pub enum Shift3<T> {
+    LSL(T),
+    LSR(T),
+    ASR(T),
+}
+
+impl<T> From<(u8, T)> for Shift3<T> {
+    fn from((i, n): (u8, T)) -> Self {
+        match i {
+            0b00 => Shift3::LSL(n),
+            0b01 => Shift3::LSR(n),
+            0b10 => Shift3::ASR(n),
+            _ => panic!("shift options in range of 0b00 - 0b11"),
+        }
+    }
+}
+
+impl<T> From<Shift3<T>> for (u8, T) {
+    fn from(value: Shift3<T>) -> Self {
+        match value {
+            Shift3::LSL(n) => (0b00, n),
+            Shift3::LSR(n) => (0b01, n),
+            Shift3::ASR(n) => (0b10, n),
         }
     }
 }

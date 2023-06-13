@@ -2,6 +2,7 @@ use std::{mem, slice};
 
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
 use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
 use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
@@ -125,6 +126,8 @@ impl<'mem, M: Memory, E: Emitter> PcRelAddressing<Instr> for InstrStream<'mem, M
 impl<'mem, M: Memory, E: Emitter> DataProcessingOneSource<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LogicalShiftRegister<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> AddSubtractShiftedRegister<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> DataProcessingRegister<Instr> for InstrStream<'mem, M, E> {}
 

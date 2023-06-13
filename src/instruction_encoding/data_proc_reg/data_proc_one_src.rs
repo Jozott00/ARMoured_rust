@@ -23,11 +23,13 @@ use bit_seq::{bseq_32, bseq_8};
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::Register;
 
+#[inline(always)]
 fn emit_data_proc_one<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, s: u8, opcode2: u8, opcode: u8, rn: Register, rd: Register) -> T {
     let i = bseq_32!(sf:1 1 s:1 11010110 opcode2:5 opcode:6 rn:5 rd:5);
     proc.process(i)
 }
 
+#[inline(always)]
 fn emit_sys_instrs<P: InstructionProcessor<T>, T>(proc: &mut P, crm: u8, op2: u8) -> T {
     let i = bseq_32!(110 10101 0:6 110010 crm:4 op2:3 !0:5);
     proc.process(i)
@@ -59,6 +61,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// RBIT <Wd>, <Wn>
     /// ```
+    #[inline(always)]
     fn rbit_32(&mut self, wd: Register, wn: Register) -> T {
         emit_data_proc_one(self, 0, 0, 0, 0, wn, wd)
     }
@@ -71,6 +74,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// RBIT <Xd>, <Xn>
     /// ```
+    #[inline(always)]
     fn rbit_64(&mut self, xd: Register, xn: Register) -> T {
         emit_data_proc_one(self, 1, 0, 0, 0, xn, xd)
     }
@@ -83,6 +87,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// REV16 <Wd>, <Wn>
     /// ```
+    #[inline(always)]
     fn rev16_32(&mut self, wd: Register, wn: Register) -> T {
         emit_data_proc_one(self, 0, 0, 0, 1, wn, wd)
     }
@@ -95,6 +100,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// REV16 <Xd>, <Xn>
     /// ```
+    #[inline(always)]
     fn rev16_64(&mut self, xd: Register, xn: Register) -> T {
         emit_data_proc_one(self, 1, 0, 0, 1, xn, xd)
     }
@@ -109,6 +115,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// REV <Wd>, <Wn>
     /// ```
+    #[inline(always)]
     fn rev_32(&mut self, wd: Register, wn: Register) -> T {
         emit_data_proc_one(self, 0, 0, 0, 0b10, wn, wd)
     }
@@ -123,6 +130,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// REV <Xd>, <Xn>
     /// ```
+    #[inline(always)]
     fn rev_64(&mut self, xd: Register, xn: Register) -> T {
         emit_data_proc_one(self, 1, 0, 0, 0b11, xn, xd)
     }
@@ -135,6 +143,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CLZ <Wd>, <Wn>
     /// ```
+    #[inline(always)]
     fn clz_32(&mut self, wd: Register, wn: Register) -> T {
         emit_data_proc_one(self, 0, 0, 0, 0b100, wn, wd)
     }
@@ -147,6 +156,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CLZ <Xd>, <Xn>
     /// ```
+    #[inline(always)]
     fn clz_64(&mut self, xd: Register, xn: Register) -> T {
         emit_data_proc_one(self, 1, 0, 0, 0b100, xn, xd)
     }
@@ -159,6 +169,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CLS <Wd>, <Wn>
     /// ```
+    #[inline(always)]
     fn cls_32(&mut self, wd: Register, wn: Register) -> T {
         emit_data_proc_one(self, 0, 0, 0, 0b101, wn, wd)
     }
@@ -171,6 +182,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CLS <Xd>, <Xn>
     /// ```
+    #[inline(always)]
     fn cls_64(&mut self, xd: Register, xn: Register) -> T {
         emit_data_proc_one(self, 1, 0, 0, 0b101, xn, xd)
     }
@@ -183,6 +195,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// REV32 <Xd>, <Xn>
     /// ```
+    #[inline(always)]
     fn rev32(&mut self, xd: Register, xn: Register) -> T {
         emit_data_proc_one(self, 1, 0, 0, 0b10, xn, xd)
     }
@@ -195,6 +208,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACIA <Xd>, <Xn|SP>
     /// ```
+    #[inline(always)]
     fn pacia(&mut self, xd: Register, xn_sp: Register) -> T {
         let z = 0;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 000), xn_sp, xd)
@@ -208,6 +222,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACIZA <Xd>
     /// ```
+    #[inline(always)]
     fn paciza(&mut self, xd: Register) -> T {
         let z = 1;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 000), 0b11111, xd)
@@ -221,6 +236,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACIA1716
     /// ```
+    #[inline(always)]
     fn pacia1716(&mut self) -> T {
         emit_sys_instrs(self, 1, 0)
     }
@@ -233,6 +249,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACIASP
     /// ```
+    #[inline(always)]
     fn paciasp(&mut self) -> T {
         emit_sys_instrs(self, 0b11, 1)
     }
@@ -245,6 +262,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACIAZ
     /// ```
+    #[inline(always)]
     fn paciaz(&mut self) -> T {
         emit_sys_instrs(self, 0b11, 0)
     }
@@ -257,6 +275,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACIB <Xd>, <Xn|SP>
     /// ```
+    #[inline(always)]
     fn pacib(&mut self, xd: Register, xn_sp: Register) -> T {
         let z = 0;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 001), xn_sp, xd)
@@ -270,6 +289,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACIZB <Xd>
     /// ```
+    #[inline(always)]
     fn pacizb(&mut self, xd: Register) -> T {
         let z = 1;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 001), 0b11111, xd)
@@ -283,6 +303,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACIB1716
     /// ```
+    #[inline(always)]
     fn pacib1716(&mut self) -> T {
         emit_sys_instrs(self, 1, 0b10)
     }
@@ -295,6 +316,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACIBSP
     /// ```
+    #[inline(always)]
     fn pacibsp(&mut self) -> T {
         emit_sys_instrs(self, 0b11, 0b11)
     }
@@ -307,6 +329,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACIBZ
     /// ```
+    #[inline(always)]
     fn pacibz(&mut self) -> T {
         emit_sys_instrs(self, 0b11, 0b10)
     }
@@ -321,6 +344,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACDA <Xd>, <Xn|SP>
     /// ```
+    #[inline(always)]
     fn pacda(&mut self, xd: Register, xn_sp: Register) -> T {
         let z = 0;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 010), xn_sp, xd)
@@ -336,6 +360,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACDZA <Xd>
     /// ```
+    #[inline(always)]
     fn pacdza(&mut self, xd: Register) -> T {
         let z = 1;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 010), 0b11111, xd)
@@ -351,6 +376,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACDB <Xd>, <Xn|SP>
     /// ```
+    #[inline(always)]
     fn pacdb(&mut self, xd: Register, xn_sp: Register) -> T {
         let z = 0;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 011), xn_sp, xd)
@@ -366,6 +392,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACDZB <Xd>
     /// ```
+    #[inline(always)]
     fn pacdzb(&mut self, xd: Register) -> T {
         let z = 1;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 011), 0b11111, xd)
@@ -379,6 +406,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTIA <Xd>, <Xn|SP>
     /// ```
+    #[inline(always)]
     fn autia(&mut self, xd: Register, xn_sp: Register) -> T {
         let z = 0;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 100), xn_sp, xd)
@@ -392,6 +420,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTIZA <Xd>
     /// ```
+    #[inline(always)]
     fn autiza(&mut self, xd: Register) -> T {
         let z = 1;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 100), 0b11111, xd)
@@ -405,6 +434,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTIA1716
     /// ```
+    #[inline(always)]
     fn autia1716(&mut self) -> T {
         emit_sys_instrs(self, 1, 0b100)
     }
@@ -417,6 +447,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTIASP
     /// ```
+    #[inline(always)]
     fn autiasp(&mut self) -> T {
         emit_sys_instrs(self, 0b11, 0b101)
     }
@@ -429,6 +460,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTIAZ
     /// ```
+    #[inline(always)]
     fn autiaz(&mut self) -> T {
         emit_sys_instrs(self, 0b11, 0b100)
     }
@@ -441,6 +473,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTIB <Xd>, <Xn|SP>
     /// ```
+    #[inline(always)]
     fn autib(&mut self, xd: Register, xn_sp: Register) -> T {
         let z = 0;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 101), xn_sp, xd)
@@ -454,6 +487,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTIZB <Xd>
     /// ```
+    #[inline(always)]
     fn autizb(&mut self, xd: Register) -> T {
         let z = 1;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 101), 0b11111, xd)
@@ -467,6 +501,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTIB1716
     /// ```
+    #[inline(always)]
     fn autib1716(&mut self) -> T {
         emit_sys_instrs(self, 0b1, 0b110)
     }
@@ -479,6 +514,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTIBSP
     /// ```
+    #[inline(always)]
     fn autibsp(&mut self) -> T {
         emit_sys_instrs(self, 0b11, 0b111)
     }
@@ -491,6 +527,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTIBZ
     /// ```
+    #[inline(always)]
     fn autibz(&mut self) -> T {
         emit_sys_instrs(self, 0b11, 0b110)
     }
@@ -505,6 +542,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTDA <Xd>, <Xn|SP>
     /// ```
+    #[inline(always)]
     fn autda(&mut self, xd: Register, xn_sp: Register) -> T {
         let z = 0;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 110), xn_sp, xd)
@@ -520,6 +558,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTDZA <Xd>
     /// ```
+    #[inline(always)]
     fn autdza(&mut self, xd: Register) -> T {
         let z = 1;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 110), 0b11111, xd)
@@ -535,6 +574,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTDB <Xd>, <Xn|SP>
     /// ```
+    #[inline(always)]
     fn autdb(&mut self, xd: Register, xn_sp: Register) -> T {
         let z = 0;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 111), xn_sp, xd)
@@ -550,6 +590,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// AUTDZB <Xd>
     /// ```
+    #[inline(always)]
     fn autdzb(&mut self, xd: Register) -> T {
         let z = 1;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 111), 0b11111, xd)
@@ -565,6 +606,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// XPACD <Xd>
     /// ```
+    #[inline(always)]
     fn xpacd(&mut self, xd: Register) -> T {
         emit_data_proc_one(self, 1, 0, 1, 0b10001, 0b11111, xd)
     }
@@ -579,6 +621,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// XPACI <Xd>
     /// ```
+    #[inline(always)]
     fn xpaci(&mut self, xd: Register) -> T {
         emit_data_proc_one(self, 1, 0, 1, 0b10000, 0b11111, xd)
     }
@@ -593,6 +636,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// XPACLRI
     /// ```
+    #[inline(always)]
     fn xpaclri(&mut self) -> T {
         emit_sys_instrs(self, 0, 0b111)
     }

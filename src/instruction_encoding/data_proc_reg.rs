@@ -13,6 +13,7 @@
 //! - Conditional select
 //! - Data-processing (3 source)
 
+use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
 use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
 use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
@@ -20,8 +21,11 @@ use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftR
 pub mod data_proc_two_src;
 pub mod data_proc_one_src;
 pub mod logical_shift_reg;
+pub mod add_sub_shift_reg;
+pub mod alias_instrs;
 
 pub trait DataProcessingRegister<T>: DataProcessingTwoSource<T>
 + DataProcessingOneSource<T>
 + LogicalShiftRegister<T>
++ AddSubtractShiftedRegister<T>
 {}

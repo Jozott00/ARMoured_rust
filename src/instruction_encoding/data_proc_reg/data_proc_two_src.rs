@@ -24,6 +24,7 @@ use bit_seq::{bseq_32, bseq_8};
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::Register;
 
+#[inline(always)]
 fn emit_data_proc_two<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, s: u8, rm: Register, opcode: u8, rn: Register, rd: Register) -> T {
     let i = bseq_32!(sf:1 0 s:1 11010110 rm:5 opcode:6 rn:5 rd:5);
     proc.process(i)
@@ -57,6 +58,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// UDIV <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn udiv_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         emit_data_proc_two(self, 0, 0, wm, 0b10, wn, wd)
     }
@@ -68,6 +70,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// UDIV <Xd>, <Xn>, <Xm>
     /// ```
+    #[inline(always)]
     fn udiv_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         emit_data_proc_two(self, 1, 0, xm, 0b10, xn, xd)
     }
@@ -80,6 +83,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// SDIV <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn sdiv_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         emit_data_proc_two(self, 0, 0, wm, 0b11, wn, wd)
     }
@@ -91,6 +95,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// SDIV <Xd>, <Xn>, <Xm>
     /// ```
+    #[inline(always)]
     fn sdiv_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         emit_data_proc_two(self, 1, 0, xm, 0b11, xn, xd)
     }
@@ -102,6 +107,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// LSLV <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn lslv_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         emit_data_proc_two(self, 0, 0, wm, 0b1000, wn, wd)
     }
@@ -113,6 +119,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// LSLV <Xd>, <Xn>, <Xm>
     /// ```
+    #[inline(always)]
     fn lslv_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         emit_data_proc_two(self, 1, 0, xm, 0b1000, xn, xd)
     }
@@ -124,6 +131,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// LSRV <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn lsrv_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         emit_data_proc_two(self, 0, 0, wm, 0b1001, wn, wd)
     }
@@ -135,6 +143,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// LSRV <Xd>, <Xn>, <Xm>
     /// ```
+    #[inline(always)]
     fn lsrv_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         emit_data_proc_two(self, 1, 0, xm, 0b1001, xn, xd)
     }
@@ -146,6 +155,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// ASRV <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn asrv_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         emit_data_proc_two(self, 0, 0, wm, 0b1010, wn, wd)
     }
@@ -157,6 +167,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// ASRV <Xd>, <Xn>, <Xm>
     /// ```
+    #[inline(always)]
     fn asrv_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         emit_data_proc_two(self, 1, 0, xm, 0b1010, xn, xd)
     }
@@ -169,6 +180,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// RORV <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn rorv_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         emit_data_proc_two(self, 0, 0, wm, 0b1011, wn, wd)
     }
@@ -180,6 +192,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// RORV <Xd>, <Xn>, <Xm>
     /// ```
+    #[inline(always)]
     fn rorv_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         emit_data_proc_two(self, 1, 0, xm, 0b1011, xn, xd)
     }
@@ -194,6 +207,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CRC32B <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn crc32b(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         let sz = 0b00;
         emit_data_proc_two(self, 0, 0, wm, bseq_8!(100 sz:2), wn, wd)
@@ -208,6 +222,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CRC32H <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn crc32h(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         let sz = 0b01;
         emit_data_proc_two(self, 0, 0, wm, bseq_8!(100 sz:2), wn, wd)
@@ -222,6 +237,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CRC32W <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn crc32w(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         let sz = 0b10;
         emit_data_proc_two(self, 0, 0, wm, bseq_8!(100 sz:2), wn, wd)
@@ -236,6 +252,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CRC32X <Wd>, <Wn>, <Xm>
     /// ```
+    #[inline(always)]
     fn crc32x(&mut self, wd: Register, wn: Register, xm: Register) -> T {
         let sz = 0b11;
         emit_data_proc_two(self, 1, 0, xm, bseq_8!(100 sz:2), wn, wd)
@@ -250,6 +267,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CRC32CB <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn crc32cb(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         let sz = 0b00;
         emit_data_proc_two(self, 0, 0, wm, bseq_8!(101 sz:2), wn, wd)
@@ -264,6 +282,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CRC32CH <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn crc32ch(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         let sz = 0b01;
         emit_data_proc_two(self, 0, 0, wm, bseq_8!(101 sz:2), wn, wd)
@@ -278,6 +297,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CRC32CW <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn crc32cw(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         let sz = 0b10;
         emit_data_proc_two(self, 0, 0, wm, bseq_8!(101 sz:2), wn, wd)
@@ -292,6 +312,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// CRC32CX <Wd>, <Wn>, <Xm>
     /// ```
+    #[inline(always)]
     fn crc32cx(&mut self, wd: Register, wn: Register, xm: Register) -> T {
         let sz = 0b11;
         emit_data_proc_two(self, 1, 0, xm, bseq_8!(101 sz:2), wn, wd)
@@ -304,6 +325,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// SUBP <Xd>, <Xn|SP>, <Xm|SP>
     /// ```
+    #[inline(always)]
     fn subp(&mut self, xd: Register, xn_sp: Register, xm_sp: Register) -> T {
         emit_data_proc_two(self, 1, 0, xm_sp, 0, xn_sp, xd)
     }
@@ -315,6 +337,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// IRG <Xd|SP>, <Xn|SP>, <Xm>
     /// ```
+    #[inline(always)]
     fn irg(&mut self, xd_sp: Register, xn_sp: Register, xm: Register) -> T {
         emit_data_proc_two(self, 1, 0, xm, 0b100, xn_sp, xd_sp)
     }
@@ -326,6 +349,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// GMI <Xd>, <Xn|SP>, <Xm>
     /// ```
+    #[inline(always)]
     fn gmi(&mut self, xd: Register, xn_sp: Register, xm: Register) -> T {
         emit_data_proc_two(self, 1, 0, xm, 0b101, xn_sp, xd)
     }
@@ -337,6 +361,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// PACGA <Xd>, <Xn>, <Xm|SP>
     /// ```
+    #[inline(always)]
     fn pacga(&mut self, xd: Register, xn: Register, xm_sp: Register) -> T {
         emit_data_proc_two(self, 1, 0, xm_sp, 0b1100, xn, xd)
     }
@@ -348,6 +373,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// SUBPS <Xd>, <Xn|SP>, <Xm|SP>
     /// ```
+    #[inline(always)]
     fn subps(&mut self, xd: Register, xn_sp: Register, xm_sp: Register) -> T {
         emit_data_proc_two(self, 1, 1, xm_sp, 0, xn_sp, xd)
     }
@@ -362,6 +388,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// LSL <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn lsl_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         self.lslv_32(wd, wn, wm)
     }
@@ -373,6 +400,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// LSL <Xd>, <Xn>, <Xm>
     /// ```
+    #[inline(always)]
     fn lsl_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         self.lslv_64(xd, xn, xm)
     }
@@ -384,6 +412,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// LSL <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn lsr_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         self.lsrv_32(wd, wn, wm)
     }
@@ -395,6 +424,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// LSL <Xd>, <Xn>, <Xm>
     /// ```
+    #[inline(always)]
     fn lsr_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         self.lsrv_64(xd, xn, xm)
     }
@@ -406,6 +436,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// ASR <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn asr_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         self.asrv_32(wd, wn, wm)
     }
@@ -417,6 +448,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// ASR <Xd>, <Xn>, <Xm>
     /// ```
+    #[inline(always)]
     fn asr_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         self.asrv_64(xd, xn, xm)
     }
@@ -428,6 +460,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// ROR <Wd>, <Wn>, <Wm>
     /// ```
+    #[inline(always)]
     fn ror_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         self.rorv_32(wd, wn, wm)
     }
@@ -439,6 +472,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     /// ```asm
     /// ROR <Xd>, <Xn>, <Xm>
     /// ```
+    #[inline(always)]
     fn ror_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         self.rorv_64(xd, xn, xm)
     }

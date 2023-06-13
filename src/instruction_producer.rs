@@ -1,3 +1,4 @@
+use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
 use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
 use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
@@ -88,6 +89,8 @@ impl LoadRegisterLiteral<Instr> for InstrProducer {}
 impl DataProcessingOneSource<Instr> for InstrProducer {}
 
 impl LogicalShiftRegister<Instr> for InstrProducer {}
+
+impl AddSubtractShiftedRegister<Instr> for InstrProducer {}
 
 impl DataProcessingRegister<Instr> for InstrProducer {}
 
