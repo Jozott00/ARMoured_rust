@@ -1,3 +1,6 @@
+//! Implementation of the ARM64 instruction set encodings
+
+
 pub mod branch_exception_system;
 pub mod data_proc_imm;
 pub mod loads_and_stores;
