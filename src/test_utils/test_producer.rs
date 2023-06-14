@@ -1,4 +1,5 @@
 use bad64::decode;
+use crate::instruction_encoding::data_proc_reg::evaluate_into_flags::EvaluateIntoFlags;
 use crate::instruction_encoding::data_proc_reg::rotate_right_into_flags::RotateRightIntoFlags;
 use crate::instruction_encoding::data_proc_reg::add_sub_carry::AddSubtractWithCarry;
 use crate::instruction_encoding::data_proc_reg::add_sub_ext_reg::AddSubtractExtendedRegister;
@@ -108,6 +109,8 @@ impl AddSubtractExtendedRegister<InstrRes> for TestProducer {}
 impl AddSubtractWithCarry<InstrRes> for TestProducer {}
 
 impl RotateRightIntoFlags<InstrRes> for TestProducer {}
+
+impl EvaluateIntoFlags<InstrRes> for TestProducer {}
 
 impl DataProcessingRegister<InstrRes> for TestProducer {}
 

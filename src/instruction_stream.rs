@@ -2,6 +2,7 @@ use std::{mem, slice};
 
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+use crate::instruction_encoding::data_proc_reg::evaluate_into_flags::EvaluateIntoFlags;
 use crate::instruction_encoding::data_proc_reg::rotate_right_into_flags::RotateRightIntoFlags;
 use crate::instruction_encoding::data_proc_reg::add_sub_carry::AddSubtractWithCarry;
 use crate::instruction_encoding::data_proc_reg::add_sub_ext_reg::AddSubtractExtendedRegister;
@@ -137,6 +138,8 @@ impl<'mem, M: Memory, E: Emitter> AddSubtractExtendedRegister<Instr> for InstrSt
 impl<'mem, M: Memory, E: Emitter> AddSubtractWithCarry<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> RotateRightIntoFlags<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> EvaluateIntoFlags<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> DataProcessingRegister<Instr> for InstrStream<'mem, M, E> {}
 
