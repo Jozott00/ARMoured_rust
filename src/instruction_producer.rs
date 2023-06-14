@@ -1,3 +1,12 @@
+use crate::instruction_encoding::data_proc_reg::evaluate_into_flags::EvaluateIntoFlags;
+use crate::instruction_encoding::data_proc_reg::rotate_right_into_flags::RotateRightIntoFlags;
+use crate::instruction_encoding::data_proc_reg::add_sub_carry::AddSubtractWithCarry;
+use crate::instruction_encoding::data_proc_reg::add_sub_ext_reg::AddSubtractExtendedRegister;
+use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
+use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
+use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
+use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
+use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
 use crate::instruction_encoding::branch_exception_system::BranchExceptionSystem;
 use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediate;
@@ -20,6 +29,10 @@ use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStor
 use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
 use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
+use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCompareImmediate;
+use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
+use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
+use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
 
@@ -80,6 +93,32 @@ impl CompareAndSwapPair<Instr> for InstrProducer {}
 impl LoadStoreRegUImm<Instr> for InstrProducer {}
 
 impl LoadRegisterLiteral<Instr> for InstrProducer {}
+
+impl DataProcessingOneSource<Instr> for InstrProducer {}
+
+impl LogicalShiftRegister<Instr> for InstrProducer {}
+
+impl AddSubtractShiftedRegister<Instr> for InstrProducer {}
+
+impl AddSubtractExtendedRegister<Instr> for InstrProducer {}
+
+impl AddSubtractWithCarry<Instr> for InstrProducer {}
+
+impl RotateRightIntoFlags<Instr> for InstrProducer {}
+
+impl EvaluateIntoFlags<Instr> for InstrProducer {}
+
+impl ConditionalCompareRegister<Instr> for InstrProducer {}
+
+impl ConditionalCompareImmediate<Instr> for InstrProducer {}
+
+impl ConditionalSelect<Instr> for InstrProducer {}
+
+impl DataProcessingThreeSource<Instr> for InstrProducer {}
+
+impl DataProcessingRegister<Instr> for InstrProducer {}
+
+impl DataProcessingTwoSource<Instr> for InstrProducer {}
 
 impl InstructionSet<Instr> for InstrProducer {}
 

@@ -1,4 +1,13 @@
 use bad64::decode;
+use crate::instruction_encoding::data_proc_reg::evaluate_into_flags::EvaluateIntoFlags;
+use crate::instruction_encoding::data_proc_reg::rotate_right_into_flags::RotateRightIntoFlags;
+use crate::instruction_encoding::data_proc_reg::add_sub_carry::AddSubtractWithCarry;
+use crate::instruction_encoding::data_proc_reg::add_sub_ext_reg::AddSubtractExtendedRegister;
+use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
+use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
+use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
+use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
+use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
 use crate::instruction_encoding::branch_exception_system::BranchExceptionSystem;
 use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediate;
@@ -22,6 +31,10 @@ use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStor
 use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
 use crate::types::Instruction;
 use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
+use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCompareImmediate;
+use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
+use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
+use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 
 type InstrRes = String;
 
@@ -88,5 +101,31 @@ impl CompareAndSwapPair<InstrRes> for TestProducer {}
 impl LoadStoreRegUImm<InstrRes> for TestProducer {}
 
 impl LoadRegisterLiteral<InstrRes> for TestProducer {}
+
+impl DataProcessingOneSource<InstrRes> for TestProducer {}
+
+impl LogicalShiftRegister<InstrRes> for TestProducer {}
+
+impl AddSubtractShiftedRegister<InstrRes> for TestProducer {}
+
+impl AddSubtractExtendedRegister<InstrRes> for TestProducer {}
+
+impl AddSubtractWithCarry<InstrRes> for TestProducer {}
+
+impl RotateRightIntoFlags<InstrRes> for TestProducer {}
+
+impl EvaluateIntoFlags<InstrRes> for TestProducer {}
+
+impl ConditionalCompareRegister<InstrRes> for TestProducer {}
+
+impl ConditionalCompareImmediate<InstrRes> for TestProducer {}
+
+impl ConditionalSelect<InstrRes> for TestProducer {}
+
+impl DataProcessingThreeSource<InstrRes> for TestProducer {}
+
+impl DataProcessingRegister<InstrRes> for TestProducer {}
+
+impl DataProcessingTwoSource<InstrRes> for TestProducer {}
 
 impl InstructionSet<InstrRes> for TestProducer {}

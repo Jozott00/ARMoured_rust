@@ -2,6 +2,15 @@ use std::{mem, slice};
 
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+use crate::instruction_encoding::data_proc_reg::evaluate_into_flags::EvaluateIntoFlags;
+use crate::instruction_encoding::data_proc_reg::rotate_right_into_flags::RotateRightIntoFlags;
+use crate::instruction_encoding::data_proc_reg::add_sub_carry::AddSubtractWithCarry;
+use crate::instruction_encoding::data_proc_reg::add_sub_ext_reg::AddSubtractExtendedRegister;
+use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
+use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
+use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
+use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
+use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::data_proc_imm::extract::ExtractInstructions;
 use crate::instruction_encoding::data_proc_imm::bitfield::BitfieldInstructions;
 use crate::instruction_encoding::data_proc_imm::add_substract_imm::AddSubtractImmediate;
@@ -32,8 +41,12 @@ use crate::instruction_encoding::branch_exception_system::unconditional_branch_i
 
 use crate::instruction_emitter::{Emitter, InstrEmitter};
 use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
+use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCompareImmediate;
+use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
+use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
+use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 use crate::mc_memory::{McMemory, Memory};
-use crate::types::{Instruction, InstructionPointer, Register};
+use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
 
 pub type PatchFn<M: Memory, E: Emitter> = fn(&mut InstrStream<M, E>) -> ();
@@ -117,6 +130,32 @@ impl<'mem, M: Memory, E: Emitter> DataProcessingImmediate<Instr> for InstrStream
 impl<'mem, M: Memory, E: Emitter> MovWideImmediate<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> PcRelAddressing<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> DataProcessingOneSource<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> LogicalShiftRegister<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> AddSubtractShiftedRegister<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> AddSubtractExtendedRegister<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> AddSubtractWithCarry<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> RotateRightIntoFlags<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> EvaluateIntoFlags<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> ConditionalCompareRegister<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> ConditionalCompareImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> ConditionalSelect<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> DataProcessingThreeSource<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> DataProcessingRegister<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> DataProcessingTwoSource<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> InstructionSet<Instr> for InstrStream<'mem, M, E> {}
 
