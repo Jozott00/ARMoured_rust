@@ -1,10 +1,15 @@
+//! Implementation of the ARM64 instruction set encodings
+
+
 pub mod branch_exception_system;
 pub mod data_proc_imm;
 pub mod loads_and_stores;
+pub mod data_proc_reg;
 
 
 use crate::instruction_encoding::branch_exception_system::{BranchExceptionSystem, BranchExceptionSystemWithAddress};
 use crate::instruction_encoding::data_proc_imm::{DataProcessingImmediate, DataProcessingImmediateWithAddress};
+use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::loads_and_stores::{LoadsAndStores, LoadsAndStoresWithAddress};
 use crate::types::{Instruction, Offset32};
 
@@ -29,6 +34,7 @@ pub trait AddressableInstructionProcessor<T>: InstructionProcessor<T> {
 pub trait InstructionSet<T>: DataProcessingImmediate<T>
 + BranchExceptionSystem<T>
 + LoadsAndStores<T>
++ DataProcessingRegister<T>
 {}
 
 /// Bundles all instruction of Arm64 instruction set

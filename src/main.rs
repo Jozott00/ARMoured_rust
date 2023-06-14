@@ -11,6 +11,8 @@ use crate::instruction_encoding::data_proc_imm::bitfield::BitfieldInstructions;
 use crate::instruction_encoding::data_proc_imm::logical_imm::LogicalImmediate;
 use crate::instruction_encoding::data_proc_imm::mov_wide_imm::MovWideImmediate;
 use crate::instruction_encoding::data_proc_imm::pc_rel_addr::{PcRelAddressing, PcRelAddressingWithAddress};
+use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
+use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
 use crate::instruction_producer::InstrProducer;
@@ -54,6 +56,8 @@ fn main() {
     stream.b_from_byte_offset(0);
     stream.sbfm_64(1, 2, 0x8, 0x3);
     stream.movk_64_imm(2, 0xffff);
+    stream.xpaci(3);
+    stream.madd_64(3, 4, 2, 6);
 
     stream.patch_at(stream.base_ptr(), |s| {
         s.movn_64_imm(1, 4);
