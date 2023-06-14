@@ -37,7 +37,7 @@ fn emit_add_sub_ext_opt_shift<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u
 pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
     /// [ADD - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADD--extended-register---Add--extended-register--?lang=en)
     ///
-    /// Add (extended register) adds a register value and a sign or zero-extended register value, followed by an optional left shift amount, and writes the result to the destination register. The argument that is extended from the <Rm> register can be a byte, halfword, word, or doubleword.
+    /// Add (extended register) adds a register value and a sign or zero-extended register value, followed by an optional left shift amount, and writes the result to the destination register. The argument that is extended from the `<Rm>` register can be a byte, halfword, word, or doubleword.
     ///
     /// ```asm
     /// ADD <Wd|WSP>, <Wn|WSP>, <Wm>, <extend> {#<amount>}
@@ -50,7 +50,7 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
 
     /// [ADD - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADD--extended-register---Add--extended-register--?lang=en)
     ///
-    /// Add (extended register) adds a register value and a sign or zero-extended register value, followed by an optional left shift amount, and writes the result to the destination register. The argument that is extended from the <Rm> register can be a byte, halfword, word, or doubleword.
+    /// Add (extended register) adds a register value and a sign or zero-extended register value, followed by an optional left shift amount, and writes the result to the destination register. The argument that is extended from the `<Rm>` register can be a byte, halfword, word, or doubleword.
     ///
     /// ```asm
     /// ADD <Xd|SP>, <Xn|SP>, <R><m>, <extend> {#<amount>}
@@ -66,7 +66,7 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
 
     /// [ADDS - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDS--extended-register---Add--extended-register---setting-flags-?lang=en)
     ///
-    /// Add (extended register), setting flags, adds a register value and a sign or zero-extended register value, followed by an optional left shift amount, and writes the result to the destination register. The argument that is extended from the <Rm> register can be a byte, halfword, word, or doubleword. It updates the condition flags based on the result.
+    /// Add (extended register), setting flags, adds a register value and a sign or zero-extended register value, followed by an optional left shift amount, and writes the result to the destination register. The argument that is extended from the `<Rm>` register can be a byte, halfword, word, or doubleword. It updates the condition flags based on the result.
     ///
     /// This instruction is used by the alias CMN (extended register).
     ///
@@ -81,7 +81,7 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
 
     /// [ADDS - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDS--extended-register---Add--extended-register---setting-flags-?lang=en)
     ///
-    /// Add (extended register), setting flags, adds a register value and a sign or zero-extended register value, followed by an optional left shift amount, and writes the result to the destination register. The argument that is extended from the <Rm> register can be a byte, halfword, word, or doubleword. It updates the condition flags based on the result.
+    /// Add (extended register), setting flags, adds a register value and a sign or zero-extended register value, followed by an optional left shift amount, and writes the result to the destination register. The argument that is extended from the `<Rm>` register can be a byte, halfword, word, or doubleword. It updates the condition flags based on the result.
     ///
     /// This instruction is used by the alias CMN (extended register).
     ///
@@ -99,7 +99,7 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
 
     /// [SUB - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--extended-register---Subtract--extended-register--?lang=en)
     ///
-    /// Subtract (extended register) subtracts a sign or zero-extended register value, followed by an optional left shift amount, from a register value, and writes the result to the destination register. The argument that is extended from the <Rm> register can be a byte, halfword, word, or doubleword.
+    /// Subtract (extended register) subtracts a sign or zero-extended register value, followed by an optional left shift amount, from a register value, and writes the result to the destination register. The argument that is extended from the `<Rm>` register can be a byte, halfword, word, or doubleword.
     ///
     /// ```asm
     /// SUB <Wd|WSP>, <Wn|WSP>, <Wm>{, <extend> {#<amount>}}
@@ -112,7 +112,7 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
 
     /// [SUB - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--extended-register---Subtract--extended-register--?lang=en)
     ///
-    /// Subtract (extended register) subtracts a sign or zero-extended register value, followed by an optional left shift amount, from a register value, and writes the result to the destination register. The argument that is extended from the <Rm> register can be a byte, halfword, word, or doubleword.
+    /// Subtract (extended register) subtracts a sign or zero-extended register value, followed by an optional left shift amount, from a register value, and writes the result to the destination register. The argument that is extended from the `<Rm>` register can be a byte, halfword, word, or doubleword.
     ///
     /// ```asm
     /// SUB <Xd|SP>, <Xn|SP>, <R><m>{, <extend> {#<amount>}}
@@ -128,7 +128,7 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
 
     /// [SUBS - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--extended-register---Subtract--extended-register---setting-flags-?lang=en)
     ///
-    /// Subtract (extended register), setting flags, subtracts a sign or zero-extended register value, followed by an optional left shift amount, from a register value, and writes the result to the destination register. The argument that is extended from the <Rm> register can be a byte, halfword, word, or doubleword. It updates the condition flags based on the result.
+    /// Subtract (extended register), setting flags, subtracts a sign or zero-extended register value, followed by an optional left shift amount, from a register value, and writes the result to the destination register. The argument that is extended from the `<Rm>` register can be a byte, halfword, word, or doubleword. It updates the condition flags based on the result.
     ///
     /// This instruction is used by the alias CMP (extended register).
     ///
@@ -143,7 +143,7 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
 
     /// [SUBS - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--extended-register---Subtract--extended-register---setting-flags-?lang=en)
     ///
-    /// Subtract (extended register), setting flags, subtracts a sign or zero-extended register value, followed by an optional left shift amount, from a register value, and writes the result to the destination register. The argument that is extended from the <Rm> register can be a byte, halfword, word, or doubleword. It updates the condition flags based on the result.
+    /// Subtract (extended register), setting flags, subtracts a sign or zero-extended register value, followed by an optional left shift amount, from a register value, and writes the result to the destination register. The argument that is extended from the `<Rm>` register can be a byte, halfword, word, or doubleword. It updates the condition flags based on the result.
     ///
     /// This instruction is used by the alias CMP (extended register).
     ///

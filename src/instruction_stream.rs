@@ -2,6 +2,7 @@ use std::{mem, slice};
 
 use bad64::disasm;
 use bit_seq::{bseq, bseq_32};
+use crate::instruction_encoding::data_proc_reg::add_sub_carry::AddSubtractWithCarry;
 use crate::instruction_encoding::data_proc_reg::add_sub_ext_reg::AddSubtractExtendedRegister;
 use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
 use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
@@ -39,7 +40,7 @@ use crate::instruction_encoding::branch_exception_system::unconditional_branch_i
 use crate::instruction_emitter::{Emitter, InstrEmitter};
 use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
 use crate::mc_memory::{McMemory, Memory};
-use crate::types::{Instruction, InstructionPointer, Register};
+use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
 
 pub type PatchFn<M: Memory, E: Emitter> = fn(&mut InstrStream<M, E>) -> ();
@@ -131,6 +132,8 @@ impl<'mem, M: Memory, E: Emitter> LogicalShiftRegister<Instr> for InstrStream<'m
 impl<'mem, M: Memory, E: Emitter> AddSubtractShiftedRegister<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> AddSubtractExtendedRegister<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> AddSubtractWithCarry<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> DataProcessingRegister<Instr> for InstrStream<'mem, M, E> {}
 
