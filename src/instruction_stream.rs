@@ -43,6 +43,7 @@ use crate::instruction_emitter::{Emitter, InstrEmitter};
 use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
 use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCompareImmediate;
 use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
+use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
 use crate::mc_memory::{McMemory, Memory};
 use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
@@ -146,6 +147,8 @@ impl<'mem, M: Memory, E: Emitter> EvaluateIntoFlags<Instr> for InstrStream<'mem,
 impl<'mem, M: Memory, E: Emitter> ConditionalCompareRegister<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> ConditionalCompareImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> ConditionalSelect<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> DataProcessingRegister<Instr> for InstrStream<'mem, M, E> {}
 

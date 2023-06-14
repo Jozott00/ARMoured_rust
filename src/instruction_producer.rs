@@ -31,6 +31,7 @@ use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
 use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCompareImmediate;
 use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
+use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
 use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
 
@@ -109,6 +110,8 @@ impl EvaluateIntoFlags<Instr> for InstrProducer {}
 impl ConditionalCompareRegister<Instr> for InstrProducer {}
 
 impl ConditionalCompareImmediate<Instr> for InstrProducer {}
+
+impl ConditionalSelect<Instr> for InstrProducer {}
 
 impl DataProcessingRegister<Instr> for InstrProducer {}
 
