@@ -54,7 +54,7 @@ def main():
             unique_instrs[name] = construct_instruction_definition(instr)
 
     mod_doc = f"""
-# {type_name}
+# [{type_name}]({sys.argv[1]})
 
 Implements the following instructions:
 """.strip()
