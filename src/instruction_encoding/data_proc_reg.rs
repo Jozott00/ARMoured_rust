@@ -19,6 +19,7 @@ use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractSh
 use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
 use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
+use crate::instruction_encoding::data_proc_reg::rotate_right_into_flags::RotateRightIntoFlags;
 
 pub mod data_proc_two_src;
 pub mod data_proc_one_src;
@@ -27,6 +28,7 @@ pub mod add_sub_shift_reg;
 pub mod alias_instrs;
 pub mod add_sub_ext_reg;
 pub mod add_sub_carry;
+pub mod rotate_right_into_flags;
 
 pub trait DataProcessingRegister<T>: DataProcessingTwoSource<T>
 + DataProcessingOneSource<T>
@@ -34,4 +36,5 @@ pub trait DataProcessingRegister<T>: DataProcessingTwoSource<T>
 + AddSubtractShiftedRegister<T>
 + AddSubtractExtendedRegister<T>
 + AddSubtractWithCarry<T>
++ RotateRightIntoFlags<T>
 {}

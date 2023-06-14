@@ -1,3 +1,4 @@
+use crate::instruction_encoding::data_proc_reg::rotate_right_into_flags::RotateRightIntoFlags;
 use crate::instruction_encoding::data_proc_reg::add_sub_carry::AddSubtractWithCarry;
 use crate::instruction_encoding::data_proc_reg::add_sub_ext_reg::AddSubtractExtendedRegister;
 use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
@@ -97,6 +98,8 @@ impl AddSubtractShiftedRegister<Instr> for InstrProducer {}
 impl AddSubtractExtendedRegister<Instr> for InstrProducer {}
 
 impl AddSubtractWithCarry<Instr> for InstrProducer {}
+
+impl RotateRightIntoFlags<Instr> for InstrProducer {}
 
 impl DataProcessingRegister<Instr> for InstrProducer {}
 

@@ -13,7 +13,7 @@ use crate::types::Register;
 use crate::instruction_encoding::InstructionProcessor;
 
 #[inline(always)]
-fn emit_bitfield<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op: u8, s: u8, rm: Register, rn: Register, rd: Register) -> T {
+fn emit_add_sub_carry<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op: u8, s: u8, rm: Register, rn: Register, rd: Register) -> T {
     let i = bseq_32!(sf:1 op:1 s:1 11010000 rm:5 0:6 rn:5 rd:5);
     proc.process(i)
 }
@@ -35,7 +35,7 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn adc_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
-        emit_bitfield(self, 0, 0, 0, wm, wn, wd)
+        emit_add_sub_carry(self, 0, 0, 0, wm, wn, wd)
     }
 
 
@@ -48,7 +48,7 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn adc_64(&mut self, wd: Register, wn: Register, wm: Register) -> T {
-        emit_bitfield(self, 1, 0, 0, wm, wn, wd)
+        emit_add_sub_carry(self, 1, 0, 0, wm, wn, wd)
     }
 
 
@@ -61,7 +61,7 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn adcs_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
-        emit_bitfield(self, 0, 0, 1, wm, wn, wd)
+        emit_add_sub_carry(self, 0, 0, 1, wm, wn, wd)
     }
 
 
@@ -74,7 +74,7 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn adcs_64(&mut self, wd: Register, wn: Register, wm: Register) -> T {
-        emit_bitfield(self, 1, 0, 1, wm, wn, wd)
+        emit_add_sub_carry(self, 1, 0, 1, wm, wn, wd)
     }
 
     /// [SBC - Subtract with Carry](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SBC--Subtract-with-Carry-?lang=en)
@@ -88,7 +88,7 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn sbc_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
-        emit_bitfield(self, 0, 1, 0, wm, wn, wd)
+        emit_add_sub_carry(self, 0, 1, 0, wm, wn, wd)
     }
 
 
@@ -103,7 +103,7 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn sbc_64(&mut self, wd: Register, wn: Register, wm: Register) -> T {
-        emit_bitfield(self, 1, 1, 0, wm, wn, wd)
+        emit_add_sub_carry(self, 1, 1, 0, wm, wn, wd)
     }
 
 
@@ -118,7 +118,7 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn sbcs_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
-        emit_bitfield(self, 0, 1, 1, wm, wn, wd)
+        emit_add_sub_carry(self, 0, 1, 1, wm, wn, wd)
     }
 
 
@@ -133,7 +133,7 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn sbcs_64(&mut self, wd: Register, wn: Register, wm: Register) -> T {
-        emit_bitfield(self, 1, 1, 1, wm, wn, wd)
+        emit_add_sub_carry(self, 1, 1, 1, wm, wn, wd)
     }
 }
 
