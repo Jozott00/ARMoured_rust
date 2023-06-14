@@ -31,6 +31,7 @@ use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStor
 use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
 use crate::types::Instruction;
 use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
+use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCompareImmediate;
 use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
 
 type InstrRes = String;
@@ -114,6 +115,8 @@ impl RotateRightIntoFlags<InstrRes> for TestProducer {}
 impl EvaluateIntoFlags<InstrRes> for TestProducer {}
 
 impl ConditionalCompareRegister<InstrRes> for TestProducer {}
+
+impl ConditionalCompareImmediate<InstrRes> for TestProducer {}
 
 impl DataProcessingRegister<InstrRes> for TestProducer {}
 
