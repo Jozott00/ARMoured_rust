@@ -29,6 +29,7 @@ use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStor
 use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
 use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
+use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
 use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
 
@@ -103,6 +104,8 @@ impl AddSubtractWithCarry<Instr> for InstrProducer {}
 impl RotateRightIntoFlags<Instr> for InstrProducer {}
 
 impl EvaluateIntoFlags<Instr> for InstrProducer {}
+
+impl ConditionalCompareRegister<Instr> for InstrProducer {}
 
 impl DataProcessingRegister<Instr> for InstrProducer {}
 

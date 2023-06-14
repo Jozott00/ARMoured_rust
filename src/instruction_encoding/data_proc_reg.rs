@@ -16,6 +16,7 @@
 use crate::instruction_encoding::data_proc_reg::add_sub_carry::AddSubtractWithCarry;
 use crate::instruction_encoding::data_proc_reg::add_sub_ext_reg::AddSubtractExtendedRegister;
 use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
+use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
 use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
 use crate::instruction_encoding::data_proc_reg::evaluate_into_flags::EvaluateIntoFlags;
@@ -31,6 +32,7 @@ pub mod add_sub_ext_reg;
 pub mod add_sub_carry;
 pub mod rotate_right_into_flags;
 pub mod evaluate_into_flags;
+pub mod cond_compare_reg;
 
 pub trait DataProcessingRegister<T>: DataProcessingTwoSource<T>
 + DataProcessingOneSource<T>
@@ -40,4 +42,5 @@ pub trait DataProcessingRegister<T>: DataProcessingTwoSource<T>
 + AddSubtractWithCarry<T>
 + RotateRightIntoFlags<T>
 + EvaluateIntoFlags<T>
++ ConditionalCompareRegister<T>
 {}

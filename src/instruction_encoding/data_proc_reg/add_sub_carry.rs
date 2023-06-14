@@ -47,8 +47,8 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     /// ADC <Xd>, <Xn>, <Xm>
     /// ```
     #[inline(always)]
-    fn adc_64(&mut self, wd: Register, wn: Register, wm: Register) -> T {
-        emit_add_sub_carry(self, 1, 0, 0, wm, wn, wd)
+    fn adc_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
+        emit_add_sub_carry(self, 1, 0, 0, xm, xn, xd)
     }
 
 
@@ -73,8 +73,8 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     /// ADCS <Xd>, <Xn>, <Xm>
     /// ```
     #[inline(always)]
-    fn adcs_64(&mut self, wd: Register, wn: Register, wm: Register) -> T {
-        emit_add_sub_carry(self, 1, 0, 1, wm, wn, wd)
+    fn adcs_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
+        emit_add_sub_carry(self, 1, 0, 1, xm, xn, xd)
     }
 
     /// [SBC - Subtract with Carry](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SBC--Subtract-with-Carry-?lang=en)
@@ -102,8 +102,8 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     /// SBC <Xd>, <Xn>, <Xm>
     /// ```
     #[inline(always)]
-    fn sbc_64(&mut self, wd: Register, wn: Register, wm: Register) -> T {
-        emit_add_sub_carry(self, 1, 1, 0, wm, wn, wd)
+    fn sbc_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
+        emit_add_sub_carry(self, 1, 1, 0, xm, xn, xd)
     }
 
 
@@ -132,8 +132,8 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     /// SBCS <Xd>, <Xn>, <Xm>
     /// ```
     #[inline(always)]
-    fn sbcs_64(&mut self, wd: Register, wn: Register, wm: Register) -> T {
-        emit_add_sub_carry(self, 1, 1, 1, wm, wn, wd)
+    fn sbcs_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
+        emit_add_sub_carry(self, 1, 1, 1, xm, xn, xd)
     }
 }
 
