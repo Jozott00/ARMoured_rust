@@ -33,7 +33,7 @@ fn emit_add_sub_shift<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op: u
 ///  - [SUB - shifted register ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--shifted-register---Subtract--shifted-register--?lang=en)
 ///  - [SUBS - shifted register -  setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--shifted-register---Subtract--shifted-register---setting-flags-?lang=en)
 pub trait AddSubtractShiftedRegister<T>: InstructionProcessor<T> {
-    /// [ADD - shifted register -  Add - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADD--shifted-register---Add--shifted-register--?lang=en)
+    /// [ADD - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADD--shifted-register---Add--shifted-register--?lang=en)
     ///
     /// Add (shifted register) adds a register value and an optionally-shifted register value, and writes the result to the destination register.
     ///
@@ -41,12 +41,12 @@ pub trait AddSubtractShiftedRegister<T>: InstructionProcessor<T> {
     /// ADD <Wd>, <Wn>, <Wm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn add_32_shifted_reg(&mut self, wd: Register, wn: Register, wm: Register, shift: Shift3<UImm5>) -> T {
+    fn add_32_reg_shift(&mut self, wd: Register, wn: Register, wm: Register, shift: Shift3<UImm5>) -> T {
         emit_add_sub_shift(self, 0, 0, 0, shift, wm, wn, wd)
     }
 
 
-    /// [ADD - shifted register -  Add - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADD--shifted-register---Add--shifted-register--?lang=en)
+    /// [ADD - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADD--shifted-register---Add--shifted-register--?lang=en)
     ///
     /// Add (shifted register) adds a register value and an optionally-shifted register value, and writes the result to the destination register.
     ///
@@ -54,7 +54,7 @@ pub trait AddSubtractShiftedRegister<T>: InstructionProcessor<T> {
     /// ADD <Xd>, <Xn>, <Xm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn add_64_shifted_reg(&mut self, xd: Register, xn: Register, xm: Register, shift: Shift3<UImm6>) -> T {
+    fn add_64_reg_shift(&mut self, xd: Register, xn: Register, xm: Register, shift: Shift3<UImm6>) -> T {
         emit_add_sub_shift(self, 1, 0, 0, shift, xm, xn, xd)
     }
 
@@ -69,12 +69,12 @@ pub trait AddSubtractShiftedRegister<T>: InstructionProcessor<T> {
     /// ADDS <Wd>, <Wn>, <Wm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn adds_32_shifted_reg(&mut self, wd: Register, wn: Register, wm: Register, shift: Shift3<UImm5>) -> T {
+    fn adds_32_reg_shift(&mut self, wd: Register, wn: Register, wm: Register, shift: Shift3<UImm5>) -> T {
         emit_add_sub_shift(self, 0, 0, 1, shift, wm, wn, wd)
     }
 
 
-    /// [ADDS - shifted register -  Add - shifted register -  setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDS--shifted-register---Add--shifted-register---setting-flags-?lang=en)
+    /// [ADDS - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDS--shifted-register---Add--shifted-register---setting-flags-?lang=en)
     ///
     /// Add (shifted register), setting flags, adds a register value and an optionally-shifted register value, and writes the result to the destination register. It updates the condition flags based on the result.
     ///
@@ -84,12 +84,12 @@ pub trait AddSubtractShiftedRegister<T>: InstructionProcessor<T> {
     /// ADDS <Xd>, <Xn>, <Xm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn adds_64_shifted_reg(&mut self, xd: Register, xn: Register, xm: Register, shift: Shift3<UImm6>) -> T {
+    fn adds_64_reg_shift(&mut self, xd: Register, xn: Register, xm: Register, shift: Shift3<UImm6>) -> T {
         emit_add_sub_shift(self, 1, 0, 1, shift, xm, xn, xd)
     }
 
 
-    /// [SUB - shifted register -  Subtract - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--shifted-register---Subtract--shifted-register--?lang=en)
+    /// [SUB - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--shifted-register---Subtract--shifted-register--?lang=en)
     ///
     /// Subtract (shifted register) subtracts an optionally-shifted register value from a register value, and writes the result to the destination register.
     ///
@@ -99,12 +99,12 @@ pub trait AddSubtractShiftedRegister<T>: InstructionProcessor<T> {
     /// SUB <Wd>, <Wn>, <Wm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn sub_32_shifted_reg(&mut self, wd: Register, wn: Register, wm: Register, shift: Shift3<UImm5>) -> T {
+    fn sub_32_reg_shift(&mut self, wd: Register, wn: Register, wm: Register, shift: Shift3<UImm5>) -> T {
         emit_add_sub_shift(self, 0, 1, 0, shift, wm, wn, wd)
     }
 
 
-    /// [SUB - shifted register -  Subtract - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--shifted-register---Subtract--shifted-register--?lang=en)
+    /// [SUB - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--shifted-register---Subtract--shifted-register--?lang=en)
     ///
     /// Subtract (shifted register) subtracts an optionally-shifted register value from a register value, and writes the result to the destination register.
     ///
@@ -114,12 +114,12 @@ pub trait AddSubtractShiftedRegister<T>: InstructionProcessor<T> {
     /// SUB <Xd>, <Xn>, <Xm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn sub_64_shifted_reg(&mut self, xd: Register, xn: Register, xm: Register, shift: Shift3<UImm6>) -> T {
+    fn sub_64_reg_shift(&mut self, xd: Register, xn: Register, xm: Register, shift: Shift3<UImm6>) -> T {
         emit_add_sub_shift(self, 1, 1, 0, shift, xm, xn, xd)
     }
 
 
-    /// [SUBS - shifted register -  Subtract - shifted register -  setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--shifted-register---Subtract--shifted-register---setting-flags-?lang=en)
+    /// [SUBS - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--shifted-register---Subtract--shifted-register---setting-flags-?lang=en)
     ///
     /// Subtract (shifted register), setting flags, subtracts an optionally-shifted register value from a register value, and writes the result to the destination register. It updates the condition flags based on the result.
     ///
@@ -129,12 +129,12 @@ pub trait AddSubtractShiftedRegister<T>: InstructionProcessor<T> {
     /// SUBS <Wd>, <Wn>, <Wm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn subs_32_shifted_reg(&mut self, wd: Register, wn: Register, wm: Register, shift: Shift3<UImm5>) -> T {
+    fn subs_32_reg_shift(&mut self, wd: Register, wn: Register, wm: Register, shift: Shift3<UImm5>) -> T {
         emit_add_sub_shift(self, 0, 1, 1, shift, wm, wn, wd)
     }
 
 
-    /// [SUBS - shifted register -  Subtract - shifted register -  setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--shifted-register---Subtract--shifted-register---setting-flags-?lang=en)
+    /// [SUBS - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--shifted-register---Subtract--shifted-register---setting-flags-?lang=en)
     ///
     /// Subtract (shifted register), setting flags, subtracts an optionally-shifted register value from a register value, and writes the result to the destination register. It updates the condition flags based on the result.
     ///
@@ -144,7 +144,7 @@ pub trait AddSubtractShiftedRegister<T>: InstructionProcessor<T> {
     /// SUBS <Xd>, <Xn>, <Xm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn subs_64_shifted_reg(&mut self, xd: Register, xn: Register, xm: Register, shift: Shift3<UImm6>) -> T {
+    fn subs_64_reg_shift(&mut self, xd: Register, xn: Register, xm: Register, shift: Shift3<UImm6>) -> T {
         emit_add_sub_shift(self, 1, 1, 1, shift, xm, xn, xd)
     }
 }
@@ -158,10 +158,10 @@ mod tests {
     fn test_add() {
         let mut prod = TestProducer::new();
 
-        let instr = prod.add_32_shifted_reg(3, 4, 5, Shift3::LSL(6));
+        let instr = prod.add_32_reg_shift(3, 4, 5, Shift3::LSL(6));
         assert_eq!(instr, "add w3, w4, w5, lsl #0x6");
 
-        let instr = prod.add_64_shifted_reg(3, 4, 5, Shift3::LSR(6));
+        let instr = prod.add_64_reg_shift(3, 4, 5, Shift3::LSR(6));
         assert_eq!(instr, "add x3, x4, x5, lsr #0x6");
     }
 
@@ -169,10 +169,10 @@ mod tests {
     fn test_adds() {
         let mut prod = TestProducer::new();
 
-        let instr = prod.adds_32_shifted_reg(3, 4, 5, Shift3::ASR(6));
+        let instr = prod.adds_32_reg_shift(3, 4, 5, Shift3::ASR(6));
         assert_eq!(instr, "adds w3, w4, w5, asr #0x6");
 
-        let instr = prod.adds_64_shifted_reg(3, 4, 5, Shift3::LSR(6));
+        let instr = prod.adds_64_reg_shift(3, 4, 5, Shift3::LSR(6));
         assert_eq!(instr, "adds x3, x4, x5, lsr #0x6");
     }
 
@@ -180,10 +180,10 @@ mod tests {
     fn test_sub() {
         let mut prod = TestProducer::new();
 
-        let instr = prod.sub_32_shifted_reg(3, 4, 5, Shift3::ASR(6));
+        let instr = prod.sub_32_reg_shift(3, 4, 5, Shift3::ASR(6));
         assert_eq!(instr, "sub w3, w4, w5, asr #0x6");
 
-        let instr = prod.sub_64_shifted_reg(3, 4, 5, Shift3::LSR(6));
+        let instr = prod.sub_64_reg_shift(3, 4, 5, Shift3::LSR(6));
         assert_eq!(instr, "sub x3, x4, x5, lsr #0x6");
     }
 
@@ -191,10 +191,10 @@ mod tests {
     fn test_subs() {
         let mut prod = TestProducer::new();
 
-        let instr = prod.subs_32_shifted_reg(3, 4, 5, Shift3::ASR(6));
+        let instr = prod.subs_32_reg_shift(3, 4, 5, Shift3::ASR(6));
         assert_eq!(instr, "subs w3, w4, w5, asr #0x6");
 
-        let instr = prod.subs_64_shifted_reg(3, 4, 5, Shift3::LSR(6));
+        let instr = prod.subs_64_reg_shift(3, 4, 5, Shift3::LSR(6));
         assert_eq!(instr, "subs x3, x4, x5, lsr #0x6");
     }
 }
