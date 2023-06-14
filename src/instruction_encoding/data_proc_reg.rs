@@ -20,6 +20,7 @@ use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCom
 use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
 use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
 use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
+use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
 use crate::instruction_encoding::data_proc_reg::evaluate_into_flags::EvaluateIntoFlags;
 use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
@@ -37,6 +38,7 @@ pub mod evaluate_into_flags;
 pub mod cond_compare_reg;
 pub mod cond_compare_imm;
 pub mod conditional_select;
+pub mod data_proc_three_src;
 
 pub trait DataProcessingRegister<T>: DataProcessingTwoSource<T>
 + DataProcessingOneSource<T>
@@ -49,4 +51,5 @@ pub trait DataProcessingRegister<T>: DataProcessingTwoSource<T>
 + ConditionalCompareRegister<T>
 + ConditionalCompareImmediate<T>
 + ConditionalSelect<T>
++ DataProcessingThreeSource<T>
 {}

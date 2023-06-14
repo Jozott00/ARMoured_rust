@@ -34,6 +34,7 @@ use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
 use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCompareImmediate;
 use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
 use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
+use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 
 type InstrRes = String;
 
@@ -120,6 +121,8 @@ impl ConditionalCompareRegister<InstrRes> for TestProducer {}
 impl ConditionalCompareImmediate<InstrRes> for TestProducer {}
 
 impl ConditionalSelect<InstrRes> for TestProducer {}
+
+impl DataProcessingThreeSource<InstrRes> for TestProducer {}
 
 impl DataProcessingRegister<InstrRes> for TestProducer {}
 
