@@ -1,4 +1,5 @@
 use bad64::decode;
+use crate::instruction_encoding::data_proc_reg::add_sub_ext_reg::AddSubtractExtendedRegister;
 use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
 use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
 use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
@@ -99,6 +100,8 @@ impl DataProcessingOneSource<InstrRes> for TestProducer {}
 impl LogicalShiftRegister<InstrRes> for TestProducer {}
 
 impl AddSubtractShiftedRegister<InstrRes> for TestProducer {}
+
+impl AddSubtractExtendedRegister<InstrRes> for TestProducer {}
 
 impl DataProcessingRegister<InstrRes> for TestProducer {}
 

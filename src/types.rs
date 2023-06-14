@@ -9,6 +9,7 @@ pub mod condition;
 pub mod mem_barrier_option;
 pub mod pstate;
 pub mod sys_ops;
+pub mod extends;
 
 pub type Instruction = u32;
 pub type InstructionPointer = *mut Instruction;
