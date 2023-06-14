@@ -33,14 +33,16 @@ def main():
         print("link must be of specific instruction type (fragment link)")
         exit(1)
 
-    print(f"Create template for '{type_name}'...\n\n")
 
     content = get_content(url.path)
 
-    types = content.xpath(f'//*[@id="iclass-{type_id}"]')
+    type = content.xpath(f'//*[@id="iclass-{type_id}"]')[0]
+    type_name = type.xpath(f'.//h3')[0].text
 
-    first = types[0]
-    instrs = first.xpath('.//td/a[1]')
+    print(f"Create template for '{type_name}'...\n\n")
+
+    instrs = type.xpath('.//td/a[1]')
+
 
     # element is {full_name, url}
     unique_instrs = {}
@@ -76,7 +78,7 @@ Implements the following instructions:
 
     for i, m_def in enumerate(method_defs):
         final_str += m_def
-        final_str += f"\nfn f{i}(&mut self, ) -> T" + " { \ntodo!()\n\n} \n\n\n"
+        final_str += f"\n#[inline(always)]\nfn f{i}(&mut self, ) -> T" + " { \ntodo!()\n\n} \n\n\n"
 
     final_str += "}"
 
@@ -104,10 +106,7 @@ def prepend_per_line(str, prefix):
 
 def construct_instruction_definition(instr):
     url = instr.get('href')
-    # Extract the last path in URL before the query parameters start
-    last_path = re.search(r'.*/(.*?)-\?', url).group(1)
-    # Replace '--' with ' - ', remove trailing '-', and replace '-' with ' '
-    full_name = last_path.replace('--', 'PLACEHOLDER').rstrip('-').replace('-', ' ').replace('PLACEHOLDER', ' - ')
+    full_name = extract_name_from_url(url)
     info_variants = extract_info_and_variants(url)
     return {'name': full_name, 'url': url, 'info': info_variants['info'], 'variants': info_variants['variants']}
 
@@ -118,8 +117,10 @@ def extract_name_from_url(url):
 
     # Temporarily replace '----' and '--' with unique placeholders, remove trailing '-'
     # replace remaining '-' with ' ', restore placeholders
-    clean_string = last_path.replace('----', 'PLACEHOLDER1').replace('--', 'PLACEHOLDER2').rstrip('-').replace('-', ' ')
-    return clean_string.replace('PLACEHOLDER1', ' (').replace('PLACEHOLDER2', ' - ') + ")"
+    clean_string = last_path.replace('----', 'PLACEHOLDER1').replace('---', 'CUTOFF').replace('--', 'PLACEHOLDER2').split('CUTOFF')[0]
+    clean_string = clean_string.rstrip('-').replace('-', ' ')
+    closing_brack = "}" if 'PLACEHOLDER1' in clean_string else ''
+    return clean_string.replace('PLACEHOLDER1', ' (').replace('PLACEHOLDER2', ' - ') + closing_brack
 
 
 def extract_info_and_variants(url):
@@ -149,5 +150,5 @@ def get_raw_html(url):
 if __name__ == '__main__':
     main()
 
-    # print(get_raw_html('/documentation/ddi0596/2021-12/Base-Instructions/CRC32B--CRC32H--CRC32W--CRC32X--CRC32-checksum-?lang=en').decode('utf-8'))
+    # print(get_raw_html('/documentation/ddi0596/2021-12/Index-by-Encoding/Data-Processing----Register?lang=en#dp_2src').decode('utf-8'))
     print()
