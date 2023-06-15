@@ -36,6 +36,7 @@ use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCom
 use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
 use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
+use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
 
 type InstrRes = String;
@@ -99,6 +100,8 @@ impl UnconditionalBranchImmediate<InstrRes> for TestProducer {}
 impl LoadStoreMemoryTags<InstrRes> for TestProducer {}
 
 impl LoadStoreExclusivePair<InstrRes> for TestProducer {}
+
+impl LoadStoreExclusiveRegister<InstrRes> for TestProducer {}
 
 impl LoadsAndStores<InstrRes> for TestProducer {}
 

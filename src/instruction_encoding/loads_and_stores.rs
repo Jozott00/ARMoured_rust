@@ -9,6 +9,7 @@
 use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
 use crate::instruction_encoding::loads_and_stores::load_register_literal::{LoadRegisterLiteral, LoadRegisterLiteralWithAddress};
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
+use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
 
@@ -17,6 +18,7 @@ pub mod load_store_reg_uimm;
 pub mod load_register_literal;
 pub mod load_store_memory_tags;
 pub mod load_store_exclusive_pair;
+pub mod load_store_exclusive_register;
 
 
 pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
@@ -24,6 +26,7 @@ pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
 + LoadRegisterLiteral<T>
 + LoadStoreMemoryTags<T>
 + LoadStoreExclusivePair<T>
++ LoadStoreExclusiveRegister<T>
 {}
 
 pub trait LoadsAndStoresWithAddress<T>: LoadsAndStores<T>
