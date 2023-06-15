@@ -14,6 +14,7 @@ use armoured_rust::mc_memory::{McMemory, Memory};
 use armoured_rust::types::Imm64;
 use armoured_rust::types::prefetch_memory::{PrfOp, PrfPolicy, PrfTarget, PrfType};
 
+#[cfg(target_arch = "aarch64")]
 #[test]
 fn main_tryout() {
     let mut mem = McMemory::new_pagesize();
