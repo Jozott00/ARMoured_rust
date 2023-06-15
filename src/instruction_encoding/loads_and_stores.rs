@@ -8,16 +8,19 @@
 
 use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
 use crate::instruction_encoding::loads_and_stores::load_register_literal::{LoadRegisterLiteral, LoadRegisterLiteralWithAddress};
+use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
 
 pub mod compare_and_swap_pair;
 pub mod load_store_reg_uimm;
 pub mod load_register_literal;
+mod load_store_memory_tags;
 
 
 pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
 + LoadStoreRegUImm<T>
 + LoadRegisterLiteral<T>
++ LoadStoreMemoryTags<T>
 {}
 
 pub trait LoadsAndStoresWithAddress<T>: LoadsAndStores<T>
