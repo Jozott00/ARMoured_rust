@@ -51,6 +51,7 @@ use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::Lo
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
 use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
+use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 use crate::mc_memory::{McMemory, Memory};
 use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
@@ -180,6 +181,8 @@ impl<'mem, M: Memory, E: Emitter> LoadStoreOrdered<Instr> for InstrStream<'mem, 
 impl<'mem, M: Memory, E: Emitter> CompareAndSwap<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LdaprStlrUnscaleImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> MemoryCopyAndMemorySet<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadsAndStores<Instr> for InstrStream<'mem, M, E> {}
 

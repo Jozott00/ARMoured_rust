@@ -39,6 +39,7 @@ use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::Lo
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
 use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
+use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
 
@@ -103,6 +104,8 @@ impl LoadStoreOrdered<Instr> for InstrProducer {}
 impl CompareAndSwap<Instr> for InstrProducer {}
 
 impl LdaprStlrUnscaleImmediate<Instr> for InstrProducer {}
+
+impl MemoryCopyAndMemorySet<Instr> for InstrProducer {}
 
 impl LoadsAndStores<Instr> for InstrProducer {}
 

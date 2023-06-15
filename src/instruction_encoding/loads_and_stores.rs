@@ -15,6 +15,7 @@ use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
 use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
+use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 
 pub mod compare_and_swap_pair;
 pub mod load_store_reg_uimm;
@@ -25,6 +26,7 @@ pub mod load_store_exclusive_register;
 pub mod load_store_ordered;
 pub mod compare_and_swap;
 pub mod ldapr_stlr_unscale_imm;
+pub mod memory_copy_and_memory_set;
 
 
 pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
@@ -36,6 +38,7 @@ pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
 + LoadStoreOrdered<T>
 + CompareAndSwap<T>
 + LdaprStlrUnscaleImmediate<T>
++ MemoryCopyAndMemorySet<T>
 {}
 
 pub trait LoadsAndStoresWithAddress<T>: LoadsAndStores<T>

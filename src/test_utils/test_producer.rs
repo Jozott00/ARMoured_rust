@@ -41,6 +41,7 @@ use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::Lo
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
 use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
+use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 
 type InstrRes = String;
 
@@ -111,6 +112,8 @@ impl LoadStoreOrdered<InstrRes> for TestProducer {}
 impl CompareAndSwap<InstrRes> for TestProducer {}
 
 impl LdaprStlrUnscaleImmediate<InstrRes> for TestProducer {}
+
+impl MemoryCopyAndMemorySet<InstrRes> for TestProducer {}
 
 impl LoadsAndStores<InstrRes> for TestProducer {}
 
