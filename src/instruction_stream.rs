@@ -45,6 +45,7 @@ use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCom
 use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
 use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
 use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
+use crate::instruction_encoding::loads_and_stores::compare_and_swap::CompareAndSwap;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
@@ -174,6 +175,8 @@ impl<'mem, M: Memory, E: Emitter> LoadStoreExclusivePair<Instr> for InstrStream<
 impl<'mem, M: Memory, E: Emitter> LoadStoreExclusiveRegister<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadStoreOrdered<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> CompareAndSwap<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadsAndStores<Instr> for InstrStream<'mem, M, E> {}
 
