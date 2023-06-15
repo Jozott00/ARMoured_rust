@@ -8,6 +8,7 @@
 
 use crate::instruction_encoding::loads_and_stores::compare_and_swap::CompareAndSwap;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
+use crate::instruction_encoding::loads_and_stores::ldapr_stlr_unscale_imm::LdaprStlrUnscaleImmediate;
 use crate::instruction_encoding::loads_and_stores::load_register_literal::{LoadRegisterLiteral, LoadRegisterLiteralWithAddress};
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
@@ -23,6 +24,7 @@ pub mod load_store_exclusive_pair;
 pub mod load_store_exclusive_register;
 pub mod load_store_ordered;
 pub mod compare_and_swap;
+pub mod ldapr_stlr_unscale_imm;
 
 
 pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
@@ -33,6 +35,7 @@ pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
 + LoadStoreExclusiveRegister<T>
 + LoadStoreOrdered<T>
 + CompareAndSwap<T>
++ LdaprStlrUnscaleImmediate<T>
 {}
 
 pub trait LoadsAndStoresWithAddress<T>: LoadsAndStores<T>

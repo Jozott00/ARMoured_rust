@@ -36,6 +36,7 @@ use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCom
 use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
 use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap::CompareAndSwap;
+use crate::instruction_encoding::loads_and_stores::ldapr_stlr_unscale_imm::LdaprStlrUnscaleImmediate;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
@@ -108,6 +109,8 @@ impl LoadStoreExclusiveRegister<InstrRes> for TestProducer {}
 impl LoadStoreOrdered<InstrRes> for TestProducer {}
 
 impl CompareAndSwap<InstrRes> for TestProducer {}
+
+impl LdaprStlrUnscaleImmediate<InstrRes> for TestProducer {}
 
 impl LoadsAndStores<InstrRes> for TestProducer {}
 
