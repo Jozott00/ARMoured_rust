@@ -48,6 +48,7 @@ use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcess
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
+use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
 use crate::mc_memory::{McMemory, Memory};
 use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
@@ -171,6 +172,8 @@ impl<'mem, M: Memory, E: Emitter> LoadStoreMemoryTags<Instr> for InstrStream<'me
 impl<'mem, M: Memory, E: Emitter> LoadStoreExclusivePair<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadStoreExclusiveRegister<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> LoadStoreOrdered<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadsAndStores<Instr> for InstrStream<'mem, M, E> {}
 

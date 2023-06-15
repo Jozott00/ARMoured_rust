@@ -38,6 +38,7 @@ use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcess
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
+use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
 
 type InstrRes = String;
 
@@ -102,6 +103,8 @@ impl LoadStoreMemoryTags<InstrRes> for TestProducer {}
 impl LoadStoreExclusivePair<InstrRes> for TestProducer {}
 
 impl LoadStoreExclusiveRegister<InstrRes> for TestProducer {}
+
+impl LoadStoreOrdered<InstrRes> for TestProducer {}
 
 impl LoadsAndStores<InstrRes> for TestProducer {}
 

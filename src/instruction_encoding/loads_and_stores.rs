@@ -11,6 +11,7 @@ use crate::instruction_encoding::loads_and_stores::load_register_literal::{LoadR
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
+use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
 
 pub mod compare_and_swap_pair;
@@ -19,6 +20,7 @@ pub mod load_register_literal;
 pub mod load_store_memory_tags;
 pub mod load_store_exclusive_pair;
 pub mod load_store_exclusive_register;
+pub mod load_store_ordered;
 
 
 pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
@@ -27,6 +29,7 @@ pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
 + LoadStoreMemoryTags<T>
 + LoadStoreExclusivePair<T>
 + LoadStoreExclusiveRegister<T>
++ LoadStoreOrdered<T>
 {}
 
 pub trait LoadsAndStoresWithAddress<T>: LoadsAndStores<T>
