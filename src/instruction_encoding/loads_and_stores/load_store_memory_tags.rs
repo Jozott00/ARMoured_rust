@@ -12,8 +12,24 @@
 
 
 
+use bit_seq::bseq_32;
+use crate::instruction_encoding::Constants::LOG2_TAG_GRANULE;
 use crate::instruction_encoding::InstructionProcessor;
-use crate::types::{Imm9, Register};
+use crate::types::{Imm13, Register};
+
+#[inline(always)]
+fn emit_ldr_str_enc<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, imm9: u16, op2: u8, rn: Register, rt: Register) -> T {
+    let r = bseq_32!(11011001 opc:2 1 imm9:9 op2:2 rn:5 rt:5);
+    proc.process(r)
+}
+
+#[inline(always)]
+fn emit_ldr_str_mem_tags<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, imm13: Imm13, op2: u8, rn: Register, rt: Register) -> T {
+    debug_assert!(imm13 % 16 == 0, "imm13 must be a multiply of 16, was {}", imm13);
+    let imm13 = imm13 >> LOG2_TAG_GRANULE;
+    emit_ldr_str_enc(proc, opc, imm13 as u16, op2, rn, rt)
+}
+
 
 /// # [Load/store memory tags](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Loads-and-Stores?lang=en#ldsttags)
 ///
@@ -27,9 +43,6 @@ use crate::types::{Imm9, Register};
 ///  - [STZ2G - Store Allocation Tags - Zeroing](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STZ2G--Store-Allocation-Tags--Zeroing-?lang=en)
 ///  - [LDGM - Load Tag Multiple](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDGM--Load-Tag-Multiple-?lang=en)
 pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
-
-
-
     /// [STG - Store Allocation Tag](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STG--Store-Allocation-Tag-?lang=en)
     ///
     /// Store Allocation Tag stores an Allocation Tag to memory. The address used for the store is calculated from the base register and an immediate signed offset scaled by the Tag granule. The Allocation Tag is calculated from the Logical Address Tag in the source register.
@@ -40,9 +53,8 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// STG <Xt|SP>, [<Xn|SP>], #<simm>
     /// ```
     #[inline(always)]
-    fn stg(&mut self, xt_sp: Register, xn_sp: Register, simm: Imm9) -> T {
-        todo!()
-
+    fn stg_post_index(&mut self, xt_sp: Register, xn_sp: Register, simm: Imm13) -> T {
+        emit_ldr_str_mem_tags(self, 0b00, simm, 0b01, xn_sp, xt_sp)
     }
 
 
@@ -56,9 +68,8 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// STG <Xt|SP>, [<Xn|SP>, #<simm>]!
     /// ```
     #[inline(always)]
-    fn f1(&mut self, ) -> T {
-        todo!()
-
+    fn stg_pre_index(&mut self, xt_sp: Register, xn_sp: Register, simm: Imm13) -> T {
+        emit_ldr_str_mem_tags(self, 0b00, simm, 0b11, xn_sp, xt_sp)
     }
 
 
@@ -72,9 +83,8 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// STG <Xt|SP>, [<Xn|SP>{, #<simm>}]
     /// ```
     #[inline(always)]
-    fn f2(&mut self, ) -> T {
-        todo!()
-
+    fn stg_signed_offset(&mut self, xt_sp: Register, xn_sp: Register, simm: Imm13) -> T {
+        emit_ldr_str_mem_tags(self, 0b00, simm, 0b10, xn_sp, xt_sp)
     }
 
 
@@ -88,9 +98,8 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// STZGM <Xt>, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn f3(&mut self, ) -> T {
-        todo!()
-
+    fn stzgm(&mut self, xt: Register, xn_sp: Register) -> T {
+        emit_ldr_str_mem_tags(self, 0b00, 0, 0b00, xn_sp, xt)
     }
 
 
@@ -102,9 +111,8 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// LDG <Xt>, [<Xn|SP>{, #<simm>}]
     /// ```
     #[inline(always)]
-    fn f4(&mut self, ) -> T {
-        todo!()
-
+    fn ldg(&mut self, xt: Register, xn_sp: Register, simm: Imm13) -> T {
+        emit_ldr_str_mem_tags(self, 0b01, simm, 0b00, xn_sp, xt)
     }
 
 
@@ -118,11 +126,9 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// STZG <Xt|SP>, [<Xn|SP>], #<simm>
     /// ```
     #[inline(always)]
-    fn f5(&mut self, ) -> T {
-        todo!()
-
+    fn stzg_post_index(&mut self, xt_sp: Register, xn_sp: Register, simm: Imm13) -> T {
+        emit_ldr_str_mem_tags(self, 0b01, simm, 0b01, xn_sp, xt_sp)
     }
-
 
     /// [STZG - Store Allocation Tag - Zeroing](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STZG--Store-Allocation-Tag--Zeroing-?lang=en)
     ///
@@ -134,9 +140,8 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// STZG <Xt|SP>, [<Xn|SP>, #<simm>]!
     /// ```
     #[inline(always)]
-    fn f6(&mut self, ) -> T {
-        todo!()
-
+    fn stzg_pre_index(&mut self, xt_sp: Register, xn_sp: Register, simm: Imm13) -> T {
+        emit_ldr_str_mem_tags(self, 0b01, simm, 0b11, xn_sp, xt_sp)
     }
 
 
@@ -150,9 +155,8 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// STZG <Xt|SP>, [<Xn|SP>{, #<simm>}]
     /// ```
     #[inline(always)]
-    fn f7(&mut self, ) -> T {
-        todo!()
-
+    fn stzg_signed_offset(&mut self, xt_sp: Register, xn_sp: Register, simm: Imm13) -> T {
+        emit_ldr_str_mem_tags(self, 0b01, simm, 0b10, xn_sp, xt_sp)
     }
 
 
@@ -166,9 +170,8 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// ST2G <Xt|SP>, [<Xn|SP>], #<simm>
     /// ```
     #[inline(always)]
-    fn f8(&mut self, ) -> T {
-        todo!()
-
+    fn st2g_post_index(&mut self, xt_sp: Register, xn_sp: Register, simm: Imm13) -> T {
+        emit_ldr_str_mem_tags(self, 0b10, simm, 0b01, xn_sp, xt_sp)
     }
 
 
@@ -182,9 +185,8 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// ST2G <Xt|SP>, [<Xn|SP>, #<simm>]!
     /// ```
     #[inline(always)]
-    fn f9(&mut self, ) -> T {
-        todo!()
-
+    fn st2g_pre_index(&mut self, xt_sp: Register, xn_sp: Register, simm: Imm13) -> T {
+        emit_ldr_str_mem_tags(self, 0b10, simm, 0b11, xn_sp, xt_sp)
     }
 
 
@@ -198,9 +200,8 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// ST2G <Xt|SP>, [<Xn|SP>{, #<simm>}]
     /// ```
     #[inline(always)]
-    fn f10(&mut self, ) -> T {
-        todo!()
-
+    fn st2g_signed_offset(&mut self, xt_sp: Register, xn_sp: Register, simm: Imm13) -> T {
+        emit_ldr_str_mem_tags(self, 0b10, simm, 0b10, xn_sp, xt_sp)
     }
 
 
@@ -214,9 +215,8 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// STGM <Xt>, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn f11(&mut self, ) -> T {
-        todo!()
-
+    fn stgm(&mut self, xt: Register, xn_sp: Register) -> T {
+        emit_ldr_str_mem_tags(self, 0b10, 0, 0b00, xn_sp, xt)
     }
 
 
@@ -230,11 +230,9 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// STZ2G <Xt|SP>, [<Xn|SP>], #<simm>
     /// ```
     #[inline(always)]
-    fn f12(&mut self, ) -> T {
-        todo!()
-
+    fn stz2g_post_index(&mut self, xt_sp: Register, xn_sp: Register, simm: Imm13) -> T {
+        emit_ldr_str_mem_tags(self, 0b11, simm, 0b01, xn_sp, xt_sp)
     }
-
 
     /// [STZ2G - Store Allocation Tags - Zeroing](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STZ2G--Store-Allocation-Tags--Zeroing-?lang=en)
     ///
@@ -246,9 +244,8 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// STZ2G <Xt|SP>, [<Xn|SP>, #<simm>]!
     /// ```
     #[inline(always)]
-    fn f13(&mut self, ) -> T {
-        todo!()
-
+    fn stz2g_pre_index(&mut self, xt_sp: Register, xn_sp: Register, simm: Imm13) -> T {
+        emit_ldr_str_mem_tags(self, 0b11, simm, 0b11, xn_sp, xt_sp)
     }
 
 
@@ -262,9 +259,8 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// STZ2G <Xt|SP>, [<Xn|SP>{, #<simm>}]
     /// ```
     #[inline(always)]
-    fn f14(&mut self, ) -> T {
-        todo!()
-
+    fn stz2g_signed_offset(&mut self, xt_sp: Register, xn_sp: Register, simm: Imm13) -> T {
+        emit_ldr_str_mem_tags(self, 0b11, simm, 0b10, xn_sp, xt_sp)
     }
 
 
@@ -278,10 +274,204 @@ pub trait LoadStoreMemoryTags<T>: InstructionProcessor<T> {
     /// LDGM <Xt>, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn f15(&mut self, ) -> T {
-        todo!()
+    fn ldgm(&mut self, xt: Register, xn_sp: Register) -> T {
+        emit_ldr_str_mem_tags(self, 0b11, 0, 0b00, xn_sp, xt)
+    }
+}
 
+#[cfg(test)]
+mod tests {
+    use crate::assert_panic;
+    use crate::test_utils::test_producer::TestProducer;
+    use super::*;
+
+    #[test]
+    fn test_stg_post_index() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.stg_post_index(3, 4, -4096);
+        assert_eq!(instr, "stg x3, [x4], #0xfffffffffffff000");
+
+        let instr = prod.stg_post_index(3, 4, 4080);
+        assert_eq!(instr, "stg x3, [x4], #0xff0");
+
+        assert_panic!("Should panic: not multiply"; prod.stg_post_index(3, 4, 15) )
     }
 
+    #[test]
+    fn test_stg_pre_index() {
+        let mut prod = TestProducer::new();
 
+        let instr = prod.stg_pre_index(3, 4, -4096);
+        assert_eq!(instr, "stg x3, [x4, #0xfffffffffffff000]!");
+
+        let instr = prod.stg_pre_index(3, 4, 4080);
+        assert_eq!(instr, "stg x3, [x4, #0xff0]!");
+
+        assert_panic!("Should panic: not multiply"; prod.stg_pre_index(3, 4, 15) )
+    }
+
+    #[test]
+    fn test_stg_signed_offset() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.stg_signed_offset(3, 4, -4096);
+        assert_eq!(instr, "stg x3, [x4, #0xfffffffffffff000]");
+
+        let instr = prod.stg_signed_offset(3, 4, 4080);
+        assert_eq!(instr, "stg x3, [x4, #0xff0]");
+
+        assert_panic!("Should panic: not multiply"; prod.stg_signed_offset(3, 4, 15) )
+    }
+
+    #[test]
+    fn test_stzgm() {
+        let mut prod = TestProducer::new();
+        let instr = prod.stzgm(3, 4);
+        assert_eq!(instr, "stzgm x3, [x4]");
+    }
+
+    #[test]
+    fn test_ldg() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.ldg(3, 4, -4096);
+        assert_eq!(instr, "ldg x3, [x4, #0xfffffffffffff000]");
+
+        let instr = prod.ldg(3, 4, 4080);
+        assert_eq!(instr, "ldg x3, [x4, #0xff0]");
+
+        assert_panic!("Should panic: not multiply"; prod.ldg(3, 4, 15) )
+    }
+
+    #[test]
+    fn test_stzg_post_index() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.stzg_post_index(3, 4, -4096);
+        assert_eq!(instr, "stzg x3, [x4], #0xfffffffffffff000");
+
+        let instr = prod.stzg_post_index(3, 4, 4080);
+        assert_eq!(instr, "stzg x3, [x4], #0xff0");
+
+        assert_panic!("Should panic: not multiply"; prod.stzg_post_index(3, 4, 15) )
+    }
+
+    #[test]
+    fn test_stzg_pre_index() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.stzg_pre_index(3, 4, -4096);
+        assert_eq!(instr, "stzg x3, [x4, #0xfffffffffffff000]!");
+
+        let instr = prod.stzg_pre_index(3, 4, 4080);
+        assert_eq!(instr, "stzg x3, [x4, #0xff0]!");
+
+        assert_panic!("Should panic: not multiply"; prod.stzg_pre_index(3, 4, 15) )
+    }
+
+    #[test]
+    fn test_stzg_signed_offset() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.stzg_signed_offset(3, 4, -4096);
+        assert_eq!(instr, "stzg x3, [x4, #0xfffffffffffff000]");
+
+        let instr = prod.stzg_signed_offset(3, 4, 4080);
+        assert_eq!(instr, "stzg x3, [x4, #0xff0]");
+
+        assert_panic!("Should panic: not multiply"; prod.stzg_signed_offset(3, 4, 15) )
+    }
+
+    #[test]
+    fn test_st2g_post_index() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.st2g_post_index(3, 4, -4096);
+        assert_eq!(instr, "st2g x3, [x4], #0xfffffffffffff000");
+
+        let instr = prod.st2g_post_index(3, 4, 4080);
+        assert_eq!(instr, "st2g x3, [x4], #0xff0");
+
+        assert_panic!("Should panic: not multiply"; prod.st2g_post_index(3, 4, 15) )
+    }
+
+    #[test]
+    fn test_st2g_pre_index() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.st2g_pre_index(3, 4, -4096);
+        assert_eq!(instr, "st2g x3, [x4, #0xfffffffffffff000]!");
+
+        let instr = prod.st2g_pre_index(3, 4, 4080);
+        assert_eq!(instr, "st2g x3, [x4, #0xff0]!");
+
+        assert_panic!("Should panic: not multiply"; prod.st2g_pre_index(3, 4, 15) )
+    }
+
+    #[test]
+    fn test_st2g_signed_offset() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.st2g_signed_offset(3, 4, -4096);
+        assert_eq!(instr, "st2g x3, [x4, #0xfffffffffffff000]");
+
+        let instr = prod.st2g_signed_offset(3, 4, 4080);
+        assert_eq!(instr, "st2g x3, [x4, #0xff0]");
+
+        assert_panic!("Should panic: not multiply"; prod.st2g_signed_offset(3, 4, 15) )
+    }
+
+    #[test]
+    fn test_stgm() {
+        let mut prod = TestProducer::new();
+        let instr = prod.stgm(3, 4);
+        assert_eq!(instr, "stgm x3, [x4]");
+    }
+
+    #[test]
+    fn test_stz2g_post_index() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.stz2g_post_index(3, 4, -4096);
+        assert_eq!(instr, "stz2g x3, [x4], #0xfffffffffffff000");
+
+        let instr = prod.stz2g_post_index(3, 4, 4080);
+        assert_eq!(instr, "stz2g x3, [x4], #0xff0");
+
+        assert_panic!("Should panic: not multiply"; prod.stz2g_post_index(3, 4, 15) )
+    }
+
+    #[test]
+    fn test_stz2g_pre_index() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.stz2g_pre_index(3, 4, -4096);
+        assert_eq!(instr, "stz2g x3, [x4, #0xfffffffffffff000]!");
+
+        let instr = prod.stz2g_pre_index(3, 4, 4080);
+        assert_eq!(instr, "stz2g x3, [x4, #0xff0]!");
+
+        assert_panic!("Should panic: not multiply"; prod.stz2g_pre_index(3, 4, 15) )
+    }
+
+    #[test]
+    fn test_stz2g_signed_offset() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.stz2g_signed_offset(3, 4, -4096);
+        assert_eq!(instr, "stz2g x3, [x4, #0xfffffffffffff000]");
+
+        let instr = prod.stz2g_signed_offset(3, 4, 4080);
+        assert_eq!(instr, "stz2g x3, [x4, #0xff0]");
+
+        assert_panic!("Should panic: not multiply"; prod.stz2g_signed_offset(3, 4, 15) )
+    }
+
+    #[test]
+    fn test_ldgm() {
+        let mut prod = TestProducer::new();
+        let instr = prod.ldgm(3, 4);
+        assert_eq!(instr, "ldgm x3, [x4]");
+    }
 }
