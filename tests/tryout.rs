@@ -44,7 +44,6 @@ fn main_tryout() {
     stream.caspl_64(0, 1, 4, 5, 0);
     stream.strb_pre_index(0, 3, -256);
     stream.prfm_imm_prfop(PrfOp(PrfType::PLD, PrfTarget::L1, PrfPolicy::KEEP), 0, 0x0);
-    stream.prfum_prfop()
     stream.b_from_byte_offset(0);
     stream.sbfm_64(1, 2, 0x8, 0x3);
     stream.movk_64_imm(2, 0xffff);
