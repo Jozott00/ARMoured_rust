@@ -48,6 +48,7 @@ fn main_tryout() {
     stream.xpaci(3);
     stream.madd_64(3, 4, 2, 6);
 
+
     stream.patch_at(stream.base_ptr(), |s| {
         s.movn_64_imm(1, 4);
     });

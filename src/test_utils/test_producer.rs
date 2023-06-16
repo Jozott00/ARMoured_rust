@@ -42,6 +42,7 @@ use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
 use crate::instruction_encoding::loads_and_stores::load_store_no_allocate_pair_offset::LoadStoreNoAllocatePairOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_post_indexed::LoadStoreRegisterPairPostIndexed;
 use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 
 type InstrRes = String;
@@ -117,6 +118,8 @@ impl LdaprStlrUnscaleImmediate<InstrRes> for TestProducer {}
 impl MemoryCopyAndMemorySet<InstrRes> for TestProducer {}
 
 impl LoadStoreNoAllocatePairOffset<InstrRes> for TestProducer {}
+
+impl LoadStoreRegisterPairPostIndexed<InstrRes> for TestProducer {}
 
 impl LoadsAndStores<InstrRes> for TestProducer {}
 

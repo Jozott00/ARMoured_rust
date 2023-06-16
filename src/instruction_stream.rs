@@ -52,6 +52,7 @@ use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
 use crate::instruction_encoding::loads_and_stores::load_store_no_allocate_pair_offset::LoadStoreNoAllocatePairOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_post_indexed::LoadStoreRegisterPairPostIndexed;
 use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 use crate::mc_memory::{McMemory, Memory};
 use crate::types::{Instruction, InstructionPointer};
@@ -186,6 +187,8 @@ impl<'mem, M: Memory, E: Emitter> LdaprStlrUnscaleImmediate<Instr> for InstrStre
 impl<'mem, M: Memory, E: Emitter> MemoryCopyAndMemorySet<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadStoreNoAllocatePairOffset<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> LoadStoreRegisterPairPostIndexed<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadsAndStores<Instr> for InstrStream<'mem, M, E> {}
 
