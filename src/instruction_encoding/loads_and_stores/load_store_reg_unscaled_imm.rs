@@ -533,9 +533,9 @@ mod tests {
         let mut prod = TestProducer::new();
 
         let instr = prod.ldursw(2, 3, -256);
-        assert_eq!(instr, "ldursw w2, [x3, #0xffffffffffffff00]");
+        assert_eq!(instr, "ldursw x2, [x3, #0xffffffffffffff00]");
         let instr = prod.ldursw(2, 3, -257);
-        assert_eq!(instr, "ldursw w2, [x3, #0xff]");
+        assert_eq!(instr, "ldursw x2, [x3, #0xff]");
     }
 
 
