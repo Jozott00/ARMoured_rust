@@ -13,6 +13,7 @@ use crate::instruction_encoding::loads_and_stores::load_register_literal::{LoadR
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
+use crate::instruction_encoding::loads_and_stores::load_store_no_allocate_pair_offset::LoadStoreNoAllocatePairOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
 use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
@@ -27,6 +28,7 @@ pub mod load_store_ordered;
 pub mod compare_and_swap;
 pub mod ldapr_stlr_unscale_imm;
 pub mod memory_copy_and_memory_set;
+pub mod load_store_no_allocate_pair_offset;
 
 
 pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
@@ -39,6 +41,7 @@ pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
 + CompareAndSwap<T>
 + LdaprStlrUnscaleImmediate<T>
 + MemoryCopyAndMemorySet<T>
++ LoadStoreNoAllocatePairOffset<T>
 {}
 
 pub trait LoadsAndStoresWithAddress<T>: LoadsAndStores<T>

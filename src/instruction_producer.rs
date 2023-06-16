@@ -38,6 +38,7 @@ use crate::instruction_encoding::loads_and_stores::ldapr_stlr_unscale_imm::Ldapr
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
+use crate::instruction_encoding::loads_and_stores::load_store_no_allocate_pair_offset::LoadStoreNoAllocatePairOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
 use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 use crate::types::{Instruction, InstructionPointer};
@@ -106,6 +107,8 @@ impl CompareAndSwap<Instr> for InstrProducer {}
 impl LdaprStlrUnscaleImmediate<Instr> for InstrProducer {}
 
 impl MemoryCopyAndMemorySet<Instr> for InstrProducer {}
+
+impl LoadStoreNoAllocatePairOffset<Instr> for InstrProducer {}
 
 impl LoadsAndStores<Instr> for InstrProducer {}
 
