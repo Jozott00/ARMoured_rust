@@ -40,7 +40,9 @@ use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
 use crate::instruction_encoding::loads_and_stores::load_store_no_allocate_pair_offset::LoadStoreNoAllocatePairOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_offset::LoadStoreRegisterPairOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_post_indexed::LoadStoreRegisterPairPostIndexed;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_pre_indexed::LoadStoreRegisterPairPreIndexed;
 use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
@@ -112,6 +114,10 @@ impl MemoryCopyAndMemorySet<Instr> for InstrProducer {}
 impl LoadStoreNoAllocatePairOffset<Instr> for InstrProducer {}
 
 impl LoadStoreRegisterPairPostIndexed<Instr> for InstrProducer {}
+
+impl LoadStoreRegisterPairOffset<Instr> for InstrProducer {}
+
+impl LoadStoreRegisterPairPreIndexed<Instr> for InstrProducer {}
 
 impl LoadsAndStores<Instr> for InstrProducer {}
 

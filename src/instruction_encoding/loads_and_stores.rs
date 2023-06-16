@@ -15,7 +15,9 @@ use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
 use crate::instruction_encoding::loads_and_stores::load_store_no_allocate_pair_offset::LoadStoreNoAllocatePairOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_offset::LoadStoreRegisterPairOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_post_indexed::LoadStoreRegisterPairPostIndexed;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_pre_indexed::LoadStoreRegisterPairPreIndexed;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
 use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 
@@ -31,6 +33,8 @@ pub mod ldapr_stlr_unscale_imm;
 pub mod memory_copy_and_memory_set;
 pub mod load_store_no_allocate_pair_offset;
 pub mod load_store_reg_pair_post_indexed;
+pub mod load_store_reg_pair_offset;
+pub mod load_store_reg_pair_pre_indexed;
 
 
 pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
@@ -45,6 +49,8 @@ pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
 + MemoryCopyAndMemorySet<T>
 + LoadStoreNoAllocatePairOffset<T>
 + LoadStoreRegisterPairPostIndexed<T>
++ LoadStoreRegisterPairOffset<T>
++ LoadStoreRegisterPairPreIndexed<T>
 {}
 
 pub trait LoadsAndStoresWithAddress<T>: LoadsAndStores<T>
