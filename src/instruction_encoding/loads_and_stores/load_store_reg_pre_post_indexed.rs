@@ -61,7 +61,7 @@ pub trait LoadStoreRegisterPrePostIndexed<T>: InstructionProcessor<T> {
     /// STRB <Wt>, [<Xn|SP>], #<simm>
     /// ```
     #[inline(always)]
-    fn strb_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+    fn strb_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
         emit_load_store_pre_post(self, 0, 0, 0, simm, 0b01, wt, xn_sp)
     }
 
@@ -75,7 +75,7 @@ pub trait LoadStoreRegisterPrePostIndexed<T>: InstructionProcessor<T> {
     /// STRB <Wt>, [<Xn|SP>, #<simm>]!
     /// ```
     #[inline(always)]
-    fn strb_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+    fn strb_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
         emit_load_store_pre_post(self, 0, 0, 0, simm, 0b11, wt, xn_sp)
     }
 
@@ -92,7 +92,7 @@ pub trait LoadStoreRegisterPrePostIndexed<T>: InstructionProcessor<T> {
     /// LDRB <Wt>, [<Xn|SP>], #<simm>
     /// ```
     #[inline(always)]
-    fn ldrb_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+    fn ldrb_imm_post_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
         emit_load_store_pre_post(self, 0, 0, 0b01, simm, 0b01, wt, xn_sp)
     }
 
@@ -107,7 +107,7 @@ pub trait LoadStoreRegisterPrePostIndexed<T>: InstructionProcessor<T> {
     /// LDRB <Wt>, [<Xn|SP>, #<simm>]!
     /// ```
     #[inline(always)]
-    fn ldrb_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
+    fn ldrb_imm_pre_index(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
         emit_load_store_pre_post(self, 0, 0, 0b01, simm, 0b11, wt, xn_sp)
     }
 
@@ -753,28 +753,28 @@ mod tests {
     #[test]
     fn test_strb_pre_index() {
         stream_mock!(stream, {
-            let instr = stream.strb_pre_index(0, 3, -256);
+            let instr = stream.strb_imm_pre_index(0, 3, -256);
             assert_eq!(instr.to_string(), "strb w0, [x3, #0xffffffffffffff00]!");
 
-            let instr = stream.strb_pre_index(0, 0b11111, 255);
+            let instr = stream.strb_imm_pre_index(0, 0b11111, 255);
             assert_eq!(instr.to_string(), "strb w0, [sp, #0xff]!");
 
-            assert_panic!("Should panic: imm out of range"; stream.strb_pre_index(0, 3, -257));
-            assert_panic!("Should panic: imm out of range"; stream.strb_pre_index(0, 3, 256));
+            assert_panic!("Should panic: imm out of range"; stream.strb_imm_pre_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.strb_imm_pre_index(0, 3, 256));
         })
     }
 
     #[test]
     fn test_strb_post_index() {
         stream_mock!(stream, {
-            let instr = stream.strb_post_index(0, 3, -256);
+            let instr = stream.strb_imm_post_index(0, 3, -256);
             assert_eq!(instr.to_string(), "strb w0, [x3], #0xffffffffffffff00");
 
-            let instr = stream.strb_post_index(0, 0b11111, 255);
+            let instr = stream.strb_imm_post_index(0, 0b11111, 255);
             assert_eq!(instr.to_string(), "strb w0, [sp], #0xff");
 
-            assert_panic!("Should panic: imm out of range"; stream.strb_post_index(0, 3, -257));
-            assert_panic!("Should panic: imm out of range"; stream.strb_post_index(0, 3, 256));
+            assert_panic!("Should panic: imm out of range"; stream.strb_imm_post_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.strb_imm_post_index(0, 3, 256));
         })
     }
 
@@ -783,28 +783,28 @@ mod tests {
     #[test]
     fn test_ldrb_pre_index() {
         stream_mock!(stream, {
-            let instr = stream.ldrb_pre_index(0, 3, -256);
+            let instr = stream.ldrb_imm_pre_index(0, 3, -256);
             assert_eq!(instr.to_string(), "ldrb w0, [x3, #0xffffffffffffff00]!");
 
-            let instr = stream.ldrb_pre_index(0, 0b11111, 255);
+            let instr = stream.ldrb_imm_pre_index(0, 0b11111, 255);
             assert_eq!(instr.to_string(), "ldrb w0, [sp, #0xff]!");
 
-            assert_panic!("Should panic: imm out of range"; stream.ldrb_pre_index(0, 3, -257));
-            assert_panic!("Should panic: imm out of range"; stream.ldrb_pre_index(0, 3, 256));
+            assert_panic!("Should panic: imm out of range"; stream.ldrb_imm_pre_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldrb_imm_pre_index(0, 3, 256));
         })
     }
 
     #[test]
     fn test_ldrb_post_index() {
         stream_mock!(stream, {
-            let instr = stream.ldrb_post_index(0, 3, -256);
+            let instr = stream.ldrb_imm_post_index(0, 3, -256);
             assert_eq!(instr.to_string(), "ldrb w0, [x3], #0xffffffffffffff00");
 
-            let instr = stream.ldrb_post_index(0, 0b11111, 255);
+            let instr = stream.ldrb_imm_post_index(0, 0b11111, 255);
             assert_eq!(instr.to_string(), "ldrb w0, [sp], #0xff");
 
-            assert_panic!("Should panic: imm out of range"; stream.ldrb_post_index(0, 3, -257));
-            assert_panic!("Should panic: imm out of range"; stream.ldrb_post_index(0, 3, 256));
+            assert_panic!("Should panic: imm out of range"; stream.ldrb_imm_post_index(0, 3, -257));
+            assert_panic!("Should panic: imm out of range"; stream.ldrb_imm_post_index(0, 3, 256));
         })
     }
 

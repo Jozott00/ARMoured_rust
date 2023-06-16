@@ -53,7 +53,7 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// STRB <Wt>, [<Xn|SP>{, #<pimm>}]
     /// ```
     #[inline(always)]
-    fn strb_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
+    fn strb_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
         emit_load_store_offset(self, 0, 0, 0, pimm, xn_sp, wt)
     }
 
@@ -68,7 +68,7 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// LDRB <Wt>, [<Xn|SP>{, #<pimm>}]
     /// ```
     #[inline(always)]
-    fn ldrb_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
+    fn ldrb_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
         emit_load_store_offset(self, 0, 0, 0b01, pimm, xn_sp, wt)
     }
 
@@ -489,26 +489,26 @@ mod tests {
     #[test]
     fn test_strb_unsigned_offset() {
         stream_mock!(stream, {
-            let instr = stream.strb_unsigned_offset(0, 3, 0);
+            let instr = stream.strb_imm_unsigned_offset(0, 3, 0);
             assert_eq!(instr.to_string(), "strb w0, [x3]");
 
-            let instr = stream.strb_unsigned_offset(0, 0b11111, 4095);
+            let instr = stream.strb_imm_unsigned_offset(0, 0b11111, 4095);
             assert_eq!(instr.to_string(), "strb w0, [sp, #0xfff]");
 
-            assert_panic!("Should panic: imm out of range"; stream.strb_unsigned_offset(0, 3, 4096));
+            assert_panic!("Should panic: imm out of range"; stream.strb_imm_unsigned_offset(0, 3, 4096));
         })
     }
 
     #[test]
     fn test_ldrb_unsigned_offset() {
         stream_mock!(stream, {
-            let instr = stream.ldrb_unsigned_offset(0, 3, 0);
+            let instr = stream.ldrb_imm_unsigned_offset(0, 3, 0);
             assert_eq!(instr.to_string(), "ldrb w0, [x3]");
 
-            let instr = stream.ldrb_unsigned_offset(0, 0b11111, 4095);
+            let instr = stream.ldrb_imm_unsigned_offset(0, 0b11111, 4095);
             assert_eq!(instr.to_string(), "ldrb w0, [sp, #0xfff]");
 
-            assert_panic!("Should panic: imm out of range"; stream.ldrb_unsigned_offset(0, 3, 4096));
+            assert_panic!("Should panic: imm out of range"; stream.ldrb_imm_unsigned_offset(0, 3, 4096));
         })
     }
 

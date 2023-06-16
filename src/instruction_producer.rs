@@ -45,6 +45,7 @@ use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_post_inde
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_pre_indexed::LoadStoreRegisterPairPreIndexed;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_unprivileged::LoadStoreRegisterUnprivileged;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_unscaled_imm::LoadStoreRegisterUnscaledImmediate;
+use crate::instruction_encoding::loads_and_stores::load_store_register_regoffset::LoadStoreRegisterRegisterOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_register_unsigned_imm::LoadStoreRegisterUnsignedImmediate;
 use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 use crate::types::{Instruction, InstructionPointer};
@@ -127,6 +128,8 @@ impl LoadStoreRegisterUnscaledImmediate<Instr> for InstrProducer {}
 impl LoadStoreRegisterUnsignedImmediate<Instr> for InstrProducer {}
 
 impl LoadStoreRegisterUnprivileged<Instr> for InstrProducer {}
+
+impl LoadStoreRegisterRegisterOffset<Instr> for InstrProducer {}
 
 impl LoadsAndStores<Instr> for InstrProducer {}
 
