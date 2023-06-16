@@ -25,7 +25,7 @@ use crate::instruction_encoding::data_proc_imm::mov_wide_imm::MovWideImmediate;
 use crate::instruction_encoding::data_proc_imm::pc_rel_addr::PcRelAddressing;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
 use crate::instruction_encoding::loads_and_stores::load_register_literal::LoadRegisterLiteral;
-use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pre_post_indexed::LoadStoreRegisterPrePostIndexed;
 use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
 use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
@@ -44,6 +44,7 @@ use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_offset::L
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_post_indexed::LoadStoreRegisterPairPostIndexed;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_pre_indexed::LoadStoreRegisterPairPreIndexed;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_unscaled_imm::LoadStoreRegisterUnscaledImmediate;
+use crate::instruction_encoding::loads_and_stores::load_store_register_unsigned_imm::LoadStoreRegisterUnsignedImmediate;
 use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
@@ -122,11 +123,13 @@ impl LoadStoreRegisterPairPreIndexed<Instr> for InstrProducer {}
 
 impl LoadStoreRegisterUnscaledImmediate<Instr> for InstrProducer {}
 
+impl LoadStoreRegisterUnsignedImmediate<Instr> for InstrProducer {}
+
 impl LoadsAndStores<Instr> for InstrProducer {}
 
 impl CompareAndSwapPair<Instr> for InstrProducer {}
 
-impl LoadStoreRegUImm<Instr> for InstrProducer {}
+impl LoadStoreRegisterPrePostIndexed<Instr> for InstrProducer {}
 
 impl LoadRegisterLiteral<Instr> for InstrProducer {}
 

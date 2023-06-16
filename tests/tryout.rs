@@ -8,7 +8,9 @@ use armoured_rust::instruction_encoding::data_proc_imm::pc_rel_addr::{PcRelAddre
 use armoured_rust::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
 use armoured_rust::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 use armoured_rust::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
-use armoured_rust::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
+use armoured_rust::instruction_encoding::loads_and_stores::load_store_reg_pre_post_indexed::LoadStoreRegisterPrePostIndexed;
+use armoured_rust::instruction_encoding::loads_and_stores::load_store_reg_unscaled_imm::LoadStoreRegisterUnscaledImmediate;
+use armoured_rust::instruction_encoding::loads_and_stores::load_store_register_unsigned_imm::LoadStoreRegisterUnsignedImmediate;
 use armoured_rust::instruction_stream::InstrStream;
 use armoured_rust::mc_memory::{McMemory, Memory};
 use armoured_rust::types::Imm64;
@@ -42,6 +44,7 @@ fn main_tryout() {
     stream.caspl_64(0, 1, 4, 5, 0);
     stream.strb_pre_index(0, 3, -256);
     stream.prfm_imm_prfop(PrfOp(PrfType::PLD, PrfTarget::L1, PrfPolicy::KEEP), 0, 0x0);
+    stream.prfum_prfop()
     stream.b_from_byte_offset(0);
     stream.sbfm_64(1, 2, 0x8, 0x3);
     stream.movk_64_imm(2, 0xffff);

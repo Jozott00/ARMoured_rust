@@ -20,7 +20,7 @@ use crate::instruction_encoding::data_proc_imm::mov_wide_imm::MovWideImmediate;
 use crate::instruction_encoding::data_proc_imm::pc_rel_addr::{PcRelAddressing, PcRelAddressingWithAddress};
 use crate::instruction_encoding::loads_and_stores::load_register_literal::{LoadRegisterLiteral, LoadRegisterLiteralWithAddress};
 use crate::instruction_encoding::loads_and_stores::LoadsAndStoresWithAddress;
-use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pre_post_indexed::LoadStoreRegisterPrePostIndexed;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
 use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
@@ -56,6 +56,7 @@ use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_offset::L
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_post_indexed::LoadStoreRegisterPairPostIndexed;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_pre_indexed::LoadStoreRegisterPairPreIndexed;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_unscaled_imm::LoadStoreRegisterUnscaledImmediate;
+use crate::instruction_encoding::loads_and_stores::load_store_register_unsigned_imm::LoadStoreRegisterUnsignedImmediate;
 use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 use crate::mc_memory::{McMemory, Memory};
 use crate::types::{Instruction, InstructionPointer};
@@ -171,7 +172,7 @@ impl<'mem, M: Memory, E: Emitter> DataProcessingTwoSource<Instr> for InstrStream
 
 impl<'mem, M: Memory, E: Emitter> InstructionSet<Instr> for InstrStream<'mem, M, E> {}
 
-impl<'mem, M: Memory, E: Emitter> LoadStoreRegUImm<Instr> for InstrStream<'mem, M, E> {}
+impl<'mem, M: Memory, E: Emitter> LoadStoreRegisterPrePostIndexed<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadRegisterLiteral<Instr> for InstrStream<'mem, M, E> {}
 
@@ -198,6 +199,8 @@ impl<'mem, M: Memory, E: Emitter> LoadStoreRegisterPairOffset<Instr> for InstrSt
 impl<'mem, M: Memory, E: Emitter> LoadStoreRegisterPairPreIndexed<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadStoreRegisterUnscaledImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> LoadStoreRegisterUnsignedImmediate<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadsAndStores<Instr> for InstrStream<'mem, M, E> {}
 

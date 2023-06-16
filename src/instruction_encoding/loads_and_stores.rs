@@ -3,7 +3,7 @@
 //! Contains the following instruction types:
 //! - [Compare and swap pair](compare_and_swap_pair)
 //! - [Load register (literal)](load_register_literal)
-//! - [Load/store register (unsigned immediate)](load_store_reg_uimm)
+//! - [Load/store register (unsigned immediate)](load_store_reg_pre_post_indexed)
 
 
 use crate::instruction_encoding::loads_and_stores::compare_and_swap::CompareAndSwap;
@@ -18,12 +18,13 @@ use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStore
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_offset::LoadStoreRegisterPairOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_post_indexed::LoadStoreRegisterPairPostIndexed;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_pre_indexed::LoadStoreRegisterPairPreIndexed;
-use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pre_post_indexed::LoadStoreRegisterPrePostIndexed;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_unscaled_imm::LoadStoreRegisterUnscaledImmediate;
+use crate::instruction_encoding::loads_and_stores::load_store_register_unsigned_imm::LoadStoreRegisterUnsignedImmediate;
 use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 
 pub mod compare_and_swap_pair;
-pub mod load_store_reg_uimm;
+pub mod load_store_reg_pre_post_indexed;
 pub mod load_register_literal;
 pub mod load_store_memory_tags;
 pub mod load_store_exclusive_pair;
@@ -37,10 +38,11 @@ pub mod load_store_reg_pair_post_indexed;
 pub mod load_store_reg_pair_offset;
 pub mod load_store_reg_pair_pre_indexed;
 pub mod load_store_reg_unscaled_imm;
+pub mod load_store_register_unsigned_imm;
 
 
 pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
-+ LoadStoreRegUImm<T>
++ LoadStoreRegisterPrePostIndexed<T> // TODO: Remove / Change
 + LoadRegisterLiteral<T>
 + LoadStoreMemoryTags<T>
 + LoadStoreExclusivePair<T>
@@ -54,6 +56,7 @@ pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
 + LoadStoreRegisterPairOffset<T>
 + LoadStoreRegisterPairPreIndexed<T>
 + LoadStoreRegisterUnscaledImmediate<T>
++ LoadStoreRegisterUnsignedImmediate<T>
 {}
 
 pub trait LoadsAndStoresWithAddress<T>: LoadsAndStores<T>

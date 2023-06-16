@@ -27,7 +27,7 @@ use crate::instruction_encoding::data_proc_imm::mov_wide_imm::MovWideImmediate;
 use crate::instruction_encoding::data_proc_imm::pc_rel_addr::PcRelAddressing;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
 use crate::instruction_encoding::loads_and_stores::load_register_literal::LoadRegisterLiteral;
-use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pre_post_indexed::LoadStoreRegisterPrePostIndexed;
 use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
 use crate::types::Instruction;
 use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
@@ -46,6 +46,7 @@ use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_offset::L
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_post_indexed::LoadStoreRegisterPairPostIndexed;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_pre_indexed::LoadStoreRegisterPairPreIndexed;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_unscaled_imm::LoadStoreRegisterUnscaledImmediate;
+use crate::instruction_encoding::loads_and_stores::load_store_register_unsigned_imm::LoadStoreRegisterUnsignedImmediate;
 use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 
 type InstrRes = String;
@@ -130,11 +131,13 @@ impl LoadStoreRegisterPairPreIndexed<InstrRes> for TestProducer {}
 
 impl LoadStoreRegisterUnscaledImmediate<InstrRes> for TestProducer {}
 
+impl LoadStoreRegisterUnsignedImmediate<InstrRes> for TestProducer {}
+
 impl LoadsAndStores<InstrRes> for TestProducer {}
 
 impl CompareAndSwapPair<InstrRes> for TestProducer {}
 
-impl LoadStoreRegUImm<InstrRes> for TestProducer {}
+impl LoadStoreRegisterPrePostIndexed<InstrRes> for TestProducer {}
 
 impl LoadRegisterLiteral<InstrRes> for TestProducer {}
 
