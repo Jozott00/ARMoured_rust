@@ -45,6 +45,7 @@ use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStore
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_offset::LoadStoreRegisterPairOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_post_indexed::LoadStoreRegisterPairPostIndexed;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_pre_indexed::LoadStoreRegisterPairPreIndexed;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_unscaled_imm::LoadStoreRegisterUnscaledImmediate;
 use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 
 type InstrRes = String;
@@ -126,6 +127,8 @@ impl LoadStoreRegisterPairPostIndexed<InstrRes> for TestProducer {}
 impl LoadStoreRegisterPairOffset<InstrRes> for TestProducer {}
 
 impl LoadStoreRegisterPairPreIndexed<InstrRes> for TestProducer {}
+
+impl LoadStoreRegisterUnscaledImmediate<InstrRes> for TestProducer {}
 
 impl LoadsAndStores<InstrRes> for TestProducer {}
 
