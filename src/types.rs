@@ -1,5 +1,7 @@
 use crate::types::HW::{LSL0, LSL16, LSL32, LSL48};
 
+mod type_creation_macro;
+
 pub mod shifts;
 pub mod bitmask_immediate;
 pub mod instruction;
@@ -10,7 +12,7 @@ pub mod mem_barrier_option;
 pub mod pstate;
 pub mod sys_ops;
 pub mod extends;
-mod type_creation_macro;
+pub mod ArrSpecifier;
 
 pub type Instruction = u32;
 pub type InstructionPointer = *mut Instruction;

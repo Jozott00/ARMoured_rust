@@ -33,6 +33,7 @@ use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCom
 use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
 use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
 use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
+use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_multi_structures::AdvancedSimdLoadStoreMultipleStructures;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap::CompareAndSwap;
 use crate::instruction_encoding::loads_and_stores::ldapr_stlr_unscale_imm::LdaprStlrUnscaleImmediate;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
@@ -133,6 +134,8 @@ impl LoadStoreRegisterUnprivileged<Instr> for InstrProducer {}
 impl LoadStoreRegisterRegisterOffset<Instr> for InstrProducer {}
 
 impl LoadStoreRegisterPac<Instr> for InstrProducer {}
+
+impl AdvancedSimdLoadStoreMultipleStructures<Instr> for InstrProducer {}
 
 impl LoadsAndStores<Instr> for InstrProducer {}
 

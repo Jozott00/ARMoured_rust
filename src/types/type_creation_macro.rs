@@ -1,6 +1,6 @@
 macro_rules! make_enum {
     ($enum_name:ident, [$(($case:ident, $val:expr)),*]) => {
-        #[derive(Debug)]
+        #[derive(Debug, Clone, Copy)]
         pub enum $enum_name {
             $(
                 $case,

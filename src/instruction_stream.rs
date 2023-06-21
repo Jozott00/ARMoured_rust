@@ -45,6 +45,7 @@ use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCom
 use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
 use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
 use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
+use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_multi_structures::AdvancedSimdLoadStoreMultipleStructures;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap::CompareAndSwap;
 use crate::instruction_encoding::loads_and_stores::ldapr_stlr_unscale_imm::LdaprStlrUnscaleImmediate;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
@@ -210,6 +211,8 @@ impl<'mem, M: Memory, E: Emitter> LoadStoreRegisterUnprivileged<Instr> for Instr
 impl<'mem, M: Memory, E: Emitter> LoadStoreRegisterRegisterOffset<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadStoreRegisterPac<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> AdvancedSimdLoadStoreMultipleStructures<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> LoadsAndStores<Instr> for InstrStream<'mem, M, E> {}
 
