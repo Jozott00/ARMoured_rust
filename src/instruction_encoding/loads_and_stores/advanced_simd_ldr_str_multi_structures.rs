@@ -21,8 +21,6 @@ use crate::types::ArrSpecifier::{ArrSpec, ArrSpecX, ArrSpec1};
 fn emit_adv_ldr_str_all<P: InstructionProcessor<T>, T>(proc: &mut P, q: u8, with_offset: bool, l: u8, rm: Register, opcode: u8, size: u8, rn: Register, rt: Register) -> T {
     let op = with_offset as u8;
     let r = bseq_32!(0 q:1 001100 op:1 l:1 0 rm:5 opcode:4 size:2 rn:5 rt:5);
-    //                     0 1  001100   1   0   0 11111 0000 11 00000 00000
-    //                     0 1  001100   0   0   0 11111 0000 11 00000 00001
     proc.process(r)
 }
 
@@ -65,7 +63,7 @@ fn are_indices_sequential(indices: &[Register]) -> bool {
 ///  - [LD2 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--multiple-structures---Load-multiple-2-element-structures-to-two-registers-?lang=en)
 ///  - [LD3 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--multiple-structures---Load-multiple-3-element-structures-to-three-registers-?lang=en)
 ///  - [LD4 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--multiple-structures---Load-multiple-4-element-structures-to-four-registers-?lang=en)
-pub trait AdvancedSimdLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
+pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// [ST4 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--multiple-structures---Store-multiple-4-element-structures-from-four-registers-?lang=en)
     ///
     /// Store multiple 4-element structures from four registers. This instruction stores multiple 4-element structures to memory from four SIMD&FP registers, with interleaving. Every element of each register is stored.

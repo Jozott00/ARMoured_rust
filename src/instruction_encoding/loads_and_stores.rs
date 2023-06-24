@@ -6,7 +6,8 @@
 //! - [Load/store register (unsigned immediate)](load_store_reg_pre_post_indexed)
 
 
-use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_multi_structures::AdvancedSimdLoadStoreMultipleStructures;
+use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_multi_structures::AdvancedSIMDLoadStoreMultipleStructures;
+use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_single_structures::AdvancedSIMDLoadStoreSingleStructures;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap::CompareAndSwap;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
 use crate::instruction_encoding::loads_and_stores::ldapr_stlr_unscale_imm::LdaprStlrUnscaleImmediate;
@@ -47,6 +48,7 @@ pub mod load_store_reg_unprivileged;
 pub mod load_store_register_regoffset;
 pub mod load_store_register_pac;
 pub mod advanced_simd_ldr_str_multi_structures;
+pub mod advanced_simd_ldr_str_single_structures;
 
 
 pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
@@ -68,7 +70,8 @@ pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
 + LoadStoreRegisterUnsignedImmediate<T>
 + LoadStoreRegisterRegisterOffset<T>
 + LoadStoreRegisterPac<T>
-+ AdvancedSimdLoadStoreMultipleStructures<T>
++ AdvancedSIMDLoadStoreMultipleStructures<T>
++ AdvancedSIMDLoadStoreSingleStructures<T>
 {}
 
 pub trait LoadsAndStoresWithAddress<T>: LoadsAndStores<T>
