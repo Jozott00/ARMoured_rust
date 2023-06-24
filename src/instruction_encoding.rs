@@ -44,3 +44,8 @@ pub trait InstructionSetWithAddress<T>: InstructionSet<T>
 + BranchExceptionSystemWithAddress<T>
 + LoadsAndStoresWithAddress<T>
 {}
+
+
+mod Constants {
+    pub const LOG2_TAG_GRANULE: u8 = 4u8;
+}

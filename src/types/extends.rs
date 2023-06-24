@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+use crate::types::type_creation_macro::make_enum;
 use crate::types::UImm3;
 
 #[derive(PartialEq)]
@@ -42,3 +44,21 @@ impl From<RegExtend> for u8 {
         }
     }
 }
+
+
+impl Display for RegExtend {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RegExtend::UXTB => f.write_str("UXTB"),
+            RegExtend::UXTH => f.write_str("UXTH"),
+            RegExtend::UXTW => f.write_str("UXTW"),
+            RegExtend::UXTX => f.write_str("UXTX"),
+            RegExtend::SXTB => f.write_str("SXTB"),
+            RegExtend::SXTH => f.write_str("SXTH"),
+            RegExtend::SXTW => f.write_str("SXTW"),
+            RegExtend::SXTX => f.write_str("SXTX"),
+        }
+    }
+}
+
+make_enum!(RegExtendLSL, [(UXTW, 0b010), (LSL, 0b011), (SXTW, 0b110), (SXTX, 0b111)]);
