@@ -8,6 +8,7 @@
 
 use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_multi_structures::AdvancedSIMDLoadStoreMultipleStructures;
 use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_single_structures::AdvancedSIMDLoadStoreSingleStructures;
+use crate::instruction_encoding::loads_and_stores::atomic_memory_operations::AtomicMemoryOperatinos;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap::CompareAndSwap;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
 use crate::instruction_encoding::loads_and_stores::ldapr_stlr_unscale_imm::LdaprStlrUnscaleImmediate;
@@ -49,6 +50,7 @@ pub mod load_store_register_regoffset;
 pub mod load_store_register_pac;
 pub mod advanced_simd_ldr_str_multi_structures;
 pub mod advanced_simd_ldr_str_single_structures;
+pub mod atomic_memory_operations;
 
 
 pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
@@ -72,6 +74,7 @@ pub trait LoadsAndStores<T>: CompareAndSwapPair<T>
 + LoadStoreRegisterPac<T>
 + AdvancedSIMDLoadStoreMultipleStructures<T>
 + AdvancedSIMDLoadStoreSingleStructures<T>
++ AtomicMemoryOperatinos<T>
 {}
 
 pub trait LoadsAndStoresWithAddress<T>: LoadsAndStores<T>

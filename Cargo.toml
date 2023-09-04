@@ -5,6 +5,13 @@ edition = "2021"
 
 exclude = ["/.github", "/dev_scripts"]
 
+[features]
+arm_feat_lse = []
+arm_feat_lrcpc = ["arm_feat_lse"]
+arm_feat_ls64_accdata = ["arm_feat_lse"]
+arm_feat_ls64_v = ["arm_feat_lse"]
+arm_feat_ls64 = ["arm_feat_lse"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

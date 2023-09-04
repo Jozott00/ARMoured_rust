@@ -37,6 +37,7 @@ use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalS
 use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_multi_structures::AdvancedSIMDLoadStoreMultipleStructures;
 use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_single_structures::AdvancedSIMDLoadStoreSingleStructures;
+use crate::instruction_encoding::loads_and_stores::atomic_memory_operations::AtomicMemoryOperatinos;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap::CompareAndSwap;
 use crate::instruction_encoding::loads_and_stores::ldapr_stlr_unscale_imm::LdaprStlrUnscaleImmediate;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
@@ -147,6 +148,8 @@ impl LoadStoreRegisterPac<InstrRes> for TestProducer {}
 impl AdvancedSIMDLoadStoreMultipleStructures<InstrRes> for TestProducer {}
 
 impl AdvancedSIMDLoadStoreSingleStructures<InstrRes> for TestProducer {}
+
+impl AtomicMemoryOperatinos<InstrRes> for TestProducer {}
 
 impl LoadsAndStores<InstrRes> for TestProducer {}
 

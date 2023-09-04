@@ -25,8 +25,6 @@ use crate::types::ArrSpecifier::{ArrSpec, ArrSpec1};
 fn emit_adv_ldr_str_all<P: InstructionProcessor<T>, T>(proc: &mut P, q: u8, with_offset: bool, l: u8, r: u8, rm: Register, opcode: u8, s: u8, size: u8, rn: Register, rt: Register) -> T {
     let op = with_offset as u8;
     let r = bseq_32!(0 q:1 001101 op:1 l:1 r:1 rm:5 opcode:3 s:1 size:2 rn:5 rt:5);
-    //                    0 0   001101  1   1    1  11111 101 0 11 00010 00001
-    //                    0 0   001101  1   1     1 11111 110 0 00 00010 00000
     proc.process(r)
 }
 
