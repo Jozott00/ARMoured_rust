@@ -56,7 +56,7 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
     /// ADD <Xd|SP>, <Xn|SP>, <R><m>, <extend> {#<amount>}
     /// ```
     ///
-    /// **Note**: The `<R>` in `<R><m>` is implicitly given by the chosen `<extend>`. We also [`RegExtend`] does not support `LSL`
+    /// **Note**: The `<R>` in `<R><m>` is implicitly given by the chosen `<extend>`. [`RegExtend`] also does not support `LSL`
     /// as it simplifies the api.
     #[inline(always)]
     fn add_64_reg_extend(&mut self, xd_sp: Register, xn_sp: Register, m: Register, extend: RegExtend, amount: Option<UImm2>) -> T {
@@ -89,7 +89,7 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
     /// ADDS <Xd>, <Xn|SP>, <R><m>{, <extend> {#<amount>}}
     /// ```
     ///
-    /// **Note**: The `<R>` in `<R><m>` is implicitly given by the chosen `<extend>`. We also [`RegExtend`] does not support `LSL`
+    /// **Note**: The `<R>` in `<R><m>` is implicitly given by the chosen `<extend>`. [`RegExtend`] also does not support `LSL`
     /// as it simplifies the api.
     #[inline(always)]
     fn adds_64_reg_extend(&mut self, xd_sp: Register, xn_sp: Register, m: Register, extend: RegExtend, amount: Option<UImm2>) -> T {
@@ -118,7 +118,7 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
     /// SUB <Xd|SP>, <Xn|SP>, <R><m>{, <extend> {#<amount>}}
     /// ```
     ///
-    /// **Note**: The `<R>` in `<R><m>` is implicitly given by the chosen `<extend>`. We also [`RegExtend`] does not support `LSL`
+    /// **Note**: The `<R>` in `<R><m>` is implicitly given by the chosen `<extend>`. [`RegExtend`] also does not support `LSL`
     /// as it simplifies the api.
     #[inline(always)]
     fn sub_64_reg_extend(&mut self, xd_sp: Register, xn_sp: Register, m: Register, extend: RegExtend, amount: Option<UImm2>) -> T {

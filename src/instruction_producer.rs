@@ -25,7 +25,7 @@ use crate::instruction_encoding::data_proc_imm::mov_wide_imm::MovWideImmediate;
 use crate::instruction_encoding::data_proc_imm::pc_rel_addr::PcRelAddressing;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
 use crate::instruction_encoding::loads_and_stores::load_register_literal::LoadRegisterLiteral;
-use crate::instruction_encoding::loads_and_stores::load_store_reg_uimm::LoadStoreRegUImm;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pre_post_indexed::LoadStoreRegisterPrePostIndexed;
 use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
 use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
@@ -33,6 +33,25 @@ use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCom
 use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
 use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
 use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
+use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_multi_structures::AdvancedSIMDLoadStoreMultipleStructures;
+use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_single_structures::AdvancedSIMDLoadStoreSingleStructures;
+use crate::instruction_encoding::loads_and_stores::atomic_memory_operations::AtomicMemoryOperatinos;
+use crate::instruction_encoding::loads_and_stores::compare_and_swap::CompareAndSwap;
+use crate::instruction_encoding::loads_and_stores::ldapr_stlr_unscale_imm::LdaprStlrUnscaleImmediate;
+use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
+use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
+use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
+use crate::instruction_encoding::loads_and_stores::load_store_no_allocate_pair_offset::LoadStoreNoAllocatePairOffset;
+use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStoreOrdered;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_offset::LoadStoreRegisterPairOffset;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_post_indexed::LoadStoreRegisterPairPostIndexed;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_pre_indexed::LoadStoreRegisterPairPreIndexed;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_unprivileged::LoadStoreRegisterUnprivileged;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_unscaled_imm::LoadStoreRegisterUnscaledImmediate;
+use crate::instruction_encoding::loads_and_stores::load_store_register_pac::LoadStoreRegisterPac;
+use crate::instruction_encoding::loads_and_stores::load_store_register_regoffset::LoadStoreRegisterRegisterOffset;
+use crate::instruction_encoding::loads_and_stores::load_store_register_unsigned_imm::LoadStoreRegisterUnsignedImmediate;
+use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
 
@@ -86,11 +105,49 @@ impl UnconditionalBranchRegister<Instr> for InstrProducer {}
 
 impl UnconditionalBranchImmediate<Instr> for InstrProducer {}
 
+impl LoadStoreMemoryTags<Instr> for InstrProducer {}
+
+impl LoadStoreExclusivePair<Instr> for InstrProducer {}
+
+impl LoadStoreExclusiveRegister<Instr> for InstrProducer {}
+
+impl LoadStoreOrdered<Instr> for InstrProducer {}
+
+impl CompareAndSwap<Instr> for InstrProducer {}
+
+impl LdaprStlrUnscaleImmediate<Instr> for InstrProducer {}
+
+impl MemoryCopyAndMemorySet<Instr> for InstrProducer {}
+
+impl LoadStoreNoAllocatePairOffset<Instr> for InstrProducer {}
+
+impl LoadStoreRegisterPairPostIndexed<Instr> for InstrProducer {}
+
+impl LoadStoreRegisterPairOffset<Instr> for InstrProducer {}
+
+impl LoadStoreRegisterPairPreIndexed<Instr> for InstrProducer {}
+
+impl LoadStoreRegisterUnscaledImmediate<Instr> for InstrProducer {}
+
+impl LoadStoreRegisterUnsignedImmediate<Instr> for InstrProducer {}
+
+impl LoadStoreRegisterUnprivileged<Instr> for InstrProducer {}
+
+impl LoadStoreRegisterRegisterOffset<Instr> for InstrProducer {}
+
+impl LoadStoreRegisterPac<Instr> for InstrProducer {}
+
+impl AdvancedSIMDLoadStoreMultipleStructures<Instr> for InstrProducer {}
+
+impl AdvancedSIMDLoadStoreSingleStructures<Instr> for InstrProducer {}
+
+impl AtomicMemoryOperatinos<Instr> for InstrProducer {}
+
 impl LoadsAndStores<Instr> for InstrProducer {}
 
 impl CompareAndSwapPair<Instr> for InstrProducer {}
 
-impl LoadStoreRegUImm<Instr> for InstrProducer {}
+impl LoadStoreRegisterPrePostIndexed<Instr> for InstrProducer {}
 
 impl LoadRegisterLiteral<Instr> for InstrProducer {}
 
