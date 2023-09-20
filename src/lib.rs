@@ -1,4 +1,4 @@
-mod instruction_emitter;
+pub mod instruction_emitter;
 pub mod mc_memory;
 pub mod types;
 pub mod instruction_stream;

@@ -1,7 +1,6 @@
 use std::{mem, slice};
 
 use bad64::disasm;
-use bit_seq::{bseq, bseq_32};
 use crate::instruction_encoding::data_proc_reg::evaluate_into_flags::EvaluateIntoFlags;
 use crate::instruction_encoding::data_proc_reg::rotate_right_into_flags::RotateRightIntoFlags;
 use crate::instruction_encoding::data_proc_reg::add_sub_carry::AddSubtractWithCarry;
@@ -109,6 +108,74 @@ impl<'mem, M: Memory, E: Emitter> AddressableInstructionProcessor<Instr> for Ins
         debug_assert!(offset_abs <= i32::MAX as usize, "Offset to address is to large (exceeds maximum of {:x})", i32::MAX);
 
         if addr >= pc { offset_abs as i32 } else { -(offset_abs as i32) }
+    }
+}
+
+/// Implementation for `InstrStream` struct.
+/// A stream of instructions that uses memory layer 'M' and emitter 'E'.
+///
+/// 'mem: The memory size descriptor.
+/// M: Represents memory.
+/// E: Represents emitter.
+impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
+    /// Modify the instruction located at the specified instruction pointer by applying a patch.
+    /// This function saves the current instruction pointer, sets a new instruction pointer,
+    /// applies the patch, and then restores the original instruction pointer.
+    ///
+    /// # Arguments
+    ///
+    /// `intr_ptr` - Provides the reference to an instruction pointer where the patch has to be applied.
+    /// `patch` - The patch operation to<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
+    pub fn patch_at(&mut self, intr_ptr: InstructionPointer, patch: PatchFn<M, E>) {
+        // save instruction pointer
+        let iptr = self.emitter.instr_ptr();
+        self.emitter.set_instr_ptr(intr_ptr);
+        patch(self);
+        // restore instruction pointer
+        self.emitter.set_instr_ptr(iptr);
+    }
+
+    #[inline(always)]
+    pub fn nullary_fn_ptr(&mut self) -> unsafe extern "C" fn() -> u64 {
+        unsafe { mem::transmute(self.base_ptr() as usize) }
+    }
+
+    #[inline(always)]
+    pub fn base_ptr(&self) -> InstructionPointer {
+        self.emitter.base_ptr()
+    }
+
+    pub fn print_disasm(&self) {
+        let decoded_iter = disasm(self.written_memory(), self.base_ptr() as u64);
+        for instr in decoded_iter {
+            if let Ok(instr) = instr {
+                let encoding = instr.opcode().to_le_bytes();
+                let enc_str = encoding.map(|e| format!("{e:02x}")).join(" ");
+                println!("{:#x}: {enc_str}      {instr}", instr.address());
+            } else {
+                println!("! Incorrect instruction");
+            };
+        }
+    }
+
+    pub fn written_memory(&self) -> &[u8] {
+        let len = (self.emitter.instr_ptr() as usize) - (self.mem.addr() as usize);
+        let ptr = self.mem.addr() as *const u8;
+
+        assert_eq!(len % 4, 0, "Len is not a multiple of 4");
+        assert_eq!(ptr as usize % mem::align_of::<u32>(), 0, "Memory not u32 aligned");
+        assert!(self.mem.len() >= len, "Requested length exceeds memory map!");
+
+        unsafe { slice::from_raw_parts(ptr, len) }
+    }
+
+    fn emit(&mut self, instr: Instruction) -> Instr {
+        debug_assert!(!self.mem.is_executable(), "Cannot emit instruction while memory is in execution mode");
+
+        let iptr = self.emitter.instr_ptr();
+        self.emitter.emit(instr);
+
+        Instr::new(instr, iptr)
     }
 }
 
@@ -233,60 +300,6 @@ impl<'mem, M: Memory, E: Emitter> DataProcessingImmediateWithAddress<Instr> for 
 impl<'mem, M: Memory, E: Emitter> PcRelAddressingWithAddress<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> InstructionSetWithAddress<Instr> for InstrStream<'mem, M, E> {}
-
-impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
-    pub fn patch_at(&mut self, intr_ptr: InstructionPointer, patch: PatchFn<M, E>) {
-        // save instruction pointer
-        let iptr = self.emitter.instr_ptr();
-        self.emitter.set_instr_ptr(intr_ptr);
-        patch(self);
-        // restore instruction pointer
-        self.emitter.set_instr_ptr(iptr);
-    }
-
-    #[inline(always)]
-    pub fn nullary_fn_ptr(&mut self) -> unsafe extern "C" fn() -> u64 {
-        unsafe { mem::transmute(self.base_ptr() as usize) }
-    }
-
-    #[inline(always)]
-    pub fn base_ptr(&self) -> InstructionPointer {
-        self.emitter.base_ptr()
-    }
-
-    pub fn print_disasm(&self) {
-        let decoded_iter = disasm(self.written_memory(), self.base_ptr() as u64);
-        for instr in decoded_iter {
-            if let Ok(instr) = instr {
-                let encoding = instr.opcode().to_le_bytes();
-                let enc_str = encoding.map(|e| format!("{e:02x}")).join(" ");
-                println!("{:#x}: {enc_str}      {instr}", instr.address());
-            } else {
-                println!("! Incorrect instruction");
-            };
-        }
-    }
-
-    pub fn written_memory(&self) -> &[u8] {
-        let len = (self.emitter.instr_ptr() as usize) - (self.mem.addr() as usize);
-        let ptr = self.mem.addr() as *const u8;
-
-        assert_eq!(len % 4, 0, "Len is not a multiple of 4");
-        assert_eq!(ptr as usize % mem::align_of::<u32>(), 0, "Memory not u32 aligned");
-        assert!(self.mem.len() >= len, "Requested length exceeds memory map!");
-
-        unsafe { slice::from_raw_parts(ptr, len) }
-    }
-
-    fn emit(&mut self, instr: Instruction) -> Instr {
-        debug_assert!(!self.mem.is_executable(), "Cannot emit instruction while memory is in execution mode");
-
-        let iptr = self.emitter.instr_ptr();
-        self.emitter.emit(instr);
-
-        Instr::new(instr, iptr)
-    }
-}
 
 #[cfg(test)]
 mod mocking_util {
