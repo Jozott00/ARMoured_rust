@@ -12,9 +12,9 @@ use crate::instruction_encoding::data_proc_imm::add_substract_imm::AddSubtractIm
 use crate::instruction_encoding::data_proc_imm::bitfield::BitfieldInstructions;
 use crate::instruction_encoding::data_proc_imm::extract::ExtractInstructions;
 use crate::instruction_encoding::data_proc_imm::logical_imm::LogicalImmediate;
-use crate::instruction_encoding::data_proc_imm::pc_rel_addr::PcRelAddressingWithAddress;
 use crate::instruction_encoding::data_proc_imm::mov_wide_imm::MovWideImmediate;
 use crate::instruction_encoding::data_proc_imm::pc_rel_addr::PcRelAddressing;
+use crate::instruction_encoding::data_proc_imm::pc_rel_addr::PcRelAddressingWithAddress;
 
 pub mod add_substract_imm;
 pub mod bitfield;
@@ -23,15 +23,17 @@ pub mod logical_imm;
 pub mod mov_wide_imm;
 pub mod pc_rel_addr;
 
+pub trait DataProcessingImmediate<T>:
+    PcRelAddressing<T>
+    + AddSubtractImmediate<T>
+    + LogicalImmediate<T>
+    + MovWideImmediate<T>
+    + BitfieldInstructions<T>
+    + ExtractInstructions<T>
+{
+}
 
-pub trait DataProcessingImmediate<T>: PcRelAddressing<T>
-+ AddSubtractImmediate<T>
-+ LogicalImmediate<T>
-+ MovWideImmediate<T>
-+ BitfieldInstructions<T>
-+ ExtractInstructions<T>
-{}
-
-pub trait DataProcessingImmediateWithAddress<T>: DataProcessingImmediate<T>
-+ PcRelAddressingWithAddress<T>
-{}
+pub trait DataProcessingImmediateWithAddress<T>:
+    DataProcessingImmediate<T> + PcRelAddressingWithAddress<T>
+{
+}
