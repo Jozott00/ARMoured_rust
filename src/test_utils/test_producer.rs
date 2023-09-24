@@ -1,15 +1,4 @@
-use bad64::decode;
-use crate::instruction_encoding::data_proc_reg::evaluate_into_flags::EvaluateIntoFlags;
-use crate::instruction_encoding::data_proc_reg::rotate_right_into_flags::RotateRightIntoFlags;
-use crate::instruction_encoding::data_proc_reg::add_sub_carry::AddSubtractWithCarry;
-use crate::instruction_encoding::data_proc_reg::add_sub_ext_reg::AddSubtractExtendedRegister;
-use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
-use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
-use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
-use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
-use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
-use crate::instruction_encoding::branch_exception_system::BranchExceptionSystem;
 use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediate;
 use crate::instruction_encoding::branch_exception_system::exception_generation::ExceptionGeneration;
 use crate::instruction_encoding::branch_exception_system::pstate::PStateInstructions;
@@ -18,28 +7,35 @@ use crate::instruction_encoding::branch_exception_system::system_instructions::S
 use crate::instruction_encoding::branch_exception_system::system_register_move::SystemRegisterMove;
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
+use crate::instruction_encoding::branch_exception_system::BranchExceptionSystem;
+use crate::instruction_encoding::common_aliases::CommonAliases;
 use crate::instruction_encoding::data_proc_imm::add_substract_imm::AddSubtractImmediate;
 use crate::instruction_encoding::data_proc_imm::bitfield::BitfieldInstructions;
-use crate::instruction_encoding::data_proc_imm::DataProcessingImmediate;
 use crate::instruction_encoding::data_proc_imm::extract::ExtractInstructions;
 use crate::instruction_encoding::data_proc_imm::logical_imm::LogicalImmediate;
 use crate::instruction_encoding::data_proc_imm::mov_wide_imm::MovWideImmediate;
 use crate::instruction_encoding::data_proc_imm::pc_rel_addr::PcRelAddressing;
-use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
-use crate::instruction_encoding::loads_and_stores::load_register_literal::LoadRegisterLiteral;
-use crate::instruction_encoding::loads_and_stores::load_store_reg_pre_post_indexed::LoadStoreRegisterPrePostIndexed;
-use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
-use crate::types::Instruction;
-use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
+use crate::instruction_encoding::data_proc_imm::DataProcessingImmediate;
+use crate::instruction_encoding::data_proc_reg::add_sub_carry::AddSubtractWithCarry;
+use crate::instruction_encoding::data_proc_reg::add_sub_ext_reg::AddSubtractExtendedRegister;
+use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
 use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCompareImmediate;
 use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
 use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalSelect;
+use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
+use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
+use crate::instruction_encoding::data_proc_reg::evaluate_into_flags::EvaluateIntoFlags;
+use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
+use crate::instruction_encoding::data_proc_reg::rotate_right_into_flags::RotateRightIntoFlags;
+use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_multi_structures::AdvancedSIMDLoadStoreMultipleStructures;
 use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_single_structures::AdvancedSIMDLoadStoreSingleStructures;
 use crate::instruction_encoding::loads_and_stores::atomic_memory_operations::AtomicMemoryOperatinos;
 use crate::instruction_encoding::loads_and_stores::compare_and_swap::CompareAndSwap;
+use crate::instruction_encoding::loads_and_stores::compare_and_swap_pair::CompareAndSwapPair;
 use crate::instruction_encoding::loads_and_stores::ldapr_stlr_unscale_imm::LdaprStlrUnscaleImmediate;
+use crate::instruction_encoding::loads_and_stores::load_register_literal::LoadRegisterLiteral;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_pair::LoadStoreExclusivePair;
 use crate::instruction_encoding::loads_and_stores::load_store_exclusive_register::LoadStoreExclusiveRegister;
 use crate::instruction_encoding::loads_and_stores::load_store_memory_tags::LoadStoreMemoryTags;
@@ -48,12 +44,17 @@ use crate::instruction_encoding::loads_and_stores::load_store_ordered::LoadStore
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_offset::LoadStoreRegisterPairOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_post_indexed::LoadStoreRegisterPairPostIndexed;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_pair_pre_indexed::LoadStoreRegisterPairPreIndexed;
+use crate::instruction_encoding::loads_and_stores::load_store_reg_pre_post_indexed::LoadStoreRegisterPrePostIndexed;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_unprivileged::LoadStoreRegisterUnprivileged;
 use crate::instruction_encoding::loads_and_stores::load_store_reg_unscaled_imm::LoadStoreRegisterUnscaledImmediate;
 use crate::instruction_encoding::loads_and_stores::load_store_register_pac::LoadStoreRegisterPac;
 use crate::instruction_encoding::loads_and_stores::load_store_register_regoffset::LoadStoreRegisterRegisterOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_register_unsigned_imm::LoadStoreRegisterUnsignedImmediate;
 use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
+use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
+use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
+use crate::types::Instruction;
+use bad64::decode;
 
 type InstrRes = String;
 
@@ -64,7 +65,6 @@ impl TestProducer {
         TestProducer {}
     }
 }
-
 
 impl InstructionProcessor<InstrRes> for TestProducer {
     fn process(&mut self, instr: Instruction) -> String {
@@ -77,7 +77,6 @@ impl InstructionProcessor<InstrRes> for TestProducer {
         format!("{decoded}")
     }
 }
-
 
 impl DataProcessingImmediate<InstrRes> for TestProducer {}
 
@@ -184,5 +183,7 @@ impl DataProcessingThreeSource<InstrRes> for TestProducer {}
 impl DataProcessingRegister<InstrRes> for TestProducer {}
 
 impl DataProcessingTwoSource<InstrRes> for TestProducer {}
+
+impl CommonAliases<InstrRes> for TestProducer {}
 
 impl InstructionSet<InstrRes> for TestProducer {}

@@ -26,30 +26,32 @@ use crate::instruction_encoding::data_proc_reg::evaluate_into_flags::EvaluateInt
 use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
 use crate::instruction_encoding::data_proc_reg::rotate_right_into_flags::RotateRightIntoFlags;
 
-pub mod data_proc_two_src;
-pub mod data_proc_one_src;
-pub mod logical_shift_reg;
+pub mod add_sub_carry;
+pub mod add_sub_ext_reg;
 pub mod add_sub_shift_reg;
 pub mod alias_instrs;
-pub mod add_sub_ext_reg;
-pub mod add_sub_carry;
-pub mod rotate_right_into_flags;
-pub mod evaluate_into_flags;
-pub mod cond_compare_reg;
 pub mod cond_compare_imm;
+pub mod cond_compare_reg;
 pub mod conditional_select;
+pub mod data_proc_one_src;
 pub mod data_proc_three_src;
+pub mod data_proc_two_src;
+pub mod evaluate_into_flags;
+pub mod logical_shift_reg;
+pub mod rotate_right_into_flags;
 
-pub trait DataProcessingRegister<T>: DataProcessingTwoSource<T>
-+ DataProcessingOneSource<T>
-+ LogicalShiftRegister<T>
-+ AddSubtractShiftedRegister<T>
-+ AddSubtractExtendedRegister<T>
-+ AddSubtractWithCarry<T>
-+ RotateRightIntoFlags<T>
-+ EvaluateIntoFlags<T>
-+ ConditionalCompareRegister<T>
-+ ConditionalCompareImmediate<T>
-+ ConditionalSelect<T>
-+ DataProcessingThreeSource<T>
-{}
+pub trait DataProcessingRegister<T>:
+    DataProcessingTwoSource<T>
+    + DataProcessingOneSource<T>
+    + LogicalShiftRegister<T>
+    + AddSubtractShiftedRegister<T>
+    + AddSubtractExtendedRegister<T>
+    + AddSubtractWithCarry<T>
+    + RotateRightIntoFlags<T>
+    + EvaluateIntoFlags<T>
+    + ConditionalCompareRegister<T>
+    + ConditionalCompareImmediate<T>
+    + ConditionalSelect<T>
+    + DataProcessingThreeSource<T>
+{
+}

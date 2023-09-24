@@ -2,17 +2,18 @@ use crate::types::HW::{LSL0, LSL16, LSL32, LSL48};
 
 mod type_creation_macro;
 
-pub mod shifts;
-pub mod bitmask_immediate;
-pub mod instruction;
-pub mod prefetch_memory;
-pub mod encodable;
-pub mod condition;
-pub mod mem_barrier_option;
-pub mod pstate;
-pub mod sys_ops;
-pub mod extends;
 pub mod ArrSpecifier;
+pub mod bitmask_immediate;
+pub mod condition;
+pub mod encodable;
+pub mod extends;
+pub mod instruction;
+pub mod mem_barrier_option;
+pub mod prefetch_memory;
+pub mod pstate;
+pub mod register;
+pub mod shifts;
+pub mod sys_ops;
 
 pub type Instruction = u32;
 pub type InstructionPointer = *mut Instruction;
@@ -66,7 +67,7 @@ impl From<u8> for HW {
             1 => LSL16,
             2 => LSL32,
             3 => LSL48,
-            _ => panic!("Invalid HW LSL {value}!") // TODO: Better error handling
+            _ => panic!("Invalid HW LSL {value}!"), // TODO: Better error handling
         }
     }
 }
@@ -77,7 +78,7 @@ impl From<HW> for u8 {
             LSL0 => 0,
             LSL16 => 1,
             LSL32 => 2,
-            LSL48 => 3
+            LSL48 => 3,
         }
     }
 }
