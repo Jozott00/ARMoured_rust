@@ -8,13 +8,15 @@
 //!  - [ADDS - register - setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDS--shifted-register---Add--shifted-register---setting-flags-?lang=en)
 //!  - [SUB - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--shifted-register---Subtract--shifted-register--?lang=en)
 //!  - [SUBS - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--shifted-register---Subtract--shifted-register---setting-flags-?lang=en)
+//!  - [MUL - Multiply](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MUL--Multiply--an-alias-of-MADD-?lang=en)
+//!  - [NEG - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/NEG--shifted-register---Negate--shifted-register---an-alias-of-SUB--shifted-register--?lang=en)
 
 use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
 use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
 use crate::types::register::{WZR, XZR};
 use crate::types::shifts::Shift3;
-use crate::types::Register;
+use crate::types::{Register, UImm5, UImm6};
 
 /// # Common Aliases
 ///
@@ -26,7 +28,8 @@ use crate::types::Register;
 ///  - [ADDS - register - setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDS--shifted-register---Add--shifted-register---setting-flags-?lang=en)
 ///  - [SUB - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--shifted-register---Subtract--shifted-register--?lang=en)
 ///  - [SUBS - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--shifted-register---Subtract--shifted-register---setting-flags-?lang=en)
-///  - [MUL - Multiply](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MADD--Multiply-Add-?lang=en)
+///  - [MUL - Multiply](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MUL--Multiply--an-alias-of-MADD-?lang=en)
+///  - [NEG - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/NEG--shifted-register---Negate--shifted-register---an-alias-of-SUB--shifted-register--?lang=en)
 pub trait CommonAliases<T>:
     LogicalShiftRegister<T> + AddSubtractShiftedRegister<T> + DataProcessingThreeSource<T>
 {
@@ -170,25 +173,29 @@ pub trait CommonAliases<T>:
         self.subs_64_reg_shift(xd, xn, xm, Shift3::LSL(0))
     }
 
-    /// [MUL - Multiply](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MADD--Multiply-Add-?lang=en)
+    /// [MUL - Multiply](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MUL--Multiply--an-alias-of-MADD-?lang=en)
     ///
-    /// Alias of: Multiply-Add multiplies two register values, adds a third register value, and writes the result to the destination register.
+    /// : Rd = Rn * Rm.
     ///
-    /// This instruction is used by the alias MUL.
+    /// This is an alias of MADD. This means:
+    /// - The encodings in this description are named to match the encodings of MADD.
+    /// - The description of MADD gives the operational pseudocode for this instruction.
     ///
     /// ```asm
-    /// MUL <Wd>, <Wn>, <Wm>
+    /// MUL <Xd>, <Xn>, <Xm>
     /// ```
     #[inline(always)]
     fn mul_32_reg(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         self.madd_32(wd, wn, wm, WZR)
     }
 
-    /// [MUL - Multiply](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MADD--Multiply-Add-?lang=en)
+    /// [MUL - Multiply](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MUL--Multiply--an-alias-of-MADD-?lang=en)
     ///
-    /// Alias of: Multiply-Add multiplies two register values, adds a third register value, and writes the result to the destination register.
+    /// : Rd = Rn * Rm.
     ///
-    /// This instruction is used by the alias MUL.
+    /// This is an alias of MADD. This means:
+    /// - The encodings in this description are named to match the encodings of MADD.
+    /// - The description of MADD gives the operational pseudocode for this instruction.
     ///
     /// ```asm
     /// MUL <Xd>, <Xn>, <Xm>
@@ -196,6 +203,36 @@ pub trait CommonAliases<T>:
     #[inline(always)]
     fn mul_64_reg(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         self.madd_64(xd, xn, xm, XZR)
+    }
+
+    /// [NEG - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/NEG--shifted-register---Negate--shifted-register---an-alias-of-SUB--shifted-register--?lang=en)
+    /// Negate (shifted register) negates an optionally-shifted register value, and writes the result to the destination register.
+    ///
+    /// This is an alias of SUB (shifted register). This means:
+    /// - The encodings in this description are named to match the encodings of SUB (shifted register).
+    /// - The description of SUB (shifted register) gives the operational pseudocode for this instruction.
+    ///
+    /// ```asm
+    /// NEG <Wd>, <Wm>{, <shift> #<amount>}
+    /// ```
+    #[inline(always)]
+    fn neg_32_reg(&mut self, wd: Register, wm: Register, shift: Option<Shift3<UImm5>>) -> T {
+        self.sub_32_reg_shift(wd, WZR, wm, shift.unwrap_or(Shift3::LSL(0)))
+    }
+
+    /// [NEG - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/NEG--shifted-register---Negate--shifted-register---an-alias-of-SUB--shifted-register--?lang=en)
+    /// Negate (shifted register) negates an optionally-shifted register value, and writes the result to the destination register.
+    ///
+    /// This is an alias of SUB (shifted register). This means:
+    /// - The encodings in this description are named to match the encodings of SUB (shifted register).
+    /// - The description of SUB (shifted register) gives the operational pseudocode for this instruction.
+    ///
+    /// ```asm
+    /// NEG <Wd>, <Wm>{, <shift> #<amount>}
+    /// ```
+    #[inline(always)]
+    fn neg_64_reg(&mut self, xd: Register, xm: Register, shift: Option<Shift3<UImm6>>) -> T {
+        self.sub_64_reg_shift(xd, WZR, xm, shift.unwrap_or(Shift3::LSL(0)))
     }
 }
 
@@ -250,7 +287,7 @@ mod tests {
     }
 
     #[test]
-    fn test_sub() {
+    fn test_mul() {
         let mut prod = TestProducer::new();
 
         let instr = prod.mul_32_reg(3, 4, 20);
@@ -258,5 +295,22 @@ mod tests {
 
         let instr = prod.mul_64_reg(1, 28, 20);
         assert_eq!(instr, "mul x1, x28, x20");
+    }
+
+    #[test]
+    fn test_neg() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.neg_32_reg(3, 20, None);
+        assert_eq!(instr, "neg w3, w20");
+
+        let instr = prod.neg_32_reg(3, 20, Shift3::ASR(31).into());
+        assert_eq!(instr, "neg w3, w20, asr #0x1f");
+
+        let instr = prod.neg_64_reg(1, 20, None);
+        assert_eq!(instr, "neg x1, x20");
+
+        let instr = prod.neg_64_reg(1, 20, Shift3::LSR(63).into());
+        assert_eq!(instr, "neg x1, x20, lsr #0x3f");
     }
 }
