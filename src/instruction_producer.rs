@@ -1,10 +1,12 @@
 use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
+use crate::instruction_encoding::branch_exception_system::compare_and_branch_imm::CompareAndBranchImm;
 use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediate;
 use crate::instruction_encoding::branch_exception_system::exception_generation::ExceptionGeneration;
 use crate::instruction_encoding::branch_exception_system::pstate::PStateInstructions;
 use crate::instruction_encoding::branch_exception_system::system_instr_w_register_arg::SystemInstructionsWithRegArg;
 use crate::instruction_encoding::branch_exception_system::system_instructions::SystemInstructions;
 use crate::instruction_encoding::branch_exception_system::system_register_move::SystemRegisterMove;
+use crate::instruction_encoding::branch_exception_system::test_and_branch_imm::TestAndBranchImmediate;
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
 use crate::instruction_encoding::branch_exception_system::BranchExceptionSystem;
@@ -83,6 +85,8 @@ impl MovWideImmediate<Instr> for InstrProducer {}
 impl BitfieldInstructions<Instr> for InstrProducer {}
 
 impl ExtractInstructions<Instr> for InstrProducer {}
+
+impl TestAndBranchImmediate<Instr> for InstrProducer {}
 
 impl BranchExceptionSystem<Instr> for InstrProducer {}
 
@@ -177,5 +181,7 @@ impl DataProcessingRegister<Instr> for InstrProducer {}
 impl DataProcessingTwoSource<Instr> for InstrProducer {}
 
 impl CommonAliases<Instr> for InstrProducer {}
+
+impl CompareAndBranchImm<Instr> for InstrProducer {}
 
 impl InstructionSet<Instr> for InstrProducer {}

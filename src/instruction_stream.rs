@@ -47,6 +47,12 @@ use crate::types::Offset32;
 use bad64::disasm;
 
 use crate::instruction_emitter::{Emitter, InstrEmitter};
+use crate::instruction_encoding::branch_exception_system::compare_and_branch_imm::{
+    CompareAndBranchImm, CompareAndBranchImmWithAddress,
+};
+use crate::instruction_encoding::branch_exception_system::test_and_branch_imm::{
+    TestAndBranchImmediate, TestAndBranchImmediateWithAddress,
+};
 use crate::instruction_encoding::common_aliases::CommonAliases;
 use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCompareImmediate;
 use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
@@ -229,9 +235,23 @@ impl<'mem, M: Memory, E: Emitter> SystemRegisterMove<Instr> for InstrStream<'mem
 
 impl<'mem, M: Memory, E: Emitter> UnconditionalBranchRegister<Instr> for InstrStream<'mem, M, E> {}
 
+impl<'mem, M: Memory, E: Emitter> CompareAndBranchImm<Instr> for InstrStream<'mem, M, E> {}
+
 impl<'mem, M: Memory, E: Emitter> BranchExceptionSystem<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> ExceptionGeneration<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> CompareAndBranchImmWithAddress<Instr>
+    for InstrStream<'mem, M, E>
+{
+}
+
+impl<'mem, M: Memory, E: Emitter> TestAndBranchImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> TestAndBranchImmediateWithAddress<Instr>
+    for InstrStream<'mem, M, E>
+{
+}
 
 impl<'mem, M: Memory, E: Emitter> BranchExceptionSystemWithAddress<Instr>
     for InstrStream<'mem, M, E>
