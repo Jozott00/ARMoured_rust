@@ -10,6 +10,7 @@
 //!  - [SUBS - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--shifted-register---Subtract--shifted-register---setting-flags-?lang=en)
 //!  - [MUL - Multiply](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MUL--Multiply--an-alias-of-MADD-?lang=en)
 //!  - [NEG - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/NEG--shifted-register---Negate--shifted-register---an-alias-of-SUB--shifted-register--?lang=en)
+//!  - [NOP](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/NOP--No-Operation-?lang=en)
 
 use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
 use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
@@ -17,6 +18,7 @@ use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftR
 use crate::types::register::{WZR, XZR};
 use crate::types::shifts::Shift3;
 use crate::types::{Register, UImm5, UImm6};
+use bit_seq::bseq_32;
 
 /// # Common Aliases
 ///
@@ -30,6 +32,7 @@ use crate::types::{Register, UImm5, UImm6};
 ///  - [SUBS - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--shifted-register---Subtract--shifted-register---setting-flags-?lang=en)
 ///  - [MUL - Multiply](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MUL--Multiply--an-alias-of-MADD-?lang=en)
 ///  - [NEG - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/NEG--shifted-register---Negate--shifted-register---an-alias-of-SUB--shifted-register--?lang=en)
+///  - [NOP](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/NOP--No-Operation-?lang=en)
 pub trait CommonAliases<T>:
     LogicalShiftRegister<T> + AddSubtractShiftedRegister<T> + DataProcessingThreeSource<T>
 {
@@ -234,6 +237,17 @@ pub trait CommonAliases<T>:
     fn neg_64_reg(&mut self, xd: Register, xm: Register, shift: Option<Shift3<UImm6>>) -> T {
         self.sub_64_reg_shift(xd, WZR, xm, shift.unwrap_or(Shift3::LSL(0)))
     }
+
+    /// [NOP](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/NOP--No-Operation-?lang=en)
+    ///
+    /// No Operation does nothing, other than advance the value of the program counter by 4. This instruction can be used for instruction alignment purposes.
+    ///
+    /// ```asm
+    /// NOP
+    /// ```
+    fn nop(&mut self) -> T {
+        self.process(0b11010101000000110010000000011111)
+    }
 }
 
 #[cfg(test)]
@@ -312,5 +326,13 @@ mod tests {
 
         let instr = prod.neg_64_reg(1, 20, Shift3::LSR(63).into());
         assert_eq!(instr, "neg x1, x20, lsr #0x3f");
+    }
+
+    #[test]
+    fn test_nop() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.nop();
+        assert_eq!(instr, "nop");
     }
 }
