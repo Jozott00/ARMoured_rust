@@ -10,6 +10,7 @@
 //!  - [SUBS - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--shifted-register---Subtract--shifted-register---setting-flags-?lang=en)
 
 use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
+use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
 use crate::types::register::{WZR, XZR};
 use crate::types::shifts::Shift3;
@@ -25,7 +26,10 @@ use crate::types::Register;
 ///  - [ADDS - register - setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDS--shifted-register---Add--shifted-register---setting-flags-?lang=en)
 ///  - [SUB - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--shifted-register---Subtract--shifted-register--?lang=en)
 ///  - [SUBS - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--shifted-register---Subtract--shifted-register---setting-flags-?lang=en)
-pub trait CommonAliases<T>: LogicalShiftRegister<T> + AddSubtractShiftedRegister<T> {
+///  - [MUL - Multiply](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MADD--Multiply-Add-?lang=en)
+pub trait CommonAliases<T>:
+    LogicalShiftRegister<T> + AddSubtractShiftedRegister<T> + DataProcessingThreeSource<T>
+{
     /// [MOV (register)](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MOV--register---Move--register---an-alias-of-ORR--shifted-register--?lang=en)
     ///
     /// Move (register) copies the value in a source register to the destination register.
@@ -165,6 +169,34 @@ pub trait CommonAliases<T>: LogicalShiftRegister<T> + AddSubtractShiftedRegister
     fn subs_64_reg(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         self.subs_64_reg_shift(xd, xn, xm, Shift3::LSL(0))
     }
+
+    /// [MUL - Multiply](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MADD--Multiply-Add-?lang=en)
+    ///
+    /// Alias of: Multiply-Add multiplies two register values, adds a third register value, and writes the result to the destination register.
+    ///
+    /// This instruction is used by the alias MUL.
+    ///
+    /// ```asm
+    /// MUL <Wd>, <Wn>, <Wm>
+    /// ```
+    #[inline(always)]
+    fn mul_32_reg(&mut self, wd: Register, wn: Register, wm: Register) -> T {
+        self.madd_32(wd, wn, wm, WZR)
+    }
+
+    /// [MUL - Multiply](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MADD--Multiply-Add-?lang=en)
+    ///
+    /// Alias of: Multiply-Add multiplies two register values, adds a third register value, and writes the result to the destination register.
+    ///
+    /// This instruction is used by the alias MUL.
+    ///
+    /// ```asm
+    /// MUL <Xd>, <Xn>, <Xm>
+    /// ```
+    #[inline(always)]
+    fn mul_64_reg(&mut self, xd: Register, xn: Register, xm: Register) -> T {
+        self.madd_64(xd, xn, xm, XZR)
+    }
 }
 
 #[cfg(test)]
@@ -215,5 +247,16 @@ mod tests {
 
         let instr = prod.subs_64_reg(1, 28, 20);
         assert_eq!(instr, "subs x1, x28, x20");
+    }
+
+    #[test]
+    fn test_sub() {
+        let mut prod = TestProducer::new();
+
+        let instr = prod.mul_32_reg(3, 4, 20);
+        assert_eq!(instr, "mul w3, w4, w20");
+
+        let instr = prod.mul_64_reg(1, 28, 20);
+        assert_eq!(instr, "mul x1, x28, x20");
     }
 }
