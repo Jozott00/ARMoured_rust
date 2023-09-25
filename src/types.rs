@@ -25,6 +25,7 @@ pub type Imm32 = u32;
 pub type Imm19 = i32;
 pub type Imm18 = i32;
 pub type Imm16 = u16;
+pub type Imm14 = i16;
 pub type Imm13 = i16;
 pub type Imm12 = u16;
 pub type Imm11 = i16;
@@ -49,6 +50,7 @@ pub type UImm3 = u8;
 pub type UImm2 = u8;
 pub type UImm1 = u8;
 
+pub type Offset16 = i16;
 pub type Offset32 = i32;
 pub type Offset64 = i64;
 

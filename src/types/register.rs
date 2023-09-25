@@ -1,4 +1,9 @@
-use crate::types::Register;
+use crate::types::{Register, UImm4};
+
+pub enum RegConstr {
+    W(Register),
+    X(Register),
+}
 
 pub const WZR: Register = 31;
 pub const XZR: Register = 31;

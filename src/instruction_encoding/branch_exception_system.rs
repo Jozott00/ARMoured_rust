@@ -22,6 +22,9 @@ use crate::instruction_encoding::branch_exception_system::pstate::PStateInstruct
 use crate::instruction_encoding::branch_exception_system::system_instr_w_register_arg::SystemInstructionsWithRegArg;
 use crate::instruction_encoding::branch_exception_system::system_instructions::SystemInstructions;
 use crate::instruction_encoding::branch_exception_system::system_register_move::SystemRegisterMove;
+use crate::instruction_encoding::branch_exception_system::test_and_branch_imm::{
+    TestAndBranchImmediate, TestAndBranchImmediateWithAddress,
+};
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::{
     UnconditionalBranchImmediate, UnconditionalBranchImmediateWithAddress,
 };
@@ -35,6 +38,7 @@ pub mod pstate;
 pub mod system_instr_w_register_arg;
 pub mod system_instructions;
 pub mod system_register_move;
+pub mod test_and_branch_imm;
 pub mod unconditional_branch_immediate;
 pub mod unconditional_branch_register;
 
@@ -49,6 +53,7 @@ pub trait BranchExceptionSystem<T>:
     + UnconditionalBranchRegister<T>
     + UnconditionalBranchImmediate<T>
     + CompareAndBranchImm<T>
+    + TestAndBranchImmediate<T>
 {
 }
 
@@ -57,5 +62,6 @@ pub trait BranchExceptionSystemWithAddress<T>:
     + ConditionalBranchImmediateWithAddress<T>
     + UnconditionalBranchImmediateWithAddress<T>
     + CompareAndBranchImmWithAddress<T>
+    + TestAndBranchImmediateWithAddress<T>
 {
 }

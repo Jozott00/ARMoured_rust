@@ -50,6 +50,9 @@ use crate::instruction_emitter::{Emitter, InstrEmitter};
 use crate::instruction_encoding::branch_exception_system::compare_and_branch_imm::{
     CompareAndBranchImm, CompareAndBranchImmWithAddress,
 };
+use crate::instruction_encoding::branch_exception_system::test_and_branch_imm::{
+    TestAndBranchImmediate, TestAndBranchImmediateWithAddress,
+};
 use crate::instruction_encoding::common_aliases::CommonAliases;
 use crate::instruction_encoding::data_proc_reg::cond_compare_imm::ConditionalCompareImmediate;
 use crate::instruction_encoding::data_proc_reg::cond_compare_reg::ConditionalCompareRegister;
@@ -239,6 +242,13 @@ impl<'mem, M: Memory, E: Emitter> BranchExceptionSystem<Instr> for InstrStream<'
 impl<'mem, M: Memory, E: Emitter> ExceptionGeneration<Instr> for InstrStream<'mem, M, E> {}
 
 impl<'mem, M: Memory, E: Emitter> CompareAndBranchImmWithAddress<Instr>
+    for InstrStream<'mem, M, E>
+{
+}
+
+impl<'mem, M: Memory, E: Emitter> TestAndBranchImmediate<Instr> for InstrStream<'mem, M, E> {}
+
+impl<'mem, M: Memory, E: Emitter> TestAndBranchImmediateWithAddress<Instr>
     for InstrStream<'mem, M, E>
 {
 }

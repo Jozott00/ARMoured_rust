@@ -6,6 +6,7 @@ use crate::instruction_encoding::branch_exception_system::pstate::PStateInstruct
 use crate::instruction_encoding::branch_exception_system::system_instr_w_register_arg::SystemInstructionsWithRegArg;
 use crate::instruction_encoding::branch_exception_system::system_instructions::SystemInstructions;
 use crate::instruction_encoding::branch_exception_system::system_register_move::SystemRegisterMove;
+use crate::instruction_encoding::branch_exception_system::test_and_branch_imm::TestAndBranchImmediate;
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
 use crate::instruction_encoding::branch_exception_system::BranchExceptionSystem;
@@ -84,6 +85,8 @@ impl MovWideImmediate<Instr> for InstrProducer {}
 impl BitfieldInstructions<Instr> for InstrProducer {}
 
 impl ExtractInstructions<Instr> for InstrProducer {}
+
+impl TestAndBranchImmediate<Instr> for InstrProducer {}
 
 impl BranchExceptionSystem<Instr> for InstrProducer {}
 
