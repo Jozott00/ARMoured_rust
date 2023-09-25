@@ -18,7 +18,6 @@ use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftR
 use crate::types::register::{WZR, XZR};
 use crate::types::shifts::Shift3;
 use crate::types::{Register, UImm5, UImm6};
-use bit_seq::bseq_32;
 
 /// # Common Aliases
 ///

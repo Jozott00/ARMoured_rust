@@ -1,4 +1,5 @@
 use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
+use crate::instruction_encoding::branch_exception_system::compare_and_branch_imm::CompareAndBranchImm;
 use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediate;
 use crate::instruction_encoding::branch_exception_system::exception_generation::ExceptionGeneration;
 use crate::instruction_encoding::branch_exception_system::pstate::PStateInstructions;
@@ -91,6 +92,8 @@ impl MovWideImmediate<InstrRes> for TestProducer {}
 impl BitfieldInstructions<InstrRes> for TestProducer {}
 
 impl ExtractInstructions<InstrRes> for TestProducer {}
+
+impl CompareAndBranchImm<InstrRes> for TestProducer {}
 
 impl BranchExceptionSystem<InstrRes> for TestProducer {}
 

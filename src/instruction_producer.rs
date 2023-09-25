@@ -1,4 +1,5 @@
 use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
+use crate::instruction_encoding::branch_exception_system::compare_and_branch_imm::CompareAndBranchImm;
 use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediate;
 use crate::instruction_encoding::branch_exception_system::exception_generation::ExceptionGeneration;
 use crate::instruction_encoding::branch_exception_system::pstate::PStateInstructions;
@@ -177,5 +178,7 @@ impl DataProcessingRegister<Instr> for InstrProducer {}
 impl DataProcessingTwoSource<Instr> for InstrProducer {}
 
 impl CommonAliases<Instr> for InstrProducer {}
+
+impl CompareAndBranchImm<Instr> for InstrProducer {}
 
 impl InstructionSet<Instr> for InstrProducer {}

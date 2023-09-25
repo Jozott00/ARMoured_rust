@@ -35,6 +35,7 @@ pub type Imm5 = u8;
 
 pub type UImm64 = u64;
 pub type UImm32 = u32;
+pub type UImm19 = u32;
 pub type UImm16 = u16;
 pub type UImm15 = u16;
 pub type UImm14 = u16;
