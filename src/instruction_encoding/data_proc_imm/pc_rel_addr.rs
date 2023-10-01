@@ -6,13 +6,11 @@
 
 pub use bit_seq::{bseq_32, bseq_8};
 use num::Signed;
+
 use crate::instruction_emitter::Emitter;
 use crate::instruction_encoding::{AddressableInstructionProcessor, InstructionProcessor};
-
-use crate::instruction_stream::InstrStream;
 use crate::mc_memory::Memory;
-use crate::types::{HW, Imm16, InstructionPointer, Offset32, Offset64, Register};
-use crate::types::instruction::Instr;
+use crate::types::{Offset32, Offset64, Register};
 
 /// Helper function to emit PC-relative addressing instructions.
 ///
@@ -23,7 +21,13 @@ use crate::types::instruction::Instr;
 /// * `immhi` - The higher 19 bits of the immediate value.
 /// * `rd` - The destination register.
 #[inline(always)]
-fn emit_pc_rel_addr<P: InstructionProcessor<T>, T>(proc: &mut P, op: u8, immlo: u8, immhi: u32, rd: Register) -> T {
+fn emit_pc_rel_addr<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    op: u8,
+    immlo: u8,
+    immhi: u32,
+    rd: Register,
+) -> T {
     let r = bseq_32!(op:1 immlo:2 10000 immhi:19 rd:5);
     proc.process(r)
 }
@@ -52,7 +56,10 @@ pub trait PcRelAddressing<T>: InstructionProcessor<T> {
     #[inline(always)]
     fn adr_from_byte_offset(&mut self, rd: Register, offset: Offset32) -> T {
         // check if offset is in range of +-1MB and a multiply of 4
-        debug_assert!(-(1 << 20) <= offset && offset < (1 << 20), "Offset must be within ±1MB");
+        debug_assert!(
+            -(1 << 20) <= offset && offset < (1 << 20),
+            "Offset must be within ±1MB"
+        );
         let immlo = offset & 0b11;
         let immhi = offset >> 2;
         emit_pc_rel_addr(self, 0, immlo as u8, immhi as u32, rd)
@@ -75,7 +82,10 @@ pub trait PcRelAddressing<T>: InstructionProcessor<T> {
     #[inline(always)]
     fn adrp_from_byte_offset(&mut self, rd: Register, offset: Offset64) -> T {
         debug_assert!(offset % 4096 == 0, "Offset must be a multiply of 4096!");
-        debug_assert!(-((1 << 30) * 4) <= offset && offset < ((1 << 30) * 4), "Offset must be within ±4GB");
+        debug_assert!(
+            -((1 << 30) * 4) <= offset && offset < ((1 << 30) * 4),
+            "Offset must be within ±4GB"
+        );
 
         // shift 12 bits (divide by 4096)
         let offset = offset >> 12;
@@ -105,7 +115,10 @@ pub trait PcRelAddressingWithAddress<T>: AddressableInstructionProcessor<T> {
     #[inline(always)]
     fn adr_from_addr(&mut self, rd: Register, addr: usize) -> T {
         let offset = self.intr_ptr_offset_to(addr);
-        debug_assert!(-(1 << 20) <= offset && offset < (1 << 20), "Offset must be within ±1MB");
+        debug_assert!(
+            -(1 << 20) <= offset && offset < (1 << 20),
+            "Offset must be within ±1MB"
+        );
 
         let immlo = offset & 0b11;
         let immhi = offset >> 2;
@@ -115,12 +128,13 @@ pub trait PcRelAddressingWithAddress<T>: AddressableInstructionProcessor<T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::mc_memory::MockMemory;
-    use crate::instruction_emitter::MockEmitter;
     use crate::{assert_panic, stream_mock};
-    use crate::types::InstructionPointer;
+    use crate::instruction_emitter::MockEmitter;
     use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::MockMemory;
+    use crate::types::InstructionPointer;
+
+    use super::*;
 
     #[test]
     fn test_adr_x() {

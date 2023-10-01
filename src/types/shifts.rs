@@ -1,4 +1,3 @@
-use crate::types::UImm5;
 macro_rules! create_shift {
     ($enum_name:ident, [$(($case:ident, $val:expr)),*]) => {
         #[derive(Debug)]
@@ -35,7 +34,6 @@ create_shift!(Shift1, [(LSL0, 0), (LSL12, 1)]);
 
 // create_shift!(Shift, [(LSL, 0), (LSR, 1), (ASR, 2), (ROR, 3)]);
 
-
 #[derive(Debug)]
 pub enum Shift4<T> {
     LSL(T),
@@ -66,7 +64,6 @@ impl<T> From<Shift4<T>> for (u8, T) {
         }
     }
 }
-
 
 #[derive(Debug)]
 pub enum Shift3<T> {

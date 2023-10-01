@@ -6,12 +6,11 @@
 //! - [MOVK](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MOVK--Move-wide-with-keep-?lang=en)
 
 use bit_seq::bseq_32;
+
 use crate::instruction_emitter::Emitter;
 use crate::instruction_encoding::InstructionProcessor;
-
-use crate::instruction_stream::InstrStream;
 use crate::mc_memory::Memory;
-use crate::types::{HW, Imm16, Imm32, Register, UImm16};
+use crate::types::{HW, Register, UImm16};
 
 /// Internal function used to encode `MOV` instructions with immediate values.
 /// Parameters:
@@ -21,7 +20,14 @@ use crate::types::{HW, Imm16, Imm32, Register, UImm16};
 /// * `d`: specifies the destination register.
 /// * `imm`: specifies the immediate value.
 #[inline(always)]
-fn emit_mov_imm_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, opc: u8, hw: u8, d: u8, imm: u16) -> T {
+fn emit_mov_imm_x<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: u8,
+    opc: u8,
+    hw: u8,
+    d: u8,
+    imm: u16,
+) -> T {
     let r = bseq_32!(sf:1 opc:2 100101 hw:2 imm:16 d:5);
     proc.process(r)
 }
@@ -31,19 +37,37 @@ fn emit_mov_imm_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, opc: u8, 
 /// * `imm`: immediate value.
 /// * `lsl`: shift amount as defined by the `HW` enum.
 #[inline(always)]
-fn emit_movn_imm_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: bool, d: Register, imm: UImm16, lsl: HW) -> T {
+fn emit_movn_imm_x<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: bool,
+    d: Register,
+    imm: UImm16,
+    lsl: HW,
+) -> T {
     emit_mov_imm_x(proc, sf.into(), 0b00, lsl.into(), d, imm)
 }
 
 /// Generates a `MOVZ` (Move Zero) instruction. The `sf` parameter indicates whether it's a 32-bit (`false`) or 64-bit (`true`) operation.
 #[inline(always)]
-fn emit_movz_imm_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: bool, d: Register, imm: UImm16, lsl: HW) -> T {
+fn emit_movz_imm_x<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: bool,
+    d: Register,
+    imm: UImm16,
+    lsl: HW,
+) -> T {
     emit_mov_imm_x(proc, sf.into(), 0b10, lsl.into(), d, imm)
 }
 
 /// Generates a `MOVK` (Move Keep) instruction. The `sf` parameter indicates whether it's a 32-bit (`false`) or 64-bit (`true`) operation.
 #[inline(always)]
-fn emit_movk_imm_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: bool, d: Register, imm: UImm16, lsl: HW) -> T {
+fn emit_movk_imm_x<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: bool,
+    d: Register,
+    imm: UImm16,
+    lsl: HW,
+) -> T {
     emit_mov_imm_x(proc, sf.into(), 0b11, lsl.into(), d, imm)
 }
 
@@ -54,7 +78,6 @@ fn emit_movk_imm_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: bool, d: Reg
 /// - [MOVZ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MOVZ--Move-wide-with-zero-?lang=en)
 /// - [MOVK](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MOVK--Move-wide-with-keep-?lang=en)
 pub trait MovWideImmediate<T>: InstructionProcessor<T> {
-
     // MOVN 32 and 64
 
     /// [MOVN](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/MOVN--Move-wide-with-NOT-?lang=en)\
@@ -76,7 +99,10 @@ pub trait MovWideImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn movn_32_imm_lsl(&mut self, wd: Register, imm: UImm16, lsl: HW) -> T {
-        debug_assert!(lsl == HW::LSL0 || lsl == HW::LSL16, "lsl shift must be either 0 or 16 for 64 bit mov");
+        debug_assert!(
+            lsl == HW::LSL0 || lsl == HW::LSL16,
+            "lsl shift must be either 0 or 16 for 32 bit mov"
+        );
         emit_movn_imm_x(self, false, wd, imm, lsl)
     }
 
@@ -123,7 +149,10 @@ pub trait MovWideImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn movz_32_imm_lsl(&mut self, wd: Register, imm: UImm16, lsl: HW) -> T {
-        debug_assert!(lsl == HW::LSL0 || lsl == HW::LSL16, "lsl shift must be either 0 or 16 for 64 bit mov");
+        debug_assert!(
+            lsl == HW::LSL0 || lsl == HW::LSL16,
+            "lsl shift must be either 0 or 16 for 32 bit mov"
+        );
         emit_movz_imm_x(self, false, wd, imm, lsl)
     }
 
@@ -170,7 +199,10 @@ pub trait MovWideImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn movk_32_imm_lsl(&mut self, wd: Register, imm: UImm16, lsl: HW) -> T {
-        debug_assert!(lsl == HW::LSL0 || lsl == HW::LSL16, "lsl shift must be either 0 or 16 for 64 bit mov");
+        debug_assert!(
+            lsl == HW::LSL0 || lsl == HW::LSL16,
+            "lsl shift must be either 0 or 16 for 32 bit mov"
+        );
         emit_movk_imm_x(self, false, wd, imm, lsl)
     }
 
@@ -201,6 +233,7 @@ pub trait MovWideImmediate<T>: InstructionProcessor<T> {
 mod tests {
     use crate::assert_panic;
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]
@@ -214,7 +247,6 @@ mod tests {
         assert_eq!(instr, "movn w2, #0xffff, lsl #0x10");
 
         assert_panic!("Should panic: wrong shift"; prod.movn_32_imm_lsl(2, 0xffff, HW::LSL32));
-
 
         let instr = prod.movn_64_imm(2, 0xffff);
         assert_eq!(instr, "mov x2, #0xffffffffffff0000");

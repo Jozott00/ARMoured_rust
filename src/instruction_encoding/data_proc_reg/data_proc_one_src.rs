@@ -17,14 +17,21 @@
 //!  - [AUTDB - AUTDZB - Authenticate Data address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTDB--AUTDZB--Authenticate-Data-address--using-key-B-?lang=en)
 //!  - [XPACD - XPACI - XPACLRI - Strip Pointer Authentication Code](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/XPACD--XPACI--XPACLRI--Strip-Pointer-Authentication-Code-?lang=en)
 
-
-
 use bit_seq::{bseq_32, bseq_8};
+
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::Register;
 
 #[inline(always)]
-fn emit_data_proc_one<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, s: u8, opcode2: u8, opcode: u8, rn: Register, rd: Register) -> T {
+fn emit_data_proc_one<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: u8,
+    s: u8,
+    opcode2: u8,
+    opcode: u8,
+    rn: Register,
+    rd: Register,
+) -> T {
     let i = bseq_32!(sf:1 1 s:1 11010110 opcode2:5 opcode:6 rn:5 rd:5);
     proc.process(i)
 }
@@ -66,7 +73,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 0, 0, 0, 0, wn, wd)
     }
 
-
     /// [RBIT - Reverse Bits](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/RBIT--Reverse-Bits-?lang=en)
     ///
     /// Reverse Bits reverses the bit order in a register.
@@ -78,7 +84,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn rbit_64(&mut self, xd: Register, xn: Register) -> T {
         emit_data_proc_one(self, 1, 0, 0, 0, xn, xd)
     }
-
 
     /// [REV16 - Reverse bytes in 16 bit halfwords](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/REV16--Reverse-bytes-in-16-bit-halfwords-?lang=en)
     ///
@@ -92,7 +97,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 0, 0, 0, 1, wn, wd)
     }
 
-
     /// [REV16 - Reverse bytes in 16 bit halfwords](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/REV16--Reverse-bytes-in-16-bit-halfwords-?lang=en)
     ///
     /// Reverse bytes in 16-bit halfwords reverses the byte order in each 16-bit halfword of a register.
@@ -104,7 +108,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn rev16_64(&mut self, xd: Register, xn: Register) -> T {
         emit_data_proc_one(self, 1, 0, 0, 1, xn, xd)
     }
-
 
     /// [REV - Reverse Bytes](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/REV--Reverse-Bytes-?lang=en)
     ///
@@ -120,7 +123,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 0, 0, 0, 0b10, wn, wd)
     }
 
-
     /// [REV - Reverse Bytes](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/REV--Reverse-Bytes-?lang=en)
     ///
     /// Reverse Bytes reverses the byte order in a register.
@@ -135,7 +137,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 0, 0b11, xn, xd)
     }
 
-
     /// [CLZ - Count Leading Zeros](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CLZ--Count-Leading-Zeros-?lang=en)
     ///
     /// Count Leading Zeros counts the number of binary zero bits before the first binary one bit in the value of the source register, and writes the result to the destination register.
@@ -147,7 +148,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn clz_32(&mut self, wd: Register, wn: Register) -> T {
         emit_data_proc_one(self, 0, 0, 0, 0b100, wn, wd)
     }
-
 
     /// [CLZ - Count Leading Zeros](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CLZ--Count-Leading-Zeros-?lang=en)
     ///
@@ -161,7 +161,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 0, 0b100, xn, xd)
     }
 
-
     /// [CLS - Count Leading Sign bits](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CLS--Count-Leading-Sign-bits-?lang=en)
     ///
     /// Count Leading Sign bits counts the number of leading bits of the source register that have the same value as the most significant bit of the register, and writes the result to the destination register. This count does not include the most significant bit of the source register.
@@ -173,7 +172,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn cls_32(&mut self, wd: Register, wn: Register) -> T {
         emit_data_proc_one(self, 0, 0, 0, 0b101, wn, wd)
     }
-
 
     /// [CLS - Count Leading Sign bits](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CLS--Count-Leading-Sign-bits-?lang=en)
     ///
@@ -187,7 +185,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 0, 0b101, xn, xd)
     }
 
-
     /// [REV32 - Reverse bytes in 32 bit words](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/REV32--Reverse-bytes-in-32-bit-words-?lang=en)
     ///
     /// Reverse bytes in 32-bit words reverses the byte order in each 32-bit word of a register.
@@ -199,7 +196,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn rev32(&mut self, xd: Register, xn: Register) -> T {
         emit_data_proc_one(self, 1, 0, 0, 0b10, xn, xd)
     }
-
 
     /// [PACIA - PACIA1716 - PACIASP - PACIAZ - PACIZA - Pointer Authentication Code for Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIA--PACIA1716--PACIASP--PACIAZ--PACIZA--Pointer-Authentication-Code-for-Instruction-address--using-key-A-?lang=en)
     ///
@@ -214,7 +210,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 000), xn_sp, xd)
     }
 
-
     /// [PACIA - PACIA1716 - PACIASP - PACIAZ - PACIZA - Pointer Authentication Code for Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIA--PACIA1716--PACIASP--PACIAZ--PACIZA--Pointer-Authentication-Code-for-Instruction-address--using-key-A-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key A. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key A.
@@ -228,7 +223,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 000), 0b11111, xd)
     }
 
-
     /// [PACIA - PACIA1716 - PACIASP - PACIAZ - PACIZA - Pointer Authentication Code for Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIA--PACIA1716--PACIASP--PACIAZ--PACIZA--Pointer-Authentication-Code-for-Instruction-address--using-key-A-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key A. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key A.
@@ -240,7 +234,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn pacia1716(&mut self) -> T {
         emit_sys_instrs(self, 1, 0)
     }
-
 
     /// [PACIA - PACIA1716 - PACIASP - PACIAZ - PACIZA - Pointer Authentication Code for Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIA--PACIA1716--PACIASP--PACIAZ--PACIZA--Pointer-Authentication-Code-for-Instruction-address--using-key-A-?lang=en)
     ///
@@ -254,7 +247,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_sys_instrs(self, 0b11, 1)
     }
 
-
     /// [PACIA - PACIA1716 - PACIASP - PACIAZ - PACIZA - Pointer Authentication Code for Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIA--PACIA1716--PACIASP--PACIAZ--PACIZA--Pointer-Authentication-Code-for-Instruction-address--using-key-A-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key A. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key A.
@@ -266,7 +258,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn paciaz(&mut self) -> T {
         emit_sys_instrs(self, 0b11, 0)
     }
-
 
     /// [PACIB - PACIB1716 - PACIBSP - PACIBZ - PACIZB - Pointer Authentication Code for Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIB--PACIB1716--PACIBSP--PACIBZ--PACIZB--Pointer-Authentication-Code-for-Instruction-address--using-key-B-?lang=en)
     ///
@@ -281,7 +272,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 001), xn_sp, xd)
     }
 
-
     /// [PACIB - PACIB1716 - PACIBSP - PACIBZ - PACIZB - Pointer Authentication Code for Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIB--PACIB1716--PACIBSP--PACIBZ--PACIZB--Pointer-Authentication-Code-for-Instruction-address--using-key-B-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key B. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key B.
@@ -295,7 +285,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 001), 0b11111, xd)
     }
 
-
     /// [PACIB - PACIB1716 - PACIBSP - PACIBZ - PACIZB - Pointer Authentication Code for Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIB--PACIB1716--PACIBSP--PACIBZ--PACIZB--Pointer-Authentication-Code-for-Instruction-address--using-key-B-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key B. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key B.
@@ -307,7 +296,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn pacib1716(&mut self) -> T {
         emit_sys_instrs(self, 1, 0b10)
     }
-
 
     /// [PACIB - PACIB1716 - PACIBSP - PACIBZ - PACIZB - Pointer Authentication Code for Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIB--PACIB1716--PACIBSP--PACIBZ--PACIZB--Pointer-Authentication-Code-for-Instruction-address--using-key-B-?lang=en)
     ///
@@ -321,7 +309,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_sys_instrs(self, 0b11, 0b11)
     }
 
-
     /// [PACIB - PACIB1716 - PACIBSP - PACIBZ - PACIZB - Pointer Authentication Code for Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACIB--PACIB1716--PACIBSP--PACIBZ--PACIZB--Pointer-Authentication-Code-for-Instruction-address--using-key-B-?lang=en)
     ///
     /// Pointer Authentication Code for Instruction address, using key B. This instruction computes and inserts a pointer authentication code for an instruction address, using a modifier and key B.
@@ -333,7 +320,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn pacibz(&mut self) -> T {
         emit_sys_instrs(self, 0b11, 0b10)
     }
-
 
     /// [PACDA - PACDZA - Pointer Authentication Code for Data address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACDA--PACDZA--Pointer-Authentication-Code-for-Data-address--using-key-A-?lang=en)
     ///
@@ -350,7 +336,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 010), xn_sp, xd)
     }
 
-
     /// [PACDA - PACDZA - Pointer Authentication Code for Data address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACDA--PACDZA--Pointer-Authentication-Code-for-Data-address--using-key-A-?lang=en)
     ///
     /// Pointer Authentication Code for Data address, using key A. This instruction computes and inserts a pointer authentication code for a data address, using a modifier and key A.
@@ -365,7 +350,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         let z = 1;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 010), 0b11111, xd)
     }
-
 
     /// [PACDB - PACDZB - Pointer Authentication Code for Data address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACDB--PACDZB--Pointer-Authentication-Code-for-Data-address--using-key-B-?lang=en)
     ///
@@ -382,7 +366,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 011), xn_sp, xd)
     }
 
-
     /// [PACDB - PACDZB - Pointer Authentication Code for Data address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACDB--PACDZB--Pointer-Authentication-Code-for-Data-address--using-key-B-?lang=en)
     ///
     /// Pointer Authentication Code for Data address, using key B. This instruction computes and inserts a pointer authentication code for a data address, using a modifier and key B.
@@ -398,7 +381,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 011), 0b11111, xd)
     }
 
-
     /// [AUTIA - AUTIA1716 - AUTIASP - AUTIAZ - AUTIZA - Authenticate Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIA--AUTIA1716--AUTIASP--AUTIAZ--AUTIZA--Authenticate-Instruction-address--using-key-A-?lang=en)
     ///
     /// Authenticate Instruction address, using key A. This instruction authenticates an instruction address, using a modifier and key A.
@@ -411,7 +393,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         let z = 0;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 100), xn_sp, xd)
     }
-
 
     /// [AUTIA - AUTIA1716 - AUTIASP - AUTIAZ - AUTIZA - Authenticate Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIA--AUTIA1716--AUTIASP--AUTIAZ--AUTIZA--Authenticate-Instruction-address--using-key-A-?lang=en)
     ///
@@ -426,7 +407,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 100), 0b11111, xd)
     }
 
-
     /// [AUTIA - AUTIA1716 - AUTIASP - AUTIAZ - AUTIZA - Authenticate Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIA--AUTIA1716--AUTIASP--AUTIAZ--AUTIZA--Authenticate-Instruction-address--using-key-A-?lang=en)
     ///
     /// Authenticate Instruction address, using key A. This instruction authenticates an instruction address, using a modifier and key A.
@@ -438,7 +418,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn autia1716(&mut self) -> T {
         emit_sys_instrs(self, 1, 0b100)
     }
-
 
     /// [AUTIA - AUTIA1716 - AUTIASP - AUTIAZ - AUTIZA - Authenticate Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIA--AUTIA1716--AUTIASP--AUTIAZ--AUTIZA--Authenticate-Instruction-address--using-key-A-?lang=en)
     ///
@@ -452,7 +431,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_sys_instrs(self, 0b11, 0b101)
     }
 
-
     /// [AUTIA - AUTIA1716 - AUTIASP - AUTIAZ - AUTIZA - Authenticate Instruction address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIA--AUTIA1716--AUTIASP--AUTIAZ--AUTIZA--Authenticate-Instruction-address--using-key-A-?lang=en)
     ///
     /// Authenticate Instruction address, using key A. This instruction authenticates an instruction address, using a modifier and key A.
@@ -464,7 +442,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn autiaz(&mut self) -> T {
         emit_sys_instrs(self, 0b11, 0b100)
     }
-
 
     /// [AUTIB - AUTIB1716 - AUTIBSP - AUTIBZ - AUTIZB - Authenticate Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIB--AUTIB1716--AUTIBSP--AUTIBZ--AUTIZB--Authenticate-Instruction-address--using-key-B-?lang=en)
     ///
@@ -479,7 +456,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 101), xn_sp, xd)
     }
 
-
     /// [AUTIB - AUTIB1716 - AUTIBSP - AUTIBZ - AUTIZB - Authenticate Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIB--AUTIB1716--AUTIBSP--AUTIBZ--AUTIZB--Authenticate-Instruction-address--using-key-B-?lang=en)
     ///
     /// Authenticate Instruction address, using key B. This instruction authenticates an instruction address, using a modifier and key B.
@@ -493,7 +469,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 101), 0b11111, xd)
     }
 
-
     /// [AUTIB - AUTIB1716 - AUTIBSP - AUTIBZ - AUTIZB - Authenticate Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIB--AUTIB1716--AUTIBSP--AUTIBZ--AUTIZB--Authenticate-Instruction-address--using-key-B-?lang=en)
     ///
     /// Authenticate Instruction address, using key B. This instruction authenticates an instruction address, using a modifier and key B.
@@ -505,7 +480,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn autib1716(&mut self) -> T {
         emit_sys_instrs(self, 0b1, 0b110)
     }
-
 
     /// [AUTIB - AUTIB1716 - AUTIBSP - AUTIBZ - AUTIZB - Authenticate Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIB--AUTIB1716--AUTIBSP--AUTIBZ--AUTIZB--Authenticate-Instruction-address--using-key-B-?lang=en)
     ///
@@ -519,7 +493,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_sys_instrs(self, 0b11, 0b111)
     }
 
-
     /// [AUTIB - AUTIB1716 - AUTIBSP - AUTIBZ - AUTIZB - Authenticate Instruction address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTIB--AUTIB1716--AUTIBSP--AUTIBZ--AUTIZB--Authenticate-Instruction-address--using-key-B-?lang=en)
     ///
     /// Authenticate Instruction address, using key B. This instruction authenticates an instruction address, using a modifier and key B.
@@ -531,7 +504,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn autibz(&mut self) -> T {
         emit_sys_instrs(self, 0b11, 0b110)
     }
-
 
     /// [AUTDA - AUTDZA - Authenticate Data address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTDA--AUTDZA--Authenticate-Data-address--using-key-A-?lang=en)
     ///
@@ -548,7 +520,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 110), xn_sp, xd)
     }
 
-
     /// [AUTDA - AUTDZA - Authenticate Data address - using key A](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTDA--AUTDZA--Authenticate-Data-address--using-key-A-?lang=en)
     ///
     /// Authenticate Data address, using key A. This instruction authenticates a data address, using a modifier and key A.
@@ -563,7 +534,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         let z = 1;
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 110), 0b11111, xd)
     }
-
 
     /// [AUTDB - AUTDZB - Authenticate Data address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTDB--AUTDZB--Authenticate-Data-address--using-key-B-?lang=en)
     ///
@@ -580,7 +550,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 111), xn_sp, xd)
     }
 
-
     /// [AUTDB - AUTDZB - Authenticate Data address - using key B](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AUTDB--AUTDZB--Authenticate-Data-address--using-key-B-?lang=en)
     ///
     /// Authenticate Data address, using key B. This instruction authenticates a data address, using a modifier and key B.
@@ -596,7 +565,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, bseq_8!(z:1 111), 0b11111, xd)
     }
 
-
     /// [XPACD - XPACI - XPACLRI - Strip Pointer Authentication Code](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/XPACD--XPACI--XPACLRI--Strip-Pointer-Authentication-Code-?lang=en)
     ///
     /// Strip Pointer Authentication Code. This instruction removes the pointer authentication code from an address. The address is in the specified general-purpose register for XPACI and XPACD, and is in LR for XPACLRI.
@@ -611,7 +579,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
         emit_data_proc_one(self, 1, 0, 1, 0b10001, 0b11111, xd)
     }
 
-
     /// [XPACD - XPACI - XPACLRI - Strip Pointer Authentication Code](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/XPACD--XPACI--XPACLRI--Strip-Pointer-Authentication-Code-?lang=en)
     ///
     /// Strip Pointer Authentication Code. This instruction removes the pointer authentication code from an address. The address is in the specified general-purpose register for XPACI and XPACD, and is in LR for XPACLRI.
@@ -625,7 +592,6 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
     fn xpaci(&mut self, xd: Register) -> T {
         emit_data_proc_one(self, 1, 0, 1, 0b10000, 0b11111, xd)
     }
-
 
     /// [XPACD - XPACI - XPACLRI - Strip Pointer Authentication Code](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/XPACD--XPACI--XPACLRI--Strip-Pointer-Authentication-Code-?lang=en)
     ///
@@ -645,6 +611,7 @@ pub trait DataProcessingOneSource<T>: InstructionProcessor<T> {
 #[cfg(test)]
 mod tests {
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]

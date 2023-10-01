@@ -1,4 +1,8 @@
+use bad64::decode;
+
+use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
 use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
+use crate::instruction_encoding::branch_exception_system::BranchExceptionSystem;
 use crate::instruction_encoding::branch_exception_system::compare_and_branch_imm::CompareAndBranchImm;
 use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediate;
 use crate::instruction_encoding::branch_exception_system::exception_generation::ExceptionGeneration;
@@ -9,15 +13,14 @@ use crate::instruction_encoding::branch_exception_system::system_register_move::
 use crate::instruction_encoding::branch_exception_system::test_and_branch_imm::TestAndBranchImmediate;
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_immediate::UnconditionalBranchImmediate;
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
-use crate::instruction_encoding::branch_exception_system::BranchExceptionSystem;
 use crate::instruction_encoding::common_aliases::CommonAliases;
 use crate::instruction_encoding::data_proc_imm::add_substract_imm::AddSubtractImmediate;
 use crate::instruction_encoding::data_proc_imm::bitfield::BitfieldInstructions;
+use crate::instruction_encoding::data_proc_imm::DataProcessingImmediate;
 use crate::instruction_encoding::data_proc_imm::extract::ExtractInstructions;
 use crate::instruction_encoding::data_proc_imm::logical_imm::LogicalImmediate;
 use crate::instruction_encoding::data_proc_imm::mov_wide_imm::MovWideImmediate;
 use crate::instruction_encoding::data_proc_imm::pc_rel_addr::PcRelAddressing;
-use crate::instruction_encoding::data_proc_imm::DataProcessingImmediate;
 use crate::instruction_encoding::data_proc_reg::add_sub_carry::AddSubtractWithCarry;
 use crate::instruction_encoding::data_proc_reg::add_sub_ext_reg::AddSubtractExtendedRegister;
 use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
@@ -27,10 +30,10 @@ use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalS
 use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
+use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::data_proc_reg::evaluate_into_flags::EvaluateIntoFlags;
 use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
 use crate::instruction_encoding::data_proc_reg::rotate_right_into_flags::RotateRightIntoFlags;
-use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_multi_structures::AdvancedSIMDLoadStoreMultipleStructures;
 use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_single_structures::AdvancedSIMDLoadStoreSingleStructures;
 use crate::instruction_encoding::loads_and_stores::atomic_memory_operations::AtomicMemoryOperatinos;
@@ -52,11 +55,9 @@ use crate::instruction_encoding::loads_and_stores::load_store_reg_unscaled_imm::
 use crate::instruction_encoding::loads_and_stores::load_store_register_pac::LoadStoreRegisterPac;
 use crate::instruction_encoding::loads_and_stores::load_store_register_regoffset::LoadStoreRegisterRegisterOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_register_unsigned_imm::LoadStoreRegisterUnsignedImmediate;
-use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
-use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
+use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 use crate::types::Instruction;
-use bad64::decode;
 
 type InstrRes = String;
 

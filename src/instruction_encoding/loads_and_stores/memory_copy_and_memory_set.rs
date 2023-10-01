@@ -42,18 +42,25 @@
 //!  - [SETGPN - SETGMN - SETGEN - Memory Set with tag setting - non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGPN--SETGMN--SETGEN--Memory-Set-with-tag-setting--non-temporal-?lang=en)
 //!  - [SETGPTN - SETGMTN - SETGETN - Memory Set with tag setting - unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGPTN--SETGMTN--SETGETN--Memory-Set-with-tag-setting--unprivileged-and-non-temporal-?lang=en)
 
-
-
 use bit_seq::bseq_32;
+
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::Register;
 
 #[inline(always)]
-fn emit_mem_cpy_mem_set<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, o0: u8, op1: u8, rs: Register, op2: u8, rn: Register, rd: Register) -> T {
+fn emit_mem_cpy_mem_set<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    size: u8,
+    o0: u8,
+    op1: u8,
+    rs: Register,
+    op2: u8,
+    rn: Register,
+    rd: Register,
+) -> T {
     let r = bseq_32!(size:2 011 o0:1 01 op1:2 0 rs:5 op2:4 01 rn:5 rd:5);
     proc.process(r)
 }
-
 
 /// # [Memory Copy and Memory Set](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Loads-and-Stores?lang=en#memcms)
 ///
@@ -115,7 +122,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0, 0, 0b10, xs, 0, xn, xd)
     }
 
-
     /// [CPYFP - CPYFM - CPYFE - Memory Copy Forward only](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFP--CPYFM--CPYFE--Memory-Copy-Forward-only-?lang=en)
     ///
     /// Memory Copy Forward-only. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFP, then CPYFM, and then CPYFE.
@@ -131,7 +137,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfm(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b01, xs, 0, xn, xd)
     }
-
 
     /// [CPYFP - CPYFM - CPYFE - Memory Copy Forward only](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFP--CPYFM--CPYFE--Memory-Copy-Forward-only-?lang=en)
     ///
@@ -149,7 +154,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b00, xs, 0, xn, xd)
     }
 
-
     /// [CPYFPWT - CPYFMWT - CPYFEWT - Memory Copy Forward only - writes unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWT--CPYFMWT--CPYFEWT--Memory-Copy-Forward-only--writes-unprivileged-?lang=en)
     ///
     /// Memory Copy Forward-only, writes unprivileged. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPWT, then CPYFMWT, and then CPYFEWT.
@@ -165,7 +169,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfewt(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b0001, xn, xd)
     }
-
 
     /// [CPYFPWT - CPYFMWT - CPYFEWT - Memory Copy Forward only - writes unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWT--CPYFMWT--CPYFEWT--Memory-Copy-Forward-only--writes-unprivileged-?lang=en)
     ///
@@ -183,7 +186,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b01, xs, 0b0001, xn, xd)
     }
 
-
     /// [CPYFPWT - CPYFMWT - CPYFEWT - Memory Copy Forward only - writes unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWT--CPYFMWT--CPYFEWT--Memory-Copy-Forward-only--writes-unprivileged-?lang=en)
     ///
     /// Memory Copy Forward-only, writes unprivileged. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPWT, then CPYFMWT, and then CPYFEWT.
@@ -199,7 +201,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfpwt(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b00, xs, 0b0001, xn, xd)
     }
-
 
     /// [CPYFPRT - CPYFMRT - CPYFERT - Memory Copy Forward only - reads unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRT--CPYFMRT--CPYFERT--Memory-Copy-Forward-only--reads-unprivileged-?lang=en)
     ///
@@ -217,7 +218,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b0010, xn, xd)
     }
 
-
     /// [CPYFPRT - CPYFMRT - CPYFERT - Memory Copy Forward only - reads unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRT--CPYFMRT--CPYFERT--Memory-Copy-Forward-only--reads-unprivileged-?lang=en)
     ///
     /// Memory Copy Forward-only, reads unprivileged. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPRT, then CPYFMRT, and then CPYFERT.
@@ -233,7 +233,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfmrt(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b01, xs, 0b0010, xn, xd)
     }
-
 
     /// [CPYFPRT - CPYFMRT - CPYFERT - Memory Copy Forward only - reads unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRT--CPYFMRT--CPYFERT--Memory-Copy-Forward-only--reads-unprivileged-?lang=en)
     ///
@@ -251,7 +250,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b00, xs, 0b0010, xn, xd)
     }
 
-
     /// [CPYFPT - CPYFMT - CPYFET - Memory Copy Forward only - reads and writes unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPT--CPYFMT--CPYFET--Memory-Copy-Forward-only--reads-and-writes-unprivileged-?lang=en)
     ///
     /// Memory Copy Forward-only, reads and writes unprivileged. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPT, then CPYFMT, and then CPYFET.
@@ -267,7 +265,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfet(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b0011, xn, xd)
     }
-
 
     /// [CPYFPT - CPYFMT - CPYFET - Memory Copy Forward only - reads and writes unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPT--CPYFMT--CPYFET--Memory-Copy-Forward-only--reads-and-writes-unprivileged-?lang=en)
     ///
@@ -285,7 +282,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b01, xs, 0b0011, xn, xd)
     }
 
-
     /// [CPYFPT - CPYFMT - CPYFET - Memory Copy Forward only - reads and writes unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPT--CPYFMT--CPYFET--Memory-Copy-Forward-only--reads-and-writes-unprivileged-?lang=en)
     ///
     /// Memory Copy Forward-only, reads and writes unprivileged. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPT, then CPYFMT, and then CPYFET.
@@ -301,7 +297,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfpt(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b00, xs, 0b0011, xn, xd)
     }
-
 
     /// [CPYFPWN - CPYFMWN - CPYFEWN - Memory Copy Forward only - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWN--CPYFMWN--CPYFEWN--Memory-Copy-Forward-only--writes-non-temporal-?lang=en)
     ///
@@ -319,7 +314,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b0100, xn, xd)
     }
 
-
     /// [CPYFPWN - CPYFMWN - CPYFEWN - Memory Copy Forward only - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWN--CPYFMWN--CPYFEWN--Memory-Copy-Forward-only--writes-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPWN, then CPYFMWN, and then CPYFEWN.
@@ -335,7 +329,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfmwn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b01, xs, 0b0100, xn, xd)
     }
-
 
     /// [CPYFPWN - CPYFMWN - CPYFEWN - Memory Copy Forward only - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWN--CPYFMWN--CPYFEWN--Memory-Copy-Forward-only--writes-non-temporal-?lang=en)
     ///
@@ -353,7 +346,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b00, xs, 0b0100, xn, xd)
     }
 
-
     /// [CPYFPWTWN - CPYFMWTWN - CPYFEWTWN - Memory Copy Forward only - writes unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWTWN--CPYFMWTWN--CPYFEWTWN--Memory-Copy-Forward-only--writes-unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, writes unprivileged and non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPWTWN, then CPYFMWTWN, and then CPYFEWTWN.
@@ -369,7 +361,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfewtwn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b0101, xn, xd)
     }
-
 
     /// [CPYFPWTWN - CPYFMWTWN - CPYFEWTWN - Memory Copy Forward only - writes unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWTWN--CPYFMWTWN--CPYFEWTWN--Memory-Copy-Forward-only--writes-unprivileged-and-non-temporal-?lang=en)
     ///
@@ -387,7 +378,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b01, xs, 0b0101, xn, xd)
     }
 
-
     /// [CPYFPWTWN - CPYFMWTWN - CPYFEWTWN - Memory Copy Forward only - writes unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWTWN--CPYFMWTWN--CPYFEWTWN--Memory-Copy-Forward-only--writes-unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, writes unprivileged and non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPWTWN, then CPYFMWTWN, and then CPYFEWTWN.
@@ -403,7 +393,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfpwtwn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b00, xs, 0b0101, xn, xd)
     }
-
 
     /// [CPYFPRTWN - CPYFMRTWN - CPYFERTWN - Memory Copy Forward only - reads unprivileged - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRTWN--CPYFMRTWN--CPYFERTWN--Memory-Copy-Forward-only--reads-unprivileged--writes-non-temporal-?lang=en)
     ///
@@ -421,7 +410,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b0110, xn, xd)
     }
 
-
     /// [CPYFPRTWN - CPYFMRTWN - CPYFERTWN - Memory Copy Forward only - reads unprivileged - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRTWN--CPYFMRTWN--CPYFERTWN--Memory-Copy-Forward-only--reads-unprivileged--writes-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, reads unprivileged, writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPRTWN, then CPYFMRTWN, and then CPYFERTWN.
@@ -437,7 +425,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfmrtwn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b01, xs, 0b0110, xn, xd)
     }
-
 
     /// [CPYFPRTWN - CPYFMRTWN - CPYFERTWN - Memory Copy Forward only - reads unprivileged - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRTWN--CPYFMRTWN--CPYFERTWN--Memory-Copy-Forward-only--reads-unprivileged--writes-non-temporal-?lang=en)
     ///
@@ -455,7 +442,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b00, xs, 0b0110, xn, xd)
     }
 
-
     /// [CPYFPTWN - CPYFMTWN - CPYFETWN - Memory Copy Forward only - reads and writes unprivileged - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPTWN--CPYFMTWN--CPYFETWN--Memory-Copy-Forward-only--reads-and-writes-unprivileged--writes-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, reads and writes unprivileged, writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPTWN, then CPYFMTWN, and then CPYFETWN.
@@ -471,7 +457,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfetwn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b0111, xn, xd)
     }
-
 
     /// [CPYFPTWN - CPYFMTWN - CPYFETWN - Memory Copy Forward only - reads and writes unprivileged - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPTWN--CPYFMTWN--CPYFETWN--Memory-Copy-Forward-only--reads-and-writes-unprivileged--writes-non-temporal-?lang=en)
     ///
@@ -489,7 +474,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b01, xs, 0b0111, xn, xd)
     }
 
-
     /// [CPYFPTWN - CPYFMTWN - CPYFETWN - Memory Copy Forward only - reads and writes unprivileged - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPTWN--CPYFMTWN--CPYFETWN--Memory-Copy-Forward-only--reads-and-writes-unprivileged--writes-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, reads and writes unprivileged, writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPTWN, then CPYFMTWN, and then CPYFETWN.
@@ -505,7 +489,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfptwn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b0, xs, 0b0111, xn, xd)
     }
-
 
     /// [CPYFPRN - CPYFMRN - CPYFERN - Memory Copy Forward only - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRN--CPYFMRN--CPYFERN--Memory-Copy-Forward-only--reads-non-temporal-?lang=en)
     ///
@@ -523,7 +506,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b1000, xn, xd)
     }
 
-
     /// [CPYFPRN - CPYFMRN - CPYFERN - Memory Copy Forward only - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRN--CPYFMRN--CPYFERN--Memory-Copy-Forward-only--reads-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, reads non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPRN, then CPYFMRN, and then CPYFERN.
@@ -539,7 +521,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfmrn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b01, xs, 0b1000, xn, xd)
     }
-
 
     /// [CPYFPRN - CPYFMRN - CPYFERN - Memory Copy Forward only - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRN--CPYFMRN--CPYFERN--Memory-Copy-Forward-only--reads-non-temporal-?lang=en)
     ///
@@ -557,7 +538,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b0, xs, 0b1000, xn, xd)
     }
 
-
     /// [CPYFPWTRN - CPYFMWTRN - CPYFEWTRN - Memory Copy Forward only - writes unprivileged - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWTRN--CPYFMWTRN--CPYFEWTRN--Memory-Copy-Forward-only--writes-unprivileged--reads-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, writes unprivileged, reads non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPWTRN, then CPYFMWTRN, and then CPYFEWTRN.
@@ -573,7 +553,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfewtrn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b1001, xn, xd)
     }
-
 
     /// [CPYFPWTRN - CPYFMWTRN - CPYFEWTRN - Memory Copy Forward only - writes unprivileged - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWTRN--CPYFMWTRN--CPYFEWTRN--Memory-Copy-Forward-only--writes-unprivileged--reads-non-temporal-?lang=en)
     ///
@@ -591,7 +570,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b01, xs, 0b1001, xn, xd)
     }
 
-
     /// [CPYFPWTRN - CPYFMWTRN - CPYFEWTRN - Memory Copy Forward only - writes unprivileged - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWTRN--CPYFMWTRN--CPYFEWTRN--Memory-Copy-Forward-only--writes-unprivileged--reads-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, writes unprivileged, reads non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPWTRN, then CPYFMWTRN, and then CPYFEWTRN.
@@ -607,7 +585,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfpwtrn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b0, xs, 0b1001, xn, xd)
     }
-
 
     /// [CPYFPRTRN - CPYFMRTRN - CPYFERTRN - Memory Copy Forward only - reads unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRTRN--CPYFMRTRN--CPYFERTRN--Memory-Copy-Forward-only--reads-unprivileged-and-non-temporal-?lang=en)
     ///
@@ -625,7 +602,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b1010, xn, xd)
     }
 
-
     /// [CPYFPRTRN - CPYFMRTRN - CPYFERTRN - Memory Copy Forward only - reads unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRTRN--CPYFMRTRN--CPYFERTRN--Memory-Copy-Forward-only--reads-unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, reads unprivileged and non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPRTRN, then CPYFMRTRN, and then CPYFERTRN.
@@ -641,7 +617,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfmrtrn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b01, xs, 0b1010, xn, xd)
     }
-
 
     /// [CPYFPRTRN - CPYFMRTRN - CPYFERTRN - Memory Copy Forward only - reads unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRTRN--CPYFMRTRN--CPYFERTRN--Memory-Copy-Forward-only--reads-unprivileged-and-non-temporal-?lang=en)
     ///
@@ -659,7 +634,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b00, xs, 0b1010, xn, xd)
     }
 
-
     /// [CPYFPTRN - CPYFMTRN - CPYFETRN - Memory Copy Forward only - reads and writes unprivileged - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPTRN--CPYFMTRN--CPYFETRN--Memory-Copy-Forward-only--reads-and-writes-unprivileged--reads-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, reads and writes unprivileged, reads non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPTRN, then CPYFMTRN, and then CPYFETRN.
@@ -675,7 +649,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfetrn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b1011, xn, xd)
     }
-
 
     /// [CPYFPTRN - CPYFMTRN - CPYFETRN - Memory Copy Forward only - reads and writes unprivileged - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPTRN--CPYFMTRN--CPYFETRN--Memory-Copy-Forward-only--reads-and-writes-unprivileged--reads-non-temporal-?lang=en)
     ///
@@ -693,7 +666,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b01, xs, 0b1011, xn, xd)
     }
 
-
     /// [CPYFPTRN - CPYFMTRN - CPYFETRN - Memory Copy Forward only - reads and writes unprivileged - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPTRN--CPYFMTRN--CPYFETRN--Memory-Copy-Forward-only--reads-and-writes-unprivileged--reads-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, reads and writes unprivileged, reads non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPTRN, then CPYFMTRN, and then CPYFETRN.
@@ -709,7 +681,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfptrn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b0, xs, 0b1011, xn, xd)
     }
-
 
     /// [CPYFPN - CPYFMN - CPYFEN - Memory Copy Forward only - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPN--CPYFMN--CPYFEN--Memory-Copy-Forward-only--reads-and-writes-non-temporal-?lang=en)
     ///
@@ -727,7 +698,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b1100, xn, xd)
     }
 
-
     /// [CPYFPN - CPYFMN - CPYFEN - Memory Copy Forward only - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPN--CPYFMN--CPYFEN--Memory-Copy-Forward-only--reads-and-writes-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, reads and writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPN, then CPYFMN, and then CPYFEN.
@@ -743,7 +713,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfmn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b1, xs, 0b1100, xn, xd)
     }
-
 
     /// [CPYFPN - CPYFMN - CPYFEN - Memory Copy Forward only - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPN--CPYFMN--CPYFEN--Memory-Copy-Forward-only--reads-and-writes-non-temporal-?lang=en)
     ///
@@ -761,7 +730,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b0, xs, 0b1100, xn, xd)
     }
 
-
     /// [CPYFPWTN - CPYFMWTN - CPYFEWTN - Memory Copy Forward only - writes unprivileged - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWTN--CPYFMWTN--CPYFEWTN--Memory-Copy-Forward-only--writes-unprivileged--reads-and-writes-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, writes unprivileged, reads and writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPWTN, then CPYFMWTN, and then CPYFEWTN.
@@ -777,7 +745,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfewtn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b1101, xn, xd)
     }
-
 
     /// [CPYFPWTN - CPYFMWTN - CPYFEWTN - Memory Copy Forward only - writes unprivileged - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWTN--CPYFMWTN--CPYFEWTN--Memory-Copy-Forward-only--writes-unprivileged--reads-and-writes-non-temporal-?lang=en)
     ///
@@ -795,7 +762,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b1, xs, 0b1101, xn, xd)
     }
 
-
     /// [CPYFPWTN - CPYFMWTN - CPYFEWTN - Memory Copy Forward only - writes unprivileged - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPWTN--CPYFMWTN--CPYFEWTN--Memory-Copy-Forward-only--writes-unprivileged--reads-and-writes-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, writes unprivileged, reads and writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPWTN, then CPYFMWTN, and then CPYFEWTN.
@@ -811,7 +777,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfpwtn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b1, xs, 0b1101, xn, xd)
     }
-
 
     /// [CPYFPRTN - CPYFMRTN - CPYFERTN - Memory Copy Forward only - reads unprivileged - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRTN--CPYFMRTN--CPYFERTN--Memory-Copy-Forward-only--reads-unprivileged--reads-and-writes-non-temporal-?lang=en)
     ///
@@ -829,7 +794,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b1110, xn, xd)
     }
 
-
     /// [CPYFPRTN - CPYFMRTN - CPYFERTN - Memory Copy Forward only - reads unprivileged - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRTN--CPYFMRTN--CPYFERTN--Memory-Copy-Forward-only--reads-unprivileged--reads-and-writes-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, reads unprivileged, reads and writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPRTN, then CPYFMRTN, and then CPYFERTN.
@@ -845,7 +809,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfmrtn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b1, xs, 0b1110, xn, xd)
     }
-
 
     /// [CPYFPRTN - CPYFMRTN - CPYFERTN - Memory Copy Forward only - reads unprivileged - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPRTN--CPYFMRTN--CPYFERTN--Memory-Copy-Forward-only--reads-unprivileged--reads-and-writes-non-temporal-?lang=en)
     ///
@@ -863,7 +826,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b0, xs, 0b1110, xn, xd)
     }
 
-
     /// [CPYFPTN - CPYFMTN - CPYFETN - Memory Copy Forward only - reads and writes unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPTN--CPYFMTN--CPYFETN--Memory-Copy-Forward-only--reads-and-writes-unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, reads and writes unprivileged and non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPTN, then CPYFMTN, and then CPYFETN.
@@ -879,7 +841,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfetn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b10, xs, 0b1111, xn, xd)
     }
-
 
     /// [CPYFPTN - CPYFMTN - CPYFETN - Memory Copy Forward only - reads and writes unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPTN--CPYFMTN--CPYFETN--Memory-Copy-Forward-only--reads-and-writes-unprivileged-and-non-temporal-?lang=en)
     ///
@@ -897,7 +858,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b1, xs, 0b1111, xn, xd)
     }
 
-
     /// [CPYFPTN - CPYFMTN - CPYFETN - Memory Copy Forward only - reads and writes unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYFPTN--CPYFMTN--CPYFETN--Memory-Copy-Forward-only--reads-and-writes-unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Copy Forward-only, reads and writes unprivileged and non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYFPTN, then CPYFMTN, and then CPYFETN.
@@ -913,7 +873,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyfptn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b0, xs, 0b1111, xn, xd)
     }
-
 
     /// [SETP - SETM - SETE - Memory Set](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETP--SETM--SETE--Memory-Set-?lang=en)
     ///
@@ -931,7 +890,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b11, xs, 0b1000, xn, xd)
     }
 
-
     /// [SETP - SETM - SETE - Memory Set](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETP--SETM--SETE--Memory-Set-?lang=en)
     ///
     /// Memory Set. These instructions perform a memory set using the value in the bottom byte of the source register. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: SETP, then SETM, and then SETE.
@@ -947,7 +905,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn setm(&mut self, xd: Register, xn: Register, xs: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b11, xs, 0b0100, xn, xd)
     }
-
 
     /// [SETP - SETM - SETE - Memory Set](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETP--SETM--SETE--Memory-Set-?lang=en)
     ///
@@ -965,7 +922,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b11, xs, 0b0000, xn, xd)
     }
 
-
     /// [SETPT - SETMT - SETET - Memory Set - unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETPT--SETMT--SETET--Memory-Set--unprivileged-?lang=en)
     ///
     /// Memory Set, unprivileged. These instructions perform a memory set using the value in the bottom byte of the source register. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: SETPT, then SETMT, and then SETET.
@@ -981,7 +937,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn setet(&mut self, xd: Register, xn: Register, xs: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b11, xs, 0b1001, xn, xd)
     }
-
 
     /// [SETPT - SETMT - SETET - Memory Set - unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETPT--SETMT--SETET--Memory-Set--unprivileged-?lang=en)
     ///
@@ -999,7 +954,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b11, xs, 0b0101, xn, xd)
     }
 
-
     /// [SETPT - SETMT - SETET - Memory Set - unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETPT--SETMT--SETET--Memory-Set--unprivileged-?lang=en)
     ///
     /// Memory Set, unprivileged. These instructions perform a memory set using the value in the bottom byte of the source register. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: SETPT, then SETMT, and then SETET.
@@ -1015,7 +969,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn setpt(&mut self, xd: Register, xn: Register, xs: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b11, xs, 0b0001, xn, xd)
     }
-
 
     /// [SETPN - SETMN - SETEN - Memory Set - non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETPN--SETMN--SETEN--Memory-Set--non-temporal-?lang=en)
     ///
@@ -1033,7 +986,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b11, xs, 0b1010, xn, xd)
     }
 
-
     /// [SETPN - SETMN - SETEN - Memory Set - non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETPN--SETMN--SETEN--Memory-Set--non-temporal-?lang=en)
     ///
     /// Memory Set, non-temporal. These instructions perform a memory set using the value in the bottom byte of the source register. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: SETPN, then SETMN, and then SETEN.
@@ -1049,7 +1001,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn setmn(&mut self, xd: Register, xn: Register, xs: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b11, xs, 0b0110, xn, xd)
     }
-
 
     /// [SETPN - SETMN - SETEN - Memory Set - non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETPN--SETMN--SETEN--Memory-Set--non-temporal-?lang=en)
     ///
@@ -1067,7 +1018,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b11, xs, 0b0010, xn, xd)
     }
 
-
     /// [SETPTN - SETMTN - SETETN - Memory Set - unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETPTN--SETMTN--SETETN--Memory-Set--unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Set, unprivileged and non-temporal. These instructions perform a memory set using the value in the bottom byte of the source register. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: SETPTN, then SETMTN, and then SETETN.
@@ -1083,7 +1033,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn setetn(&mut self, xd: Register, xn: Register, xs: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b11, xs, 0b1011, xn, xd)
     }
-
 
     /// [SETPTN - SETMTN - SETETN - Memory Set - unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETPTN--SETMTN--SETETN--Memory-Set--unprivileged-and-non-temporal-?lang=en)
     ///
@@ -1101,7 +1050,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b11, xs, 0b0111, xn, xd)
     }
 
-
     /// [SETPTN - SETMTN - SETETN - Memory Set - unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETPTN--SETMTN--SETETN--Memory-Set--unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Set, unprivileged and non-temporal. These instructions perform a memory set using the value in the bottom byte of the source register. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: SETPTN, then SETMTN, and then SETETN.
@@ -1117,7 +1065,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn setptn(&mut self, xd: Register, xn: Register, xs: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 0, 0b11, xs, 0b0011, xn, xd)
     }
-
 
     /// [CPYP - CPYM - CPYE - Memory Copy](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYP--CPYM--CPYE--Memory-Copy-?lang=en)
     ///
@@ -1135,7 +1082,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b0000, xn, xd)
     }
 
-
     /// [CPYP - CPYM - CPYE - Memory Copy](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYP--CPYM--CPYE--Memory-Copy-?lang=en)
     ///
     /// Memory Copy. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYP, then CPYM, and then CPYE.
@@ -1151,7 +1097,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpym(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b0000, xn, xd)
     }
-
 
     /// [CPYP - CPYM - CPYE - Memory Copy](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYP--CPYM--CPYE--Memory-Copy-?lang=en)
     ///
@@ -1169,7 +1114,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b0000, xn, xd)
     }
 
-
     /// [CPYPWT - CPYMWT - CPYEWT - Memory Copy - writes unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWT--CPYMWT--CPYEWT--Memory-Copy--writes-unprivileged-?lang=en)
     ///
     /// Memory Copy, writes unprivileged. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPWT, then CPYMWT, and then CPYEWT.
@@ -1185,7 +1129,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyewt(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b0001, xn, xd)
     }
-
 
     /// [CPYPWT - CPYMWT - CPYEWT - Memory Copy - writes unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWT--CPYMWT--CPYEWT--Memory-Copy--writes-unprivileged-?lang=en)
     ///
@@ -1203,7 +1146,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b0001, xn, xd)
     }
 
-
     /// [CPYPWT - CPYMWT - CPYEWT - Memory Copy - writes unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWT--CPYMWT--CPYEWT--Memory-Copy--writes-unprivileged-?lang=en)
     ///
     /// Memory Copy, writes unprivileged. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPWT, then CPYMWT, and then CPYEWT.
@@ -1219,7 +1161,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpypwt(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b0001, xn, xd)
     }
-
 
     /// [CPYPRT - CPYMRT - CPYERT - Memory Copy - reads unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRT--CPYMRT--CPYERT--Memory-Copy--reads-unprivileged-?lang=en)
     ///
@@ -1237,7 +1178,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b0010, xn, xd)
     }
 
-
     /// [CPYPRT - CPYMRT - CPYERT - Memory Copy - reads unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRT--CPYMRT--CPYERT--Memory-Copy--reads-unprivileged-?lang=en)
     ///
     /// Memory Copy, reads unprivileged. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPRT, then CPYMRT, and then CPYERT.
@@ -1253,7 +1193,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpymrt(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b0010, xn, xd)
     }
-
 
     /// [CPYPRT - CPYMRT - CPYERT - Memory Copy - reads unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRT--CPYMRT--CPYERT--Memory-Copy--reads-unprivileged-?lang=en)
     ///
@@ -1271,7 +1210,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b0010, xn, xd)
     }
 
-
     /// [CPYPT - CPYMT - CPYET - Memory Copy - reads and writes unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPT--CPYMT--CPYET--Memory-Copy--reads-and-writes-unprivileged-?lang=en)
     ///
     /// Memory Copy, reads and writes unprivileged. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPT, then CPYMT, and then CPYET.
@@ -1287,7 +1225,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyet(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b0011, xn, xd)
     }
-
 
     /// [CPYPT - CPYMT - CPYET - Memory Copy - reads and writes unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPT--CPYMT--CPYET--Memory-Copy--reads-and-writes-unprivileged-?lang=en)
     ///
@@ -1305,7 +1242,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b0011, xn, xd)
     }
 
-
     /// [CPYPT - CPYMT - CPYET - Memory Copy - reads and writes unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPT--CPYMT--CPYET--Memory-Copy--reads-and-writes-unprivileged-?lang=en)
     ///
     /// Memory Copy, reads and writes unprivileged. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPT, then CPYMT, and then CPYET.
@@ -1321,7 +1257,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpypt(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b0011, xn, xd)
     }
-
 
     /// [CPYPWN - CPYMWN - CPYEWN - Memory Copy - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWN--CPYMWN--CPYEWN--Memory-Copy--writes-non-temporal-?lang=en)
     ///
@@ -1339,7 +1274,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b0100, xn, xd)
     }
 
-
     /// [CPYPWN - CPYMWN - CPYEWN - Memory Copy - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWN--CPYMWN--CPYEWN--Memory-Copy--writes-non-temporal-?lang=en)
     ///
     /// Memory Copy, writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPWN, then CPYMWN, and then CPYEWN.
@@ -1355,7 +1289,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpymwn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b0100, xn, xd)
     }
-
 
     /// [CPYPWN - CPYMWN - CPYEWN - Memory Copy - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWN--CPYMWN--CPYEWN--Memory-Copy--writes-non-temporal-?lang=en)
     ///
@@ -1373,7 +1306,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b0100, xn, xd)
     }
 
-
     /// [CPYPWTWN - CPYMWTWN - CPYEWTWN - Memory Copy - writes unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWTWN--CPYMWTWN--CPYEWTWN--Memory-Copy--writes-unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Copy, writes unprivileged and non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPWTWN, then CPYMWTWN, and then CPYEWTWN.
@@ -1389,7 +1321,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyewtwn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b0101, xn, xd)
     }
-
 
     /// [CPYPWTWN - CPYMWTWN - CPYEWTWN - Memory Copy - writes unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWTWN--CPYMWTWN--CPYEWTWN--Memory-Copy--writes-unprivileged-and-non-temporal-?lang=en)
     ///
@@ -1407,7 +1338,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b0101, xn, xd)
     }
 
-
     /// [CPYPWTWN - CPYMWTWN - CPYEWTWN - Memory Copy - writes unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWTWN--CPYMWTWN--CPYEWTWN--Memory-Copy--writes-unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Copy, writes unprivileged and non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPWTWN, then CPYMWTWN, and then CPYEWTWN.
@@ -1423,7 +1353,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpypwtwn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b0101, xn, xd)
     }
-
 
     /// [CPYPRTWN - CPYMRTWN - CPYERTWN - Memory Copy - reads unprivileged - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRTWN--CPYMRTWN--CPYERTWN--Memory-Copy--reads-unprivileged--writes-non-temporal-?lang=en)
     ///
@@ -1441,7 +1370,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b0110, xn, xd)
     }
 
-
     /// [CPYPRTWN - CPYMRTWN - CPYERTWN - Memory Copy - reads unprivileged - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRTWN--CPYMRTWN--CPYERTWN--Memory-Copy--reads-unprivileged--writes-non-temporal-?lang=en)
     ///
     /// Memory Copy, reads unprivileged, writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPRTWN, then CPYMRTWN, and then CPYERTWN.
@@ -1458,7 +1386,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b0110, xn, xd)
     }
 
-
     /// [CPYPRTWN - CPYMRTWN - CPYERTWN - Memory Copy - reads unprivileged - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRTWN--CPYMRTWN--CPYERTWN--Memory-Copy--reads-unprivileged--writes-non-temporal-?lang=en)
     ///
     /// Memory Copy, reads unprivileged, writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPRTWN, then CPYMRTWN, and then CPYERTWN.
@@ -1474,7 +1401,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyprtwn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b0110, xn, xd)
     }
-
 
     /// [CPYPTWN - CPYMTWN - CPYETWN - Memory Copy - reads and writes unprivileged - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPTWN--CPYMTWN--CPYETWN--Memory-Copy--reads-and-writes-unprivileged--writes-non-temporal-?lang=en)
     ///
@@ -1508,7 +1434,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b0111, xn, xd)
     }
 
-
     /// [CPYPTWN - CPYMTWN - CPYETWN - Memory Copy - reads and writes unprivileged - writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPTWN--CPYMTWN--CPYETWN--Memory-Copy--reads-and-writes-unprivileged--writes-non-temporal-?lang=en)
     ///
     /// Memory Copy, reads and writes unprivileged, writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPTWN, then CPYMTWN, and then CPYETWN.
@@ -1524,7 +1449,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyptwn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b0111, xn, xd)
     }
-
 
     /// [CPYPRN - CPYMRN - CPYERN - Memory Copy - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRN--CPYMRN--CPYERN--Memory-Copy--reads-non-temporal-?lang=en)
     ///
@@ -1542,7 +1466,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b1000, xn, xd)
     }
 
-
     /// [CPYPRN - CPYMRN - CPYERN - Memory Copy - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRN--CPYMRN--CPYERN--Memory-Copy--reads-non-temporal-?lang=en)
     ///
     /// Memory Copy, reads non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPRN, then CPYMRN, and then CPYERN.
@@ -1558,7 +1481,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpymrn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b1000, xn, xd)
     }
-
 
     /// [CPYPRN - CPYMRN - CPYERN - Memory Copy - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRN--CPYMRN--CPYERN--Memory-Copy--reads-non-temporal-?lang=en)
     ///
@@ -1576,7 +1498,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b1000, xn, xd)
     }
 
-
     /// [CPYPWTRN - CPYMWTRN - CPYEWTRN - Memory Copy - writes unprivileged - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWTRN--CPYMWTRN--CPYEWTRN--Memory-Copy--writes-unprivileged--reads-non-temporal-?lang=en)
     ///
     /// Memory Copy, writes unprivileged, reads non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPWTRN, then CPYMWTRN, and then CPYEWTRN.
@@ -1592,7 +1513,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyewtrn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b1001, xn, xd)
     }
-
 
     /// [CPYPWTRN - CPYMWTRN - CPYEWTRN - Memory Copy - writes unprivileged - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWTRN--CPYMWTRN--CPYEWTRN--Memory-Copy--writes-unprivileged--reads-non-temporal-?lang=en)
     ///
@@ -1610,7 +1530,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b1001, xn, xd)
     }
 
-
     /// [CPYPWTRN - CPYMWTRN - CPYEWTRN - Memory Copy - writes unprivileged - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWTRN--CPYMWTRN--CPYEWTRN--Memory-Copy--writes-unprivileged--reads-non-temporal-?lang=en)
     ///
     /// Memory Copy, writes unprivileged, reads non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPWTRN, then CPYMWTRN, and then CPYEWTRN.
@@ -1626,7 +1545,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpypwtrn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b1001, xn, xd)
     }
-
 
     /// [CPYPRTRN - CPYMRTRN - CPYERTRN - Memory Copy - reads unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRTRN--CPYMRTRN--CPYERTRN--Memory-Copy--reads-unprivileged-and-non-temporal-?lang=en)
     ///
@@ -1644,7 +1562,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b1010, xn, xd)
     }
 
-
     /// [CPYPRTRN - CPYMRTRN - CPYERTRN - Memory Copy - reads unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRTRN--CPYMRTRN--CPYERTRN--Memory-Copy--reads-unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Copy, reads unprivileged and non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPRTRN, then CPYMRTRN, and then CPYERTRN.
@@ -1660,7 +1577,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyemtrn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b1010, xn, xd)
     }
-
 
     /// [CPYPRTRN - CPYMRTRN - CPYERTRN - Memory Copy - reads unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRTRN--CPYMRTRN--CPYERTRN--Memory-Copy--reads-unprivileged-and-non-temporal-?lang=en)
     ///
@@ -1678,7 +1594,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b1010, xn, xd)
     }
 
-
     /// [CPYPTRN - CPYMTRN - CPYETRN - Memory Copy - reads and writes unprivileged - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPTRN--CPYMTRN--CPYETRN--Memory-Copy--reads-and-writes-unprivileged--reads-non-temporal-?lang=en)
     ///
     /// Memory Copy, reads and writes unprivileged, reads non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPTRN, then CPYMTRN, and then CPYETRN.
@@ -1694,7 +1609,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyetrn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b1011, xn, xd)
     }
-
 
     /// [CPYPTRN - CPYMTRN - CPYETRN - Memory Copy - reads and writes unprivileged - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPTRN--CPYMTRN--CPYETRN--Memory-Copy--reads-and-writes-unprivileged--reads-non-temporal-?lang=en)
     ///
@@ -1712,7 +1626,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b1011, xn, xd)
     }
 
-
     /// [CPYPTRN - CPYMTRN - CPYETRN - Memory Copy - reads and writes unprivileged - reads non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPTRN--CPYMTRN--CPYETRN--Memory-Copy--reads-and-writes-unprivileged--reads-non-temporal-?lang=en)
     ///
     /// Memory Copy, reads and writes unprivileged, reads non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPTRN, then CPYMTRN, and then CPYETRN.
@@ -1728,7 +1641,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyptrn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b1011, xn, xd)
     }
-
 
     /// [CPYPN - CPYMN - CPYEN - Memory Copy - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPN--CPYMN--CPYEN--Memory-Copy--reads-and-writes-non-temporal-?lang=en)
     ///
@@ -1746,7 +1658,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b1100, xn, xd)
     }
 
-
     /// [CPYPN - CPYMN - CPYEN - Memory Copy - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPN--CPYMN--CPYEN--Memory-Copy--reads-and-writes-non-temporal-?lang=en)
     ///
     /// Memory Copy, reads and writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPN, then CPYMN, and then CPYEN.
@@ -1762,7 +1673,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpymn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b1100, xn, xd)
     }
-
 
     /// [CPYPN - CPYMN - CPYEN - Memory Copy - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPN--CPYMN--CPYEN--Memory-Copy--reads-and-writes-non-temporal-?lang=en)
     ///
@@ -1780,7 +1690,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b1100, xn, xd)
     }
 
-
     /// [CPYPWTN - CPYMWTN - CPYEWTN - Memory Copy - writes unprivileged - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWTN--CPYMWTN--CPYEWTN--Memory-Copy--writes-unprivileged--reads-and-writes-non-temporal-?lang=en)
     ///
     /// Memory Copy, writes unprivileged, reads and writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPWTN, then CPYMWTN, and then CPYEWTN.
@@ -1796,7 +1705,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyewtn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b1101, xn, xd)
     }
-
 
     /// [CPYPWTN - CPYMWTN - CPYEWTN - Memory Copy - writes unprivileged - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWTN--CPYMWTN--CPYEWTN--Memory-Copy--writes-unprivileged--reads-and-writes-non-temporal-?lang=en)
     ///
@@ -1814,7 +1722,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b1101, xn, xd)
     }
 
-
     /// [CPYPWTN - CPYMWTN - CPYEWTN - Memory Copy - writes unprivileged - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPWTN--CPYMWTN--CPYEWTN--Memory-Copy--writes-unprivileged--reads-and-writes-non-temporal-?lang=en)
     ///
     /// Memory Copy, writes unprivileged, reads and writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPWTN, then CPYMWTN, and then CPYEWTN.
@@ -1830,7 +1737,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpypwtn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b1101, xn, xd)
     }
-
 
     /// [CPYPRTN - CPYMRTN - CPYERTN - Memory Copy - reads unprivileged - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRTN--CPYMRTN--CPYERTN--Memory-Copy--reads-unprivileged--reads-and-writes-non-temporal-?lang=en)
     ///
@@ -1848,7 +1754,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b1110, xn, xd)
     }
 
-
     /// [CPYPRTN - CPYMRTN - CPYERTN - Memory Copy - reads unprivileged - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRTN--CPYMRTN--CPYERTN--Memory-Copy--reads-unprivileged--reads-and-writes-non-temporal-?lang=en)
     ///
     /// Memory Copy, reads unprivileged, reads and writes non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPRTN, then CPYMRTN, and then CPYERTN.
@@ -1864,7 +1769,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpymrtn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b1110, xn, xd)
     }
-
 
     /// [CPYPRTN - CPYMRTN - CPYERTN - Memory Copy - reads unprivileged - reads and writes non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPRTN--CPYMRTN--CPYERTN--Memory-Copy--reads-unprivileged--reads-and-writes-non-temporal-?lang=en)
     ///
@@ -1882,7 +1786,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b1110, xn, xd)
     }
 
-
     /// [CPYPTN - CPYMTN - CPYETN - Memory Copy - reads and writes unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPTN--CPYMTN--CPYETN--Memory-Copy--reads-and-writes-unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Copy, reads and writes unprivileged and non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPTN, then CPYMTN, and then CPYETN.
@@ -1898,7 +1801,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyetn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b10, xs, 0b1111, xn, xd)
     }
-
 
     /// [CPYPTN - CPYMTN - CPYETN - Memory Copy - reads and writes unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPTN--CPYMTN--CPYETN--Memory-Copy--reads-and-writes-unprivileged-and-non-temporal-?lang=en)
     ///
@@ -1916,7 +1818,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b1, xs, 0b1111, xn, xd)
     }
 
-
     /// [CPYPTN - CPYMTN - CPYETN - Memory Copy - reads and writes unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CPYPTN--CPYMTN--CPYETN--Memory-Copy--reads-and-writes-unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Copy, reads and writes unprivileged and non-temporal. These instructions perform a memory copy. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: CPYPTN, then CPYMTN, and then CPYETN.
@@ -1932,7 +1833,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn cpyptn(&mut self, xd: Register, xs: Register, xn: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b0, xs, 0b1111, xn, xd)
     }
-
 
     /// [SETGP - SETGM - SETGE - Memory Set with tag setting](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGP--SETGM--SETGE--Memory-Set-with-tag-setting-?lang=en)
     ///
@@ -1950,7 +1850,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b11, xs, 0b1000, xn, xd)
     }
 
-
     /// [SETGP - SETGM - SETGE - Memory Set with tag setting](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGP--SETGM--SETGE--Memory-Set-with-tag-setting-?lang=en)
     ///
     /// Memory Set with tag setting. These instructions perform a memory set using the value in the bottom byte of the source register and store an Allocation Tag to memory for each Tag Granule written. The Allocation Tag is calculated from the Logical Address Tag in the register which holds the first address that the set is made to. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: SETGP, then SETGM, and then SETGE.
@@ -1966,7 +1865,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn setgm(&mut self, xd: Register, xn: Register, xs: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b11, xs, 0b0100, xn, xd)
     }
-
 
     /// [SETGP - SETGM - SETGE - Memory Set with tag setting](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGP--SETGM--SETGE--Memory-Set-with-tag-setting-?lang=en)
     ///
@@ -1984,7 +1882,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b11, xs, 0b0000, xn, xd)
     }
 
-
     /// [SETGPT - SETGMT - SETGET - Memory Set with tag setting - unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGPT--SETGMT--SETGET--Memory-Set-with-tag-setting--unprivileged-?lang=en)
     ///
     /// Memory Set with tag setting, unprivileged. These instructions perform a memory set using the value in the bottom byte of the source register and store an Allocation Tag to memory for each Tag Granule written. The Allocation Tag is calculated from the Logical Address Tag in the register which holds the first address that the set is made to. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: SETGPT, then SETGMT, and then SETGET.
@@ -2000,7 +1897,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn setget(&mut self, xd: Register, xn: Register, xs: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b11, xs, 0b1001, xn, xd)
     }
-
 
     /// [SETGPT - SETGMT - SETGET - Memory Set with tag setting - unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGPT--SETGMT--SETGET--Memory-Set-with-tag-setting--unprivileged-?lang=en)
     ///
@@ -2018,7 +1914,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b11, xs, 0b0101, xn, xd)
     }
 
-
     /// [SETGPT - SETGMT - SETGET - Memory Set with tag setting - unprivileged](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGPT--SETGMT--SETGET--Memory-Set-with-tag-setting--unprivileged-?lang=en)
     ///
     /// Memory Set with tag setting, unprivileged. These instructions perform a memory set using the value in the bottom byte of the source register and store an Allocation Tag to memory for each Tag Granule written. The Allocation Tag is calculated from the Logical Address Tag in the register which holds the first address that the set is made to. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: SETGPT, then SETGMT, and then SETGET.
@@ -2034,7 +1929,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn setgpt(&mut self, xd: Register, xn: Register, xs: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b11, xs, 0b0001, xn, xd)
     }
-
 
     /// [SETGPN - SETGMN - SETGEN - Memory Set with tag setting - non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGPN--SETGMN--SETGEN--Memory-Set-with-tag-setting--non-temporal-?lang=en)
     ///
@@ -2052,7 +1946,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b11, xs, 0b1010, xn, xd)
     }
 
-
     /// [SETGPN - SETGMN - SETGEN - Memory Set with tag setting - non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGPN--SETGMN--SETGEN--Memory-Set-with-tag-setting--non-temporal-?lang=en)
     ///
     /// Memory Set with tag setting, non-temporal. These instructions perform a memory set using the value in the bottom byte of the source register and store an Allocation Tag to memory for each Tag Granule written. The Allocation Tag is calculated from the Logical Address Tag in the register which holds the first address that the set is made to. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: SETGPN, then SETGMN, and then SETGEN.
@@ -2068,7 +1961,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn setgmn(&mut self, xd: Register, xn: Register, xs: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b11, xs, 0b0110, xn, xd)
     }
-
 
     /// [SETGPN - SETGMN - SETGEN - Memory Set with tag setting - non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGPN--SETGMN--SETGEN--Memory-Set-with-tag-setting--non-temporal-?lang=en)
     ///
@@ -2086,7 +1978,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b11, xs, 0b0010, xn, xd)
     }
 
-
     /// [SETGPTN - SETGMTN - SETGETN - Memory Set with tag setting - unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGPTN--SETGMTN--SETGETN--Memory-Set-with-tag-setting--unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Set with tag setting, unprivileged and non-temporal. These instructions perform a memory set using the value in the bottom byte of the source register and store an Allocation Tag to memory for each Tag Granule written. The Allocation Tag is calculated from the Logical Address Tag in the register which holds the first address that the set is made to. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: SETGPTN, then SETGMTN, and then SETGETN.
@@ -2103,7 +1994,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b11, xs, 0b1011, xn, xd)
     }
 
-
     /// [SETGPTN - SETGMTN - SETGETN - Memory Set with tag setting - unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGPTN--SETGMTN--SETGETN--Memory-Set-with-tag-setting--unprivileged-and-non-temporal-?lang=en)
     ///
     /// Memory Set with tag setting, unprivileged and non-temporal. These instructions perform a memory set using the value in the bottom byte of the source register and store an Allocation Tag to memory for each Tag Granule written. The Allocation Tag is calculated from the Logical Address Tag in the register which holds the first address that the set is made to. The prologue, main, and epilogue instructions are expected to be run in succession and to appear consecutively in memory: SETGPTN, then SETGMTN, and then SETGETN.
@@ -2119,7 +2009,6 @@ pub trait MemoryCopyAndMemorySet<T>: InstructionProcessor<T> {
     fn setgmtn(&mut self, xd: Register, xn: Register, xs: Register) -> T {
         emit_mem_cpy_mem_set(self, 0b00, 1, 0b11, xs, 0b0111, xn, xd)
     }
-
 
     /// [SETGPTN - SETGMTN - SETGETN - Memory Set with tag setting - unprivileged and non temporal](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETGPTN--SETGMTN--SETGETN--Memory-Set-with-tag-setting--unprivileged-and-non-temporal-?lang=en)
     ///

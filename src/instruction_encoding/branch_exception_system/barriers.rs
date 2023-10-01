@@ -11,17 +11,19 @@
 //! - [SSBB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SSBB--Speculative-Store-Bypass-Barrier--an-alias-of-DSB-?lang=en)
 
 use bit_seq::{bseq_32, bseq_8};
-use crate::instruction_emitter::Emitter;
+
 use crate::instruction_encoding::InstructionProcessor;
-use crate::instruction_stream::InstrStream;
-use crate::mc_memory::Memory;
-use crate::types::instruction::Instr;
 use crate::types::{Register, UImm4};
 use crate::types::encodable::Encodable;
 use crate::types::mem_barrier_option::{MemBarrierOpt, MemNXSBarrierOpt};
 
 #[inline(always)]
-fn emit_barrier_x<P: InstructionProcessor<T>, T>(proc: &mut P, crm: u8, op2: u8, rt: Register) -> T {
+fn emit_barrier_x<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    crm: u8,
+    op2: u8,
+    rt: Register,
+) -> T {
     let i = bseq_32!(11010101 0:6 110011 crm:4 op2:3 rt:5);
     proc.process(i)
 }
@@ -102,12 +104,15 @@ pub trait Barriers<T>: InstructionProcessor<T> {
         emit_barrier_x(self, bseq_8!(option:2 10), 0b001, 0b11111)
     }
 
-
     /// [DSB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/DSB--Data-Synchronization-Barrier-?lang=en)
     ///
     /// `DSB nXS<#imm>`
     fn dsb_mem_nxs_barrier_imm(&mut self, imm: UImm4) -> T {
-        debug_assert!([16, 20, 24, 28].contains(&imm), "imm must be one of 16, 20, 24, 28, was {}", imm);
+        debug_assert!(
+            [16, 20, 24, 28].contains(&imm),
+            "imm must be one of 16, 20, 24, 28, was {}",
+            imm
+        );
         let imm = imm >> 2;
         emit_barrier_x(self, bseq_8!(imm:2 10), 0b001, 0b11111)
     }
@@ -131,11 +136,13 @@ pub trait Barriers<T>: InstructionProcessor<T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::mc_memory::MockMemory;
-    use crate::instruction_emitter::MockEmitter;
     use crate::{assert_panic, stream_mock};
+    use crate::instruction_emitter::MockEmitter;
+    use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::MockMemory;
     use crate::types::InstructionPointer;
+
+    use super::*;
 
     #[test]
     fn test_clrex() {

@@ -4,10 +4,11 @@
 //!  - [TBZ - Test bit and Branch if Zero](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/TBZ--Test-bit-and-Branch-if-Zero-?lang=en)
 //!  - [TBNZ - Test bit and Branch if Nonzero](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/TBNZ--Test-bit-and-Branch-if-Nonzero-?lang=en)
 
-use crate::instruction_encoding::{AddressableInstructionProcessor, InstructionProcessor};
-use crate::types::register::RegConstr;
-use crate::types::{Imm14, Offset16, Offset32, Register, UImm1, UImm5, UImm6};
 use bit_seq::{bseq_32, bseq_8};
+
+use crate::instruction_encoding::{AddressableInstructionProcessor, InstructionProcessor};
+use crate::types::{Imm14, Offset16, Offset32, Register, UImm1, UImm5, UImm6};
+use crate::types::register::RegConstr;
 
 #[inline(always)]
 fn emit_test_branch_imm<P: InstructionProcessor<T>, T>(
@@ -126,13 +127,14 @@ pub trait TestAndBranchImmediateWithAddress<T>: AddressableInstructionProcessor<
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::{assert_panic, stream_mock};
     use crate::instruction_emitter::MockEmitter;
     use crate::instruction_stream::InstrStream;
     use crate::mc_memory::MockMemory;
-    use crate::types::register::RegConstr;
     use crate::types::InstructionPointer;
-    use crate::{assert_panic, stream_mock};
+    use crate::types::register::RegConstr;
+
+    use super::*;
 
     #[test]
     fn test_tbz_x() {

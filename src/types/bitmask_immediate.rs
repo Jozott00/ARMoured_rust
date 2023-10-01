@@ -32,7 +32,6 @@ impl BitmaskImmediate {
             size >>= 1;
             let mask = (1 << size) - 1; // size times 1s
 
-
             // imm in half (of current size) an check if both sides
             // are equal
             if (imm & mask) != ((imm >> size) & mask) {
@@ -99,8 +98,7 @@ impl TryFrom<u64> for BitmaskImmediate {
     type Error = ();
 
     fn try_from(value: u64) -> Result<Self, Self::Error> {
-        BitmaskImmediate::encode(value)
-            .ok_or(())
+        BitmaskImmediate::encode(value).ok_or(())
     }
 }
 
@@ -118,7 +116,6 @@ fn is_shifted_mask(imm: u64) -> bool {
     is_mask((imm - 1) | imm)
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -126,31 +123,68 @@ mod tests {
     #[test]
     fn test_size_16_minimum() {
         let bitmask = BitmaskImmediate::try_from(0x0001000100010001);
-        assert!(matches!(bitmask, Ok(BitmaskImmediate { n: 0, immr: 0b000000, imms: 0b100000 })));
+        assert!(matches!(
+            bitmask,
+            Ok(BitmaskImmediate {
+                n: 0,
+                immr: 0b000000,
+                imms: 0b100000
+            })
+        ));
     }
 
     #[test]
     fn test_size_16_rotated() {
         let bitmask = BitmaskImmediate::try_from(0xff8fff8fff8fff8f);
-        assert!(matches!(bitmask, Ok(BitmaskImmediate { n: 0, immr: 0b001001, imms: 0b101100 })));
+        assert!(matches!(
+            bitmask,
+            Ok(BitmaskImmediate {
+                n: 0,
+                immr: 0b001001,
+                imms: 0b101100
+            })
+        ));
         // 1 00 100100 0 001001 101100 0000100000
     }
 
     #[test]
     fn test_size_16_maximum() {
         let bitmask = BitmaskImmediate::try_from(0xfffefffefffefffe);
-        assert!(matches!(bitmask, Ok(BitmaskImmediate { n: 0, immr: 0b001111, imms: 0b101110 })));
+        assert!(matches!(
+            bitmask,
+            Ok(BitmaskImmediate {
+                n: 0,
+                immr: 0b001111,
+                imms: 0b101110
+            })
+        ));
     }
 
     #[test]
     fn test_size_4_rotated() {
-        let bitmask = BitmaskImmediate::try_from(0b1001100110011001100110011001100110011001100110011001100110011001);
-        assert!(matches!(bitmask, Ok(BitmaskImmediate { n: 0, immr: 0b000001, imms: 0b111001 })));
+        let bitmask = BitmaskImmediate::try_from(
+            0b1001100110011001100110011001100110011001100110011001100110011001,
+        );
+        assert!(matches!(
+            bitmask,
+            Ok(BitmaskImmediate {
+                n: 0,
+                immr: 0b000001,
+                imms: 0b111001
+            })
+        ));
     }
 
     #[test]
     fn test_size_64_minimum() {
         let bitmask = BitmaskImmediate::try_from(0b1);
-        assert!(matches!(bitmask, Ok(BitmaskImmediate { n: 1, immr: 0b000000, imms: 0b000000 })));
+        assert!(matches!(
+            bitmask,
+            Ok(BitmaskImmediate {
+                n: 1,
+                immr: 0b000000,
+                imms: 0b000000
+            })
+        ));
     }
 }

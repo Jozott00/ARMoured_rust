@@ -10,21 +10,39 @@
 //!  - [ANDS - shifted register -  Bitwise AND - shifted register -  setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ANDS--shifted-register---Bitwise-AND--shifted-register---setting-flags-?lang=en)
 //!  - [BICS - shifted register -  Bitwise Bit Clear - shifted register -  setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BICS--shifted-register---Bitwise-Bit-Clear--shifted-register---setting-flags-?lang=en)
 
-
-
 use bit_seq::bseq_32;
+
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::{Register, UImm5, UImm6};
 use crate::types::shifts::Shift4;
 
 #[inline(always)]
-fn emit_log_shift<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, opc: u8, shift: u8, n: u8, rm: Register, imm6: u8, rn: Register, rd: Register) -> T {
+fn emit_log_shift<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: u8,
+    opc: u8,
+    shift: u8,
+    n: u8,
+    rm: Register,
+    imm6: u8,
+    rn: Register,
+    rd: Register,
+) -> T {
     let i = bseq_32!(sf:1 opc:2 01010 shift:2 n:1 rm:5 imm6:6 rn:5 rd:5);
     proc.process(i)
 }
 
 #[inline(always)]
-fn emit_log_opt_shift<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, opc: u8, shift: Option<Shift4<u8>>, n: u8, rm: Register, rn: Register, rd: Register) -> T {
+fn emit_log_opt_shift<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: u8,
+    opc: u8,
+    shift: Option<Shift4<u8>>,
+    n: u8,
+    rm: Register,
+    rn: Register,
+    rd: Register,
+) -> T {
     let (shift, imm6): (u8, u8) = shift.unwrap_or(Shift4::LSL(0)).into();
     emit_log_shift(proc, sf, opc, shift.into(), n, rm, imm6, rn, rd)
 }
@@ -49,10 +67,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// AND <Wd>, <Wn>, <Wm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn and_32(&mut self, wd: Register, wn: Register, wm: Register, shift: Option<Shift4<UImm5>>) -> T {
+    fn and_32(
+        &mut self,
+        wd: Register,
+        wn: Register,
+        wm: Register,
+        shift: Option<Shift4<UImm5>>,
+    ) -> T {
         emit_log_opt_shift(self, 0, 0, shift, 0, wm, wn, wd)
     }
-
 
     /// [AND - shifted register -  Bitwise AND - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AND--shifted-register---Bitwise-AND--shifted-register--?lang=en)
     ///
@@ -62,10 +85,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// AND <Xd>, <Xn>, <Xm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn and_64(&mut self, xd: Register, xn: Register, xm: Register, shift: Option<Shift4<UImm6>>) -> T {
+    fn and_64(
+        &mut self,
+        xd: Register,
+        xn: Register,
+        xm: Register,
+        shift: Option<Shift4<UImm6>>,
+    ) -> T {
         emit_log_opt_shift(self, 1, 0, shift, 0, xm, xn, xd)
     }
-
 
     /// [BIC - shifted register -  Bitwise Bit Clear - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BIC--shifted-register---Bitwise-Bit-Clear--shifted-register--?lang=en)
     ///
@@ -75,10 +103,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// BIC <Wd>, <Wn>, <Wm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn bic_32(&mut self, wd: Register, wn: Register, wm: Register, shift: Option<Shift4<UImm5>>) -> T {
+    fn bic_32(
+        &mut self,
+        wd: Register,
+        wn: Register,
+        wm: Register,
+        shift: Option<Shift4<UImm5>>,
+    ) -> T {
         emit_log_opt_shift(self, 0, 0, shift, 1, wm, wn, wd)
     }
-
 
     /// [BIC - shifted register -  Bitwise Bit Clear - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BIC--shifted-register---Bitwise-Bit-Clear--shifted-register--?lang=en)
     ///
@@ -88,10 +121,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// BIC <Xd>, <Xn>, <Xm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn bic_64(&mut self, xd: Register, xn: Register, xm: Register, shift: Option<Shift4<UImm6>>) -> T {
+    fn bic_64(
+        &mut self,
+        xd: Register,
+        xn: Register,
+        xm: Register,
+        shift: Option<Shift4<UImm6>>,
+    ) -> T {
         emit_log_opt_shift(self, 1, 0, shift, 1, xm, xn, xd)
     }
-
 
     /// [ORR - shifted register -  Bitwise OR - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ORR--shifted-register---Bitwise-OR--shifted-register--?lang=en)
     ///
@@ -103,10 +141,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// ORR <Wd>, <Wn>, <Wm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn orr_32(&mut self, wd: Register, wn: Register, wm: Register, shift: Option<Shift4<UImm5>>) -> T {
+    fn orr_32(
+        &mut self,
+        wd: Register,
+        wn: Register,
+        wm: Register,
+        shift: Option<Shift4<UImm5>>,
+    ) -> T {
         emit_log_opt_shift(self, 0, 0b01, shift, 0, wm, wn, wd)
     }
-
 
     /// [ORR - shifted register -  Bitwise OR - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ORR--shifted-register---Bitwise-OR--shifted-register--?lang=en)
     ///
@@ -118,10 +161,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// ORR <Xd>, <Xn>, <Xm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn orr_64(&mut self, xd: Register, xn: Register, xm: Register, shift: Option<Shift4<UImm6>>) -> T {
+    fn orr_64(
+        &mut self,
+        xd: Register,
+        xn: Register,
+        xm: Register,
+        shift: Option<Shift4<UImm6>>,
+    ) -> T {
         emit_log_opt_shift(self, 1, 0b01, shift, 0, xm, xn, xd)
     }
-
 
     /// [ORN - shifted register -  Bitwise OR NOT - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ORN--shifted-register---Bitwise-OR-NOT--shifted-register--?lang=en)
     ///
@@ -133,10 +181,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// ORN <Wd>, <Wn>, <Wm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn orn_32(&mut self, wd: Register, wn: Register, wm: Register, shift: Option<Shift4<UImm5>>) -> T {
+    fn orn_32(
+        &mut self,
+        wd: Register,
+        wn: Register,
+        wm: Register,
+        shift: Option<Shift4<UImm5>>,
+    ) -> T {
         emit_log_opt_shift(self, 0, 0b01, shift, 1, wm, wn, wd)
     }
-
 
     /// [ORN - shifted register -  Bitwise OR NOT - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ORN--shifted-register---Bitwise-OR-NOT--shifted-register--?lang=en)
     ///
@@ -148,10 +201,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// ORN <Xd>, <Xn>, <Xm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn orn_64(&mut self, xd: Register, xn: Register, xm: Register, shift: Option<Shift4<UImm6>>) -> T {
+    fn orn_64(
+        &mut self,
+        xd: Register,
+        xn: Register,
+        xm: Register,
+        shift: Option<Shift4<UImm6>>,
+    ) -> T {
         emit_log_opt_shift(self, 1, 0b01, shift, 1, xm, xn, xd)
     }
-
 
     /// [EOR - shifted register -  Bitwise Exclusive OR - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/EOR--shifted-register---Bitwise-Exclusive-OR--shifted-register--?lang=en)
     ///
@@ -161,10 +219,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// EOR <Wd>, <Wn>, <Wm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn eor_32(&mut self, wd: Register, wn: Register, wm: Register, shift: Option<Shift4<UImm5>>) -> T {
+    fn eor_32(
+        &mut self,
+        wd: Register,
+        wn: Register,
+        wm: Register,
+        shift: Option<Shift4<UImm5>>,
+    ) -> T {
         emit_log_opt_shift(self, 0, 0b10, shift, 0, wm, wn, wd)
     }
-
 
     /// [EOR - shifted register -  Bitwise Exclusive OR - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/EOR--shifted-register---Bitwise-Exclusive-OR--shifted-register--?lang=en)
     ///
@@ -174,10 +237,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// EOR <Xd>, <Xn>, <Xm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn eor_64(&mut self, xd: Register, xn: Register, xm: Register, shift: Option<Shift4<UImm6>>) -> T {
+    fn eor_64(
+        &mut self,
+        xd: Register,
+        xn: Register,
+        xm: Register,
+        shift: Option<Shift4<UImm6>>,
+    ) -> T {
         emit_log_opt_shift(self, 1, 0b10, shift, 0, xm, xn, xd)
     }
-
 
     /// [EON - shifted register -  Bitwise Exclusive OR NOT - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/EON--shifted-register---Bitwise-Exclusive-OR-NOT--shifted-register--?lang=en)
     ///
@@ -187,10 +255,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// EON <Wd>, <Wn>, <Wm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn eon_32(&mut self, wd: Register, wn: Register, wm: Register, shift: Option<Shift4<UImm5>>) -> T {
+    fn eon_32(
+        &mut self,
+        wd: Register,
+        wn: Register,
+        wm: Register,
+        shift: Option<Shift4<UImm5>>,
+    ) -> T {
         emit_log_opt_shift(self, 0, 0b10, shift, 1, wm, wn, wd)
     }
-
 
     /// [EON - shifted register -  Bitwise Exclusive OR NOT - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/EON--shifted-register---Bitwise-Exclusive-OR-NOT--shifted-register--?lang=en)
     ///
@@ -200,10 +273,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// EON <Xd>, <Xn>, <Xm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn eon_64(&mut self, xd: Register, xn: Register, xm: Register, shift: Option<Shift4<UImm6>>) -> T {
+    fn eon_64(
+        &mut self,
+        xd: Register,
+        xn: Register,
+        xm: Register,
+        shift: Option<Shift4<UImm6>>,
+    ) -> T {
         emit_log_opt_shift(self, 1, 0b10, shift, 1, xm, xn, xd)
     }
-
 
     /// [ANDS - shifted register -  Bitwise AND - shifted register -  setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ANDS--shifted-register---Bitwise-AND--shifted-register---setting-flags-?lang=en)
     ///
@@ -215,10 +293,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// ANDS <Wd>, <Wn>, <Wm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn ands_32(&mut self, wd: Register, wn: Register, wm: Register, shift: Option<Shift4<UImm5>>) -> T {
+    fn ands_32(
+        &mut self,
+        wd: Register,
+        wn: Register,
+        wm: Register,
+        shift: Option<Shift4<UImm5>>,
+    ) -> T {
         emit_log_opt_shift(self, 0, 0b11, shift, 0, wm, wn, wd)
     }
-
 
     /// [ANDS - shifted register -  Bitwise AND - shifted register -  setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ANDS--shifted-register---Bitwise-AND--shifted-register---setting-flags-?lang=en)
     ///
@@ -230,10 +313,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// ANDS <Xd>, <Xn>, <Xm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn ands_64(&mut self, xd: Register, xn: Register, xm: Register, shift: Option<Shift4<UImm6>>) -> T {
+    fn ands_64(
+        &mut self,
+        xd: Register,
+        xn: Register,
+        xm: Register,
+        shift: Option<Shift4<UImm6>>,
+    ) -> T {
         emit_log_opt_shift(self, 1, 0b11, shift, 0, xm, xn, xd)
     }
-
 
     /// [BICS - shifted register -  Bitwise Bit Clear - shifted register -  setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BICS--shifted-register---Bitwise-Bit-Clear--shifted-register---setting-flags-?lang=en)
     ///
@@ -243,10 +331,15 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// BICS <Wd>, <Wn>, <Wm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn bics_32(&mut self, wd: Register, wn: Register, wm: Register, shift: Option<Shift4<UImm5>>) -> T {
+    fn bics_32(
+        &mut self,
+        wd: Register,
+        wn: Register,
+        wm: Register,
+        shift: Option<Shift4<UImm5>>,
+    ) -> T {
         emit_log_opt_shift(self, 0, 0b11, shift, 1, wm, wn, wd)
     }
-
 
     /// [BICS - shifted register -  Bitwise Bit Clear - shifted register -  setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BICS--shifted-register---Bitwise-Bit-Clear--shifted-register---setting-flags-?lang=en)
     ///
@@ -256,15 +349,21 @@ pub trait LogicalShiftRegister<T>: InstructionProcessor<T> {
     /// BICS <Xd>, <Xn>, <Xm>{, <shift> #<amount>}
     /// ```
     #[inline(always)]
-    fn bics_64(&mut self, xd: Register, xn: Register, xm: Register, shift: Option<Shift4<UImm6>>) -> T {
+    fn bics_64(
+        &mut self,
+        xd: Register,
+        xn: Register,
+        xm: Register,
+        shift: Option<Shift4<UImm6>>,
+    ) -> T {
         emit_log_opt_shift(self, 1, 0b11, shift, 1, xm, xn, xd)
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]

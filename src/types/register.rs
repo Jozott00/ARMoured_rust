@@ -1,4 +1,4 @@
-use crate::types::{Register, UImm4};
+use crate::types::Register;
 
 pub enum RegConstr {
     W(Register),

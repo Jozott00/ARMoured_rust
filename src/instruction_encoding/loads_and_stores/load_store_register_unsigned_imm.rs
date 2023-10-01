@@ -13,15 +13,22 @@
 //!  - [LDR - immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDR--immediate---Load-Register--immediate--?lang=en)
 //!  - [LDRSW - immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRSW--immediate---Load-Register-Signed-Word--immediate--?lang=en)
 ///  - [PRFM - immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PRFM--immediate---Prefetch-Memory--immediate--?lang=en)
-
-
 use bit_seq::bseq_32;
+
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::{Register, UImm12, UImm13, UImm14, UImm15, UImm16, UImm5};
 use crate::types::prefetch_memory::PrfOp;
 
 #[inline(always)]
-fn emit_load_store_offset<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, V: u8, opc: u8, pimm: u16, rn: Register, rt: Register) -> T {
+fn emit_load_store_offset<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    size: u8,
+    V: u8,
+    opc: u8,
+    pimm: u16,
+    rn: Register,
+    rt: Register,
+) -> T {
     debug_assert!(0 <= pimm && pimm <= 4095, "pimm must be in range 0 to 4095");
     let r = bseq_32!(size:2 111 V:1 01 opc:2 pimm:12 rn:5 rt:5);
     proc.process(r)
@@ -57,7 +64,6 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
         emit_load_store_offset(self, 0, 0, 0, pimm, xn_sp, wt)
     }
 
-
     /// [LDRB - immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRB--immediate---Load-Register-Byte--immediate--?lang=en)
     ///
     /// Load Register Byte (immediate) loads a byte from memory, zero-extends it, and writes the result to a register. The address that is used for the load is calculated from a base register and an immediate offset. For information about memory accesses, see Load/Store addressing modes.
@@ -71,7 +77,6 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     fn ldrb_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
         emit_load_store_offset(self, 0, 0, 0b01, pimm, xn_sp, wt)
     }
-
 
     /// [LDRSB - immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRSB--immediate---Load-Register-Signed-Byte--immediate--?lang=en)
     ///
@@ -87,7 +92,6 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
         emit_load_store_offset(self, 0, 0, 0b11, pimm, xn_sp, wt)
     }
 
-
     /// [LDRSB - immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRSB--immediate---Load-Register-Signed-Byte--immediate--?lang=en)
     ///
     /// Load Register Signed Byte (immediate) loads a byte from memory, sign-extends it to either 32 bits or 64 bits, and writes the result to a register. The address that is used for the load is calculated from a base register and an immediate offset. For information about memory accesses, see Load/Store addressing modes.
@@ -101,7 +105,6 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     fn ldrsb_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> T {
         emit_load_store_offset(self, 0, 0, 0b10, pimm, xn_sp, xt)
     }
-
 
     /// [STR - immediate - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/STR--immediate--SIMD-FP---Store-SIMD-FP-register--immediate-offset--?lang=en)
     ///
@@ -117,7 +120,6 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
         emit_load_store_offset(self, 0b00, 1, 0b00, pimm, xn_sp, bt)
     }
 
-
     /// [STR - immediate - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/STR--immediate--SIMD-FP---Store-SIMD-FP-register--immediate-offset--?lang=en)
     ///
     /// Store SIMD&FP register (immediate offset). This instruction stores a single SIMD&FP register to memory. The address that is used for the store is calculated from a base register value and an immediate offset.
@@ -128,13 +130,21 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// STR <Ht>, [<Xn|SP>{, #<pimm>}]
     /// ```
     #[inline(always)]
-    fn str_16_imm_simd_unsigned_offset(&mut self, ht: Register, xn_sp: Register, pimm: UImm13) -> T {
-        debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
+    fn str_16_imm_simd_unsigned_offset(
+        &mut self,
+        ht: Register,
+        xn_sp: Register,
+        pimm: UImm13,
+    ) -> T {
+        debug_assert!(
+            pimm <= 8190,
+            "pimm must be in range 0 to 8190, was {}",
+            pimm
+        );
         debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 2;
         emit_load_store_offset(self, 0b01, 1, 0b00, pimm, xn_sp, ht)
     }
-
 
     /// [STR - immediate - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/STR--immediate--SIMD-FP---Store-SIMD-FP-register--immediate-offset--?lang=en)
     ///
@@ -146,13 +156,21 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// STR <St>, [<Xn|SP>{, #<pimm>}]
     /// ```
     #[inline(always)]
-    fn str_32_imm_simd_unsigned_offset(&mut self, st: Register, xn_sp: Register, pimm: UImm14) -> T {
-        debug_assert!(pimm <= 16380, "pimm must be in range 0 to 16380, was {}", pimm);
+    fn str_32_imm_simd_unsigned_offset(
+        &mut self,
+        st: Register,
+        xn_sp: Register,
+        pimm: UImm14,
+    ) -> T {
+        debug_assert!(
+            pimm <= 16380,
+            "pimm must be in range 0 to 16380, was {}",
+            pimm
+        );
         debug_assert!(pimm % 4 == 0, "pimm must be multiply of 4, was {}", pimm);
         let pimm = pimm / 4;
         emit_load_store_offset(self, 0b10, 1, 0b00, pimm, xn_sp, st)
     }
-
 
     /// [STR - immediate - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/STR--immediate--SIMD-FP---Store-SIMD-FP-register--immediate-offset--?lang=en)
     ///
@@ -164,13 +182,21 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// STR <Dt>, [<Xn|SP>{, #<pimm>}]
     /// ```
     #[inline(always)]
-    fn str_64_imm_simd_unsigned_offset(&mut self, dt: Register, xn_sp: Register, pimm: UImm15) -> T {
-        debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
+    fn str_64_imm_simd_unsigned_offset(
+        &mut self,
+        dt: Register,
+        xn_sp: Register,
+        pimm: UImm15,
+    ) -> T {
+        debug_assert!(
+            pimm <= 32760,
+            "pimm must be in range 0 to 32760, was {}",
+            pimm
+        );
         debug_assert!(pimm % 8 == 0, "pimm must be multiply of 8, was {}", pimm);
         let pimm = pimm / 8;
         emit_load_store_offset(self, 0b11, 1, 0b00, pimm, xn_sp, dt)
     }
-
 
     /// [STR - immediate - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/STR--immediate--SIMD-FP---Store-SIMD-FP-register--immediate-offset--?lang=en)
     ///
@@ -182,13 +208,21 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// STR <Qt>, [<Xn|SP>{, #<pimm>}]
     /// ```
     #[inline(always)]
-    fn str_128_imm_simd_unsigned_offset(&mut self, qt: Register, xn_sp: Register, pimm: UImm16) -> T {
-        debug_assert!(pimm <= 65520, "pimm must be in range 0 to 65520, was {}", pimm);
+    fn str_128_imm_simd_unsigned_offset(
+        &mut self,
+        qt: Register,
+        xn_sp: Register,
+        pimm: UImm16,
+    ) -> T {
+        debug_assert!(
+            pimm <= 65520,
+            "pimm must be in range 0 to 65520, was {}",
+            pimm
+        );
         debug_assert!(pimm % 16 == 0, "pimm must be multiply of 16, was {}", pimm);
         let pimm = pimm / 16;
         emit_load_store_offset(self, 0b00, 1, 0b10, pimm, xn_sp, qt)
     }
-
 
     /// [LDR - immediate - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LDR--immediate--SIMD-FP---Load-SIMD-FP-Register--immediate-offset--?lang=en)
     ///
@@ -214,8 +248,17 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// LDR <Ht>, [<Xn|SP>{, #<pimm>}]
     /// ```
     #[inline(always)]
-    fn ldr_16_imm_simd_unsigned_offset(&mut self, ht: Register, xn_sp: Register, pimm: UImm13) -> T {
-        debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
+    fn ldr_16_imm_simd_unsigned_offset(
+        &mut self,
+        ht: Register,
+        xn_sp: Register,
+        pimm: UImm13,
+    ) -> T {
+        debug_assert!(
+            pimm <= 8190,
+            "pimm must be in range 0 to 8190, was {}",
+            pimm
+        );
         debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 2;
         emit_load_store_offset(self, 0b01, 1, 0b01, pimm, xn_sp, ht)
@@ -231,13 +274,21 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// LDR <St>, [<Xn|SP>{, #<pimm>}]
     /// ```
     #[inline(always)]
-    fn ldr_32_imm_simd_unsigned_offset(&mut self, st: Register, xn_sp: Register, pimm: UImm14) -> T {
-        debug_assert!(pimm <= 16380, "pimm must be in range 0 to 16380, was {}", pimm);
+    fn ldr_32_imm_simd_unsigned_offset(
+        &mut self,
+        st: Register,
+        xn_sp: Register,
+        pimm: UImm14,
+    ) -> T {
+        debug_assert!(
+            pimm <= 16380,
+            "pimm must be in range 0 to 16380, was {}",
+            pimm
+        );
         debug_assert!(pimm % 4 == 0, "pimm must be multiply of 4, was {}", pimm);
         let pimm = pimm / 4;
         emit_load_store_offset(self, 0b10, 1, 0b01, pimm, xn_sp, st)
     }
-
 
     /// [LDR - immediate - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LDR--immediate--SIMD-FP---Load-SIMD-FP-Register--immediate-offset--?lang=en)
     ///
@@ -249,13 +300,21 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// LDR <Dt>, [<Xn|SP>{, #<pimm>}]
     /// ```
     #[inline(always)]
-    fn ldr_64_imm_simd_unsigned_offset(&mut self, dt: Register, xn_sp: Register, pimm: UImm15) -> T {
-        debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
+    fn ldr_64_imm_simd_unsigned_offset(
+        &mut self,
+        dt: Register,
+        xn_sp: Register,
+        pimm: UImm15,
+    ) -> T {
+        debug_assert!(
+            pimm <= 32760,
+            "pimm must be in range 0 to 32760, was {}",
+            pimm
+        );
         debug_assert!(pimm % 8 == 0, "pimm must be multiply of 8, was {}", pimm);
         let pimm = pimm / 8;
         emit_load_store_offset(self, 0b11, 1, 0b01, pimm, xn_sp, dt)
     }
-
 
     /// [LDR - immediate - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LDR--immediate--SIMD-FP---Load-SIMD-FP-Register--immediate-offset--?lang=en)
     ///
@@ -267,13 +326,21 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// LDR <Qt>, [<Xn|SP>{, #<pimm>}]
     /// ```
     #[inline(always)]
-    fn ldr_128_imm_simd_unsigned_offset(&mut self, qt: Register, xn_sp: Register, pimm: UImm16) -> T {
-        debug_assert!(pimm <= 65520, "pimm must be in range 0 to 65520, was {}", pimm);
+    fn ldr_128_imm_simd_unsigned_offset(
+        &mut self,
+        qt: Register,
+        xn_sp: Register,
+        pimm: UImm16,
+    ) -> T {
+        debug_assert!(
+            pimm <= 65520,
+            "pimm must be in range 0 to 65520, was {}",
+            pimm
+        );
         debug_assert!(pimm % 16 == 0, "pimm must be multiply of 16, was {}", pimm);
         let pimm = pimm / 16;
         emit_load_store_offset(self, 0b00, 1, 0b11, pimm, xn_sp, qt)
     }
-
 
     /// [STRH - immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STRH--immediate---Store-Register-Halfword--immediate--?lang=en)
     ///
@@ -286,12 +353,15 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn strh_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm13) -> T {
-        debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
+        debug_assert!(
+            pimm <= 8190,
+            "pimm must be in range 0 to 8190, was {}",
+            pimm
+        );
         debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 2;
         emit_load_store_offset(self, 0b01, 0, 0, pimm, xn_sp, wt)
     }
-
 
     /// [LDRH - immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRH--immediate---Load-Register-Halfword--immediate--?lang=en)
     ///
@@ -304,7 +374,11 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn ldrh_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm13) -> T {
-        debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
+        debug_assert!(
+            pimm <= 8190,
+            "pimm must be in range 0 to 8190, was {}",
+            pimm
+        );
         debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 2;
         emit_load_store_offset(self, 0b01, 0, 0b01, pimm, xn_sp, wt)
@@ -321,12 +395,15 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn ldrsh_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm13) -> T {
-        debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
+        debug_assert!(
+            pimm <= 8190,
+            "pimm must be in range 0 to 8190, was {}",
+            pimm
+        );
         debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 2;
         emit_load_store_offset(self, 0b01, 0, 0b11, pimm, xn_sp, wt)
     }
-
 
     /// [LDRSH - immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRSH--immediate---Load-Register-Signed-Halfword--immediate--?lang=en)
     ///
@@ -339,12 +416,15 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn ldrsh_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm13) -> T {
-        debug_assert!(pimm <= 8190, "pimm must be in range 0 to 8190, was {}", pimm);
+        debug_assert!(
+            pimm <= 8190,
+            "pimm must be in range 0 to 8190, was {}",
+            pimm
+        );
         debug_assert!(pimm % 2 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 2;
         emit_load_store_offset(self, 0b01, 0, 0b10, pimm, xn_sp, xt)
     }
-
 
     /// [STR - immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STR--immediate---Store-Register--immediate--?lang=en)
     ///
@@ -357,7 +437,11 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn str_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm14) -> T {
-        debug_assert!(pimm <= 16380, "pimm must be in range 0 to 16380, was {}", pimm);
+        debug_assert!(
+            pimm <= 16380,
+            "pimm must be in range 0 to 16380, was {}",
+            pimm
+        );
         debug_assert!(pimm % 4 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 4;
         emit_load_store_offset(self, 0b10, 0, 0b00, pimm, xn_sp, wt)
@@ -374,12 +458,15 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn str_64_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm15) -> T {
-        debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
+        debug_assert!(
+            pimm <= 32760,
+            "pimm must be in range 0 to 32760, was {}",
+            pimm
+        );
         debug_assert!(pimm % 8 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 8;
         emit_load_store_offset(self, 0b11, 0, 0b00, pimm, xn_sp, xt)
     }
-
 
     /// [LDR - immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDR--immediate---Load-Register--immediate--?lang=en)
     ///
@@ -392,12 +479,15 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn ldr_32_imm_unsigned_offset(&mut self, wt: Register, xn_sp: Register, pimm: UImm12) -> T {
-        debug_assert!(pimm <= 16380, "pimm must be in range 0 to 16380, was {}", pimm);
+        debug_assert!(
+            pimm <= 16380,
+            "pimm must be in range 0 to 16380, was {}",
+            pimm
+        );
         debug_assert!(pimm % 4 == 0, "pimm must be multiply of 2, was {}", pimm);
         let pimm = pimm / 4;
         emit_load_store_offset(self, 0b10, 0, 0b01, pimm, xn_sp, wt)
     }
-
 
     /// [LDR - immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDR--immediate---Load-Register--immediate--?lang=en)
     ///
@@ -415,7 +505,6 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
         emit_load_store_offset(self, 0b11, 0, 0b01, pimm, xn_sp, xt)
     }
 
-
     /// [LDRSW - immediate](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRSW--immediate---Load-Register-Signed-Word--immediate--?lang=en)
     ///
     /// Load Register Signed Word (immediate) loads a word from memory, sign-extends it to 64 bits, and writes the result to a register. The address that is used for the load is calculated from a base register and an immediate offset. For information about memory accesses, see Load/Store addressing modes.
@@ -427,7 +516,11 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn ldrsw_imm_unsigned_offset(&mut self, xt: Register, xn_sp: Register, pimm: UImm12) -> T {
-        debug_assert!(pimm <= 16380, "pimm must be in range 0 to 16380, was {}", pimm);
+        debug_assert!(
+            pimm <= 16380,
+            "pimm must be in range 0 to 16380, was {}",
+            pimm
+        );
         debug_assert!(pimm % 4 == 0, "pimm must be multiply of 4, was {}", pimm);
         let pimm = pimm / 4;
         emit_load_store_offset(self, 0b10, 0, 0b10, pimm, xn_sp, xt)
@@ -446,7 +539,11 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn prfm_imm_prfop(&mut self, prfop: PrfOp, xn_sp: Register, pimm: UImm15) -> T {
-        debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
+        debug_assert!(
+            pimm <= 32760,
+            "pimm must be in range 0 to 32760, was {}",
+            pimm
+        );
         debug_assert!(pimm % 8 == 0, "pimm must be multiply of 8, was {}", pimm);
         let pimm = pimm / 8;
         emit_load_store_offset(self, 0b11, 0, 0b10, pimm, xn_sp, prfop.encode())
@@ -465,26 +562,29 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn prfm_imm_custom(&mut self, imm5: UImm5, xn_sp: Register, pimm: UImm15) -> T {
-        debug_assert!(pimm <= 32760, "pimm must be in range 0 to 32760, was {}", pimm);
+        debug_assert!(
+            pimm <= 32760,
+            "pimm must be in range 0 to 32760, was {}",
+            pimm
+        );
         debug_assert!(pimm % 8 == 0, "pimm must be multiply of 8, was {}", pimm);
         let pimm = pimm / 8;
         emit_load_store_offset(self, 0b11, 0, 0b10, pimm, xn_sp, imm5)
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use bad64::decode;
-    use super::*;
-    use crate::mc_memory::MockMemory;
+    use crate::{assert_panic, stream_mock};
     use crate::instruction_emitter::MockEmitter;
-    use crate::{stream_mock, assert_panic};
+    use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::MockMemory;
     use crate::types::InstructionPointer;
     use crate::types::prefetch_memory::PrfPolicy::{KEEP, STRM};
     use crate::types::prefetch_memory::PrfTarget::{L1, L2, L3};
     use crate::types::prefetch_memory::PrfType::{PLD, PLI, PST};
-    use crate::instruction_stream::InstrStream;
+
+    use super::*;
 
     #[test]
     fn test_strb_unsigned_offset() {
@@ -572,7 +672,6 @@ mod tests {
         })
     }
 
-
     #[test]
     fn test_ldrsh_32_imm_unsigned_offset() {
         stream_mock!(stream, {
@@ -589,7 +688,6 @@ mod tests {
             assert_panic!("Should panic: imm out of range"; stream.ldrsh_32_imm_unsigned_offset(0, 3, 8191));
         })
     }
-
 
     #[test]
     fn test_ldrsh_64_imm_unsigned_offset() {
@@ -641,7 +739,6 @@ mod tests {
             assert_panic!("Should panic: imm out of range"; stream.str_64_imm_unsigned_offset(0, 3, 32761));
         })
     }
-
 
     #[test]
     fn test_ldr_32_imm_unsigned_offset() {
@@ -710,7 +807,6 @@ mod tests {
     #[test]
     fn test_prfm_imm_prfop() {
         stream_mock!(stream, {
-
             let prfop = PrfOp(PLD, L1, KEEP);
             let instr = stream.prfm_imm_prfop(prfop, 3, 0x0);
             assert_eq!(instr.to_string(), "prfm pldl1keep, [x3]");
@@ -723,7 +819,6 @@ mod tests {
             let instr = stream.prfm_imm_prfop(prfop, 3, 32760);
             assert_eq!(instr.to_string(), "prfm pstl3keep, [x3, #0x7ff8]");
 
-
             assert_panic!("Should panic: pimm not multiply of 8"; stream.prfm_imm_prfop(prfop, 3, 1));
             assert_panic!("Should panic: imm out of range"; stream.prfm_imm_prfop(prfop, 3, 32761));
         })
@@ -732,7 +827,6 @@ mod tests {
     #[test]
     fn test_prfm_imm_custom() {
         stream_mock!(stream, {
-
             let cust = PrfOp(PLD, L1, KEEP).encode();
             let instr = stream.prfm_imm_custom(cust, 3, 0x0);
             assert_eq!(instr.to_string(), "prfm pldl1keep, [x3]");

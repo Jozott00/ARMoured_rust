@@ -15,9 +15,9 @@
 use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
 use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
+use crate::types::{Register, UImm5, UImm6};
 use crate::types::register::{WZR, XZR};
 use crate::types::shifts::Shift3;
-use crate::types::{Register, UImm5, UImm6};
 
 /// # Common Aliases
 ///
@@ -251,8 +251,9 @@ pub trait CommonAliases<T>:
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::test_utils::test_producer::TestProducer;
+
+    use super::*;
 
     #[test]
     fn test_mov() {

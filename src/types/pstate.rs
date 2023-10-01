@@ -1,6 +1,6 @@
-use bit_seq::bseq_16;
-use crate::types::encodable::Encodable;
 use PStateField::*;
+
+use crate::types::encodable::Encodable;
 
 /// PSTATE field operand.
 ///
@@ -42,13 +42,14 @@ impl Encodable<(u8, u8)> for PStateField {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::mc_memory::MockMemory;
     use crate::instruction_emitter::MockEmitter;
-    use crate::{stream_mock};
-    use crate::types::InstructionPointer;
-    use crate::instruction_stream::InstrStream;
     use crate::instruction_encoding::branch_exception_system::pstate::PStateInstructions;
+    use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::MockMemory;
+    use crate::stream_mock;
+    use crate::types::InstructionPointer;
+
+    use super::*;
 
     #[test]
     fn test_condition_encodings() {

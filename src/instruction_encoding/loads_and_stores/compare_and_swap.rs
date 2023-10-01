@@ -5,14 +5,22 @@
 //!  - [CASH - CASAH - CASALH - CASLH - Compare and Swap halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CASH--CASAH--CASALH--CASLH--Compare-and-Swap-halfword-in-memory-?lang=en)
 //!  - [CAS - CASA - CASAL - CASL - Compare and Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CAS--CASA--CASAL--CASL--Compare-and-Swap-word-or-doubleword-in-memory-?lang=en)
 
-
-
 use bit_seq::bseq_32;
+
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::Register;
 
 #[inline(always)]
-fn emit_cmp_swap<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, l: u8, rs: Register, o0: u8, rt2: Register, rn: Register, rt: Register) -> T {
+fn emit_cmp_swap<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    size: u8,
+    l: u8,
+    rs: Register,
+    o0: u8,
+    rt2: Register,
+    rn: Register,
+    rt: Register,
+) -> T {
     let r = bseq_32!(size:2 0010001 l:1 1 rs:5 o0:1 rt2:5 rn:5 rt:5);
     proc.process(r)
 }
@@ -38,7 +46,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
         emit_cmp_swap(self, 0b00, 1, ws, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [CASB - CASAB - CASALB - CASLB - Compare and Swap byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CASB--CASAB--CASALB--CASLB--Compare-and-Swap-byte-in-memory-?lang=en)
     ///
     /// Compare and Swap byte in memory reads an 8-bit byte from memory, and compares it against the value held in a first register. If the comparison is equal, the value in a second register is written to memory. If the write is performed, the read and write occur atomically such that no other modification of the memory location can take place between the read and write.
@@ -52,7 +59,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
     fn casalb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_cmp_swap(self, 0b00, 1, ws, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [CASB - CASAB - CASALB - CASLB - Compare and Swap byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CASB--CASAB--CASALB--CASLB--Compare-and-Swap-byte-in-memory-?lang=en)
     ///
@@ -68,7 +74,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
         emit_cmp_swap(self, 0b00, 0, ws, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [CASB - CASAB - CASALB - CASLB - Compare and Swap byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CASB--CASAB--CASALB--CASLB--Compare-and-Swap-byte-in-memory-?lang=en)
     ///
     /// Compare and Swap byte in memory reads an 8-bit byte from memory, and compares it against the value held in a first register. If the comparison is equal, the value in a second register is written to memory. If the write is performed, the read and write occur atomically such that no other modification of the memory location can take place between the read and write.
@@ -82,7 +87,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
     fn caslb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_cmp_swap(self, 0b00, 0, ws, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [CASH - CASAH - CASALH - CASLH - Compare and Swap halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CASH--CASAH--CASALH--CASLH--Compare-and-Swap-halfword-in-memory-?lang=en)
     ///
@@ -98,7 +102,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
         emit_cmp_swap(self, 0b01, 1, ws, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [CASH - CASAH - CASALH - CASLH - Compare and Swap halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CASH--CASAH--CASALH--CASLH--Compare-and-Swap-halfword-in-memory-?lang=en)
     ///
     /// Compare and Swap halfword in memory reads a 16-bit halfword from memory, and compares it against the value held in a first register. If the comparison is equal, the value in a second register is written to memory. If the write is performed, the read and write occur atomically such that no other modification of the memory location can take place between the read and write.
@@ -112,7 +115,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
     fn casalh(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_cmp_swap(self, 0b01, 1, ws, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [CASH - CASAH - CASALH - CASLH - Compare and Swap halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CASH--CASAH--CASALH--CASLH--Compare-and-Swap-halfword-in-memory-?lang=en)
     ///
@@ -128,7 +130,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
         emit_cmp_swap(self, 0b01, 0, ws, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [CASH - CASAH - CASALH - CASLH - Compare and Swap halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CASH--CASAH--CASALH--CASLH--Compare-and-Swap-halfword-in-memory-?lang=en)
     ///
     /// Compare and Swap halfword in memory reads a 16-bit halfword from memory, and compares it against the value held in a first register. If the comparison is equal, the value in a second register is written to memory. If the write is performed, the read and write occur atomically such that no other modification of the memory location can take place between the read and write.
@@ -142,7 +143,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
     fn caslh(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_cmp_swap(self, 0b01, 0, ws, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [CAS - CASA - CASAL - CASL - Compare and Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CAS--CASA--CASAL--CASL--Compare-and-Swap-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -158,7 +158,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
         emit_cmp_swap(self, 0b10, 0, ws, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [CAS - CASA - CASAL - CASL - Compare and Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CAS--CASA--CASAL--CASL--Compare-and-Swap-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Compare and Swap word or doubleword in memory reads a 32-bit word or 64-bit doubleword from memory, and compares it against the value held in a first register. If the comparison is equal, the value in a second register is written to memory. If the write is performed, the read and write occur atomically such that no other modification of the memory location can take place between the read and write.
@@ -172,7 +171,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
     fn casa_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_cmp_swap(self, 0b10, 1, ws, 0, 0b11111, xn_sp, wt)
     }
-
 
     /// [CAS - CASA - CASAL - CASL - Compare and Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CAS--CASA--CASAL--CASL--Compare-and-Swap-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -188,7 +186,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
         emit_cmp_swap(self, 0b10, 1, ws, 1, 0b11111, xn_sp, wt)
     }
 
-
     /// [CAS - CASA - CASAL - CASL - Compare and Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CAS--CASA--CASAL--CASL--Compare-and-Swap-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Compare and Swap word or doubleword in memory reads a 32-bit word or 64-bit doubleword from memory, and compares it against the value held in a first register. If the comparison is equal, the value in a second register is written to memory. If the write is performed, the read and write occur atomically such that no other modification of the memory location can take place between the read and write.
@@ -202,7 +199,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
     fn casl_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_cmp_swap(self, 0b10, 0, ws, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [CAS - CASA - CASAL - CASL - Compare and Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CAS--CASA--CASAL--CASL--Compare-and-Swap-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -218,7 +214,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
         emit_cmp_swap(self, 0b11, 0, xs, 0, 0b11111, xn_sp, xt)
     }
 
-
     /// [CAS - CASA - CASAL - CASL - Compare and Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CAS--CASA--CASAL--CASL--Compare-and-Swap-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Compare and Swap word or doubleword in memory reads a 32-bit word or 64-bit doubleword from memory, and compares it against the value held in a first register. If the comparison is equal, the value in a second register is written to memory. If the write is performed, the read and write occur atomically such that no other modification of the memory location can take place between the read and write.
@@ -233,7 +228,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
         emit_cmp_swap(self, 0b11, 1, xs, 0, 0b11111, xn_sp, xt)
     }
 
-
     /// [CAS - CASA - CASAL - CASL - Compare and Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CAS--CASA--CASAL--CASL--Compare-and-Swap-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Compare and Swap word or doubleword in memory reads a 32-bit word or 64-bit doubleword from memory, and compares it against the value held in a first register. If the comparison is equal, the value in a second register is written to memory. If the write is performed, the read and write occur atomically such that no other modification of the memory location can take place between the read and write.
@@ -247,7 +241,6 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
     fn casal_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_cmp_swap(self, 0b11, 1, xs, 1, 0b11111, xn_sp, xt)
     }
-
 
     /// [CAS - CASA - CASAL - CASL - Compare and Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CAS--CASA--CASAL--CASL--Compare-and-Swap-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -264,11 +257,10 @@ pub trait CompareAndSwap<T>: InstructionProcessor<T> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use crate::assert_panic;
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]

@@ -8,39 +8,73 @@
 //!  - [STGP - Store Allocation Tag and Pair of registers](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STGP--Store-Allocation-Tag-and-Pair-of-registers-?lang=en)
 //!  - [LDPSW - Load Pair of Registers Signed Word](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDPSW--Load-Pair-of-Registers-Signed-Word-?lang=en)
 
-
-
 use bit_seq::bseq_32;
+
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::{Imm10, Imm11, Imm9, Register};
 
 #[inline(always)]
-fn emit_ld_st_reg_p_ind<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, v: u8, l: u8, imm7: u8, rt2: Register, rn: Register, rt: Register) -> T {
+fn emit_ld_st_reg_p_ind<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    opc: u8,
+    v: u8,
+    l: u8,
+    imm7: u8,
+    rt2: Register,
+    rn: Register,
+    rt: Register,
+) -> T {
     let r = bseq_32!(opc:2 101 v:1 001 l:1 imm7:7 rt2:5 rn:5 rt:5);
     proc.process(r)
 }
 
 #[inline(always)]
-fn emit_ld_st_reg_p_ind_32<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, v: u8, l: u8, imm: Imm9, rt2: Register, rn: Register, rt: Register) -> T {
+fn emit_ld_st_reg_p_ind_32<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    opc: u8,
+    v: u8,
+    l: u8,
+    imm: Imm9,
+    rt2: Register,
+    rn: Register,
+    rt: Register,
+) -> T {
     debug_assert!(imm % 4 == 0, "imm must be multiply of 4, was {}", imm);
     let imm = imm / 4;
     emit_ld_st_reg_p_ind(proc, opc, v, l, imm as u8, rt2, rn, rt)
 }
 
 #[inline(always)]
-fn emit_ld_st_reg_p_ind_64<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, v: u8, l: u8, imm: Imm10, rt2: Register, rn: Register, rt: Register) -> T {
+fn emit_ld_st_reg_p_ind_64<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    opc: u8,
+    v: u8,
+    l: u8,
+    imm: Imm10,
+    rt2: Register,
+    rn: Register,
+    rt: Register,
+) -> T {
     debug_assert!(imm % 8 == 0, "imm must be multiply of 8, was {}", imm);
     let imm = imm / 8;
     emit_ld_st_reg_p_ind(proc, opc, v, l, imm as u8, rt2, rn, rt)
 }
 
 #[inline(always)]
-fn emit_ld_st_reg_p_ind_128<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, v: u8, l: u8, imm: Imm11, rt2: Register, rn: Register, rt: Register) -> T {
+fn emit_ld_st_reg_p_ind_128<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    opc: u8,
+    v: u8,
+    l: u8,
+    imm: Imm11,
+    rt2: Register,
+    rn: Register,
+    rt: Register,
+) -> T {
     debug_assert!(imm % 16 == 0, "imm must be multiply of 16, was {}", imm);
     let imm = imm / 16;
     emit_ld_st_reg_p_ind(proc, opc, v, l, imm as u8, rt2, rn, rt)
 }
-
 
 /// # [Load/store register pair (post-indexed)](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Loads-and-Stores?lang=en#ldstpair_post)
 ///
@@ -66,7 +100,6 @@ pub trait LoadStoreRegisterPairPostIndexed<T>: InstructionProcessor<T> {
         emit_ld_st_reg_p_ind_32(self, 0b00, 0, 0, imm, wt2, xn_sp, wt1)
     }
 
-
     /// [STP - Store Pair of Registers](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STP--Store-Pair-of-Registers-?lang=en)
     ///
     /// Store Pair of Registers calculates an address from a base register value and an immediate offset, and stores two 32-bit words or two 64-bit doublewords to the calculated address, from two registers. For information about memory accesses, see Load/Store addressing modes.
@@ -77,10 +110,15 @@ pub trait LoadStoreRegisterPairPostIndexed<T>: InstructionProcessor<T> {
     /// STP <Xt1>, <Xt2>, [<Xn|SP>], #<imm>
     /// ```
     #[inline(always)]
-    fn stp_64_post_index(&mut self, xt1: Register, xt2: Register, xn_sp: Register, imm: Imm10) -> T {
+    fn stp_64_post_index(
+        &mut self,
+        xt1: Register,
+        xt2: Register,
+        xn_sp: Register,
+        imm: Imm10,
+    ) -> T {
         emit_ld_st_reg_p_ind_64(self, 0b10, 0, 0, imm, xt2, xn_sp, xt1)
     }
-
 
     /// [LDP - Load Pair of Registers](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDP--Load-Pair-of-Registers-?lang=en)
     ///
@@ -96,7 +134,6 @@ pub trait LoadStoreRegisterPairPostIndexed<T>: InstructionProcessor<T> {
         emit_ld_st_reg_p_ind_32(self, 0b00, 0, 1, imm, wt2, xn_sp, wt1)
     }
 
-
     /// [LDP - Load Pair of Registers](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDP--Load-Pair-of-Registers-?lang=en)
     ///
     /// Load Pair of Registers calculates an address from a base register value and an immediate offset, loads two 32-bit words or two 64-bit doublewords from memory, and writes them to two registers. For information about memory accesses, see Load/Store addressing modes.
@@ -107,10 +144,15 @@ pub trait LoadStoreRegisterPairPostIndexed<T>: InstructionProcessor<T> {
     /// LDP <Xt1>, <Xt2>, [<Xn|SP>], #<imm>
     /// ```
     #[inline(always)]
-    fn ldp_64_post_index(&mut self, xt1: Register, xt2: Register, xn_sp: Register, imm: Imm10) -> T {
+    fn ldp_64_post_index(
+        &mut self,
+        xt1: Register,
+        xt2: Register,
+        xn_sp: Register,
+        imm: Imm10,
+    ) -> T {
         emit_ld_st_reg_p_ind_64(self, 0b10, 0, 1, imm, xt2, xn_sp, xt1)
     }
-
 
     /// [STP - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/STP--SIMD-FP---Store-Pair-of-SIMD-FP-registers-?lang=en)
     ///
@@ -122,10 +164,15 @@ pub trait LoadStoreRegisterPairPostIndexed<T>: InstructionProcessor<T> {
     /// STP <St1>, <St2>, [<Xn|SP>], #<imm>
     /// ```
     #[inline(always)]
-    fn stp_32_simd_post_index(&mut self, st1: Register, st2: Register, xn_sp: Register, imm: Imm9) -> T {
+    fn stp_32_simd_post_index(
+        &mut self,
+        st1: Register,
+        st2: Register,
+        xn_sp: Register,
+        imm: Imm9,
+    ) -> T {
         emit_ld_st_reg_p_ind_32(self, 0b00, 1, 0, imm, st2, xn_sp, st1)
     }
-
 
     /// [STP - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/STP--SIMD-FP---Store-Pair-of-SIMD-FP-registers-?lang=en)
     ///
@@ -137,10 +184,15 @@ pub trait LoadStoreRegisterPairPostIndexed<T>: InstructionProcessor<T> {
     /// STP <Dt1>, <Dt2>, [<Xn|SP>], #<imm>
     /// ```
     #[inline(always)]
-    fn stp_64_simd_post_index(&mut self, dt1: Register, dt2: Register, xn_sp: Register, imm: Imm10) -> T {
+    fn stp_64_simd_post_index(
+        &mut self,
+        dt1: Register,
+        dt2: Register,
+        xn_sp: Register,
+        imm: Imm10,
+    ) -> T {
         emit_ld_st_reg_p_ind_64(self, 0b01, 1, 0, imm, dt2, xn_sp, dt1)
     }
-
 
     /// [STP - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/STP--SIMD-FP---Store-Pair-of-SIMD-FP-registers-?lang=en)
     ///
@@ -152,10 +204,15 @@ pub trait LoadStoreRegisterPairPostIndexed<T>: InstructionProcessor<T> {
     /// STP <Qt1>, <Qt2>, [<Xn|SP>], #<imm>
     /// ```
     #[inline(always)]
-    fn stp_128_simd_post_index(&mut self, qt1: Register, qt2: Register, xn_sp: Register, imm: Imm11) -> T {
+    fn stp_128_simd_post_index(
+        &mut self,
+        qt1: Register,
+        qt2: Register,
+        xn_sp: Register,
+        imm: Imm11,
+    ) -> T {
         emit_ld_st_reg_p_ind_128(self, 0b10, 1, 0, imm, qt2, xn_sp, qt1)
     }
-
 
     /// [LDP - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LDP--SIMD-FP---Load-Pair-of-SIMD-FP-registers-?lang=en)
     ///
@@ -167,10 +224,15 @@ pub trait LoadStoreRegisterPairPostIndexed<T>: InstructionProcessor<T> {
     /// LDP <St1>, <St2>, [<Xn|SP>], #<imm>
     /// ```
     #[inline(always)]
-    fn ldp_32_simd_post_index(&mut self, st1: Register, st2: Register, xn_sp: Register, imm: Imm9) -> T {
+    fn ldp_32_simd_post_index(
+        &mut self,
+        st1: Register,
+        st2: Register,
+        xn_sp: Register,
+        imm: Imm9,
+    ) -> T {
         emit_ld_st_reg_p_ind_32(self, 0b00, 1, 1, imm, st2, xn_sp, st1)
     }
-
 
     /// [LDP - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LDP--SIMD-FP---Load-Pair-of-SIMD-FP-registers-?lang=en)
     ///
@@ -182,10 +244,15 @@ pub trait LoadStoreRegisterPairPostIndexed<T>: InstructionProcessor<T> {
     /// LDP <Dt1>, <Dt2>, [<Xn|SP>], #<imm>
     /// ```
     #[inline(always)]
-    fn ldp_64_simd_post_index(&mut self, dt1: Register, dt2: Register, xn_sp: Register, imm: Imm10) -> T {
+    fn ldp_64_simd_post_index(
+        &mut self,
+        dt1: Register,
+        dt2: Register,
+        xn_sp: Register,
+        imm: Imm10,
+    ) -> T {
         emit_ld_st_reg_p_ind_64(self, 0b01, 1, 1, imm, dt2, xn_sp, dt1)
     }
-
 
     /// [LDP - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LDP--SIMD-FP---Load-Pair-of-SIMD-FP-registers-?lang=en)
     ///
@@ -197,10 +264,15 @@ pub trait LoadStoreRegisterPairPostIndexed<T>: InstructionProcessor<T> {
     /// LDP <Qt1>, <Qt2>, [<Xn|SP>], #<imm>
     /// ```
     #[inline(always)]
-    fn ldp_128_simd_post_index(&mut self, qt1: Register, qt2: Register, xn_sp: Register, imm: Imm11) -> T {
+    fn ldp_128_simd_post_index(
+        &mut self,
+        qt1: Register,
+        qt2: Register,
+        xn_sp: Register,
+        imm: Imm11,
+    ) -> T {
         emit_ld_st_reg_p_ind_128(self, 0b10, 1, 1, imm, qt2, xn_sp, qt1)
     }
-
 
     /// [STGP - Store Allocation Tag and Pair of registers](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STGP--Store-Allocation-Tag-and-Pair-of-registers-?lang=en)
     ///
@@ -215,7 +287,6 @@ pub trait LoadStoreRegisterPairPostIndexed<T>: InstructionProcessor<T> {
     fn stgp_post_index(&mut self, xt1: Register, xt2: Register, xn_sp: Register, imm: Imm11) -> T {
         emit_ld_st_reg_p_ind_128(self, 0b01, 0, 0, imm, xt2, xn_sp, xt1)
     }
-
 
     /// [LDPSW - Load Pair of Registers Signed Word](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDPSW--Load-Pair-of-Registers-Signed-Word-?lang=en)
     ///
@@ -236,6 +307,7 @@ pub trait LoadStoreRegisterPairPostIndexed<T>: InstructionProcessor<T> {
 mod tests {
     use crate::assert_panic;
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]

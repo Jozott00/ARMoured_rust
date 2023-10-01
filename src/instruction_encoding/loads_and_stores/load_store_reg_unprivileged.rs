@@ -11,20 +11,35 @@
 //!  - [LDTR - Load Register - unprivileged - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDTR--Load-Register--unprivileged--?lang=en)
 //!  - [LDTRSW - Load Register Signed Word - unprivileged - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDTRSW--Load-Register-Signed-Word--unprivileged--?lang=en)
 
-
-
 use bit_seq::bseq_32;
+
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::{Imm9, Register};
 
 #[inline(always)]
-fn emit_ld_st_reg_unp<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, v: u8, opc: u8, imm9: u16, rn: Register, rt: Register) -> T {
+fn emit_ld_st_reg_unp<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    size: u8,
+    v: u8,
+    opc: u8,
+    imm9: u16,
+    rn: Register,
+    rt: Register,
+) -> T {
     let r = bseq_32!(size:2 111 v:1 00 opc:2 0 imm9:9 10 rn:5 rt:5);
     proc.process(r)
 }
 
 #[inline(always)]
-fn emit_ld_st_reg_unp_checked<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, v: u8, opc: u8, simm: Imm9, rn: Register, rt: Register) -> T {
+fn emit_ld_st_reg_unp_checked<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    size: u8,
+    v: u8,
+    opc: u8,
+    simm: Imm9,
+    rn: Register,
+    rt: Register,
+) -> T {
     emit_ld_st_reg_unp(proc, size, v, opc, simm as u16, rn, rt)
 }
 
@@ -55,7 +70,6 @@ pub trait LoadStoreRegisterUnprivileged<T>: InstructionProcessor<T> {
         emit_ld_st_reg_unp_checked(self, 0b00, 0, 0b00, simm, xn, wt)
     }
 
-
     /// [LDTRB - Load Register Byte - unprivileged - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDTRB--Load-Register-Byte--unprivileged--?lang=en)
     ///
     /// Load Register Byte (unprivileged) loads a byte from memory, zero-extends it, and writes the result to a register. The address that is used for the load is calculated from a base register and an immediate offset.
@@ -69,7 +83,6 @@ pub trait LoadStoreRegisterUnprivileged<T>: InstructionProcessor<T> {
     fn ldtrb(&mut self, wt: Register, xn: Register, simm: Imm9) -> T {
         emit_ld_st_reg_unp_checked(self, 0b00, 0, 0b01, simm, xn, wt)
     }
-
 
     /// [LDTRSB - Load Register Signed Byte - unprivileged - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDTRSB--Load-Register-Signed-Byte--unprivileged--?lang=en)
     ///
@@ -85,7 +98,6 @@ pub trait LoadStoreRegisterUnprivileged<T>: InstructionProcessor<T> {
         emit_ld_st_reg_unp_checked(self, 0b00, 0, 0b11, simm, xn, wt)
     }
 
-
     /// [LDTRSB - Load Register Signed Byte - unprivileged - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDTRSB--Load-Register-Signed-Byte--unprivileged--?lang=en)
     ///
     /// Load Register Signed Byte (unprivileged) loads a byte from memory, sign-extends it to 32 bits or 64 bits, and writes the result to a register. The address that is used for the load is calculated from a base register and an immediate offset.
@@ -99,7 +111,6 @@ pub trait LoadStoreRegisterUnprivileged<T>: InstructionProcessor<T> {
     fn ldtrsb_64(&mut self, xt: Register, xn: Register, simm: Imm9) -> T {
         emit_ld_st_reg_unp_checked(self, 0b00, 0, 0b10, simm, xn, xt)
     }
-
 
     /// [STTRH - Store Register Halfword - unprivileged - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STTRH--Store-Register-Halfword--unprivileged--?lang=en)
     ///
@@ -115,7 +126,6 @@ pub trait LoadStoreRegisterUnprivileged<T>: InstructionProcessor<T> {
         emit_ld_st_reg_unp_checked(self, 0b01, 0, 0b00, simm, xn, wt)
     }
 
-
     /// [LDTRH - Load Register Halfword - unprivileged - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDTRH--Load-Register-Halfword--unprivileged--?lang=en)
     ///
     /// Load Register Halfword (unprivileged) loads a halfword from memory, zero-extends it, and writes the result to a register. The address that is used for the load is calculated from a base register and an immediate offset.
@@ -129,7 +139,6 @@ pub trait LoadStoreRegisterUnprivileged<T>: InstructionProcessor<T> {
     fn ldtrh(&mut self, wt: Register, xn: Register, simm: Imm9) -> T {
         emit_ld_st_reg_unp_checked(self, 0b01, 0, 0b01, simm, xn, wt)
     }
-
 
     /// [LDTRSH - Load Register Signed Halfword - unprivileged - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDTRSH--Load-Register-Signed-Halfword--unprivileged--?lang=en)
     ///
@@ -145,7 +154,6 @@ pub trait LoadStoreRegisterUnprivileged<T>: InstructionProcessor<T> {
         emit_ld_st_reg_unp_checked(self, 0b01, 0, 0b11, simm, xn, wt)
     }
 
-
     /// [LDTRSH - Load Register Signed Halfword - unprivileged - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDTRSH--Load-Register-Signed-Halfword--unprivileged--?lang=en)
     ///
     /// Load Register Signed Halfword (unprivileged) loads a halfword from memory, sign-extends it to 32 bits or 64 bits, and writes the result to a register. The address that is used for the load is calculated from a base register and an immediate offset.
@@ -159,7 +167,6 @@ pub trait LoadStoreRegisterUnprivileged<T>: InstructionProcessor<T> {
     fn ldtrsh_64(&mut self, xt: Register, xn: Register, simm: Imm9) -> T {
         emit_ld_st_reg_unp_checked(self, 0b01, 0, 0b10, simm, xn, xt)
     }
-
 
     /// [STTR - Store Register - unprivileged - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STTR--Store-Register--unprivileged--?lang=en)
     ///
@@ -175,7 +182,6 @@ pub trait LoadStoreRegisterUnprivileged<T>: InstructionProcessor<T> {
         emit_ld_st_reg_unp_checked(self, 0b10, 0, 0b00, simm, xn, wt)
     }
 
-
     /// [STTR - Store Register - unprivileged - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STTR--Store-Register--unprivileged--?lang=en)
     ///
     /// Store Register (unprivileged) stores a word or doubleword from a register to memory. The address that is used for the store is calculated from a base register and an immediate offset.
@@ -189,7 +195,6 @@ pub trait LoadStoreRegisterUnprivileged<T>: InstructionProcessor<T> {
     fn sttr_64(&mut self, xt: Register, xn: Register, simm: Imm9) -> T {
         emit_ld_st_reg_unp_checked(self, 0b11, 0, 0b00, simm, xn, xt)
     }
-
 
     /// [LDTR - Load Register - unprivileged - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDTR--Load-Register--unprivileged--?lang=en)
     ///
@@ -219,7 +224,6 @@ pub trait LoadStoreRegisterUnprivileged<T>: InstructionProcessor<T> {
         emit_ld_st_reg_unp_checked(self, 0b11, 0, 0b01, simm, xn, xt)
     }
 
-
     /// [LDTRSW - Load Register Signed Word - unprivileged - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDTRSW--Load-Register-Signed-Word--unprivileged--?lang=en)
     ///
     /// Load Register Signed Word (unprivileged) loads a word from memory, sign-extends it to 64 bits, and writes the result to a register. The address that is used for the load is calculated from a base register and an immediate offset.
@@ -235,12 +239,10 @@ pub trait LoadStoreRegisterUnprivileged<T>: InstructionProcessor<T> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use crate::assert_panic;
     use crate::test_utils::test_producer::TestProducer;
-    use crate::types::prefetch_memory::{PrfPolicy, PrfTarget, PrfType};
+
     use super::*;
 
     #[test]

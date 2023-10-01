@@ -1,6 +1,6 @@
-use crate::types::encodable::Encodable;
 use MemBarrierOpt::*;
 
+use crate::types::encodable::Encodable;
 
 /// # Memory Barrier Options
 ///
@@ -33,7 +33,6 @@ pub enum MemNXSBarrierOpt {
     OSH,
 }
 
-
 impl Encodable<u8> for MemBarrierOpt {
     fn encode(&self) -> u8 {
         match self {
@@ -53,7 +52,6 @@ impl Encodable<u8> for MemBarrierOpt {
     }
 }
 
-
 impl Encodable<u8> for MemNXSBarrierOpt {
     fn encode(&self) -> u8 {
         match self {
@@ -67,13 +65,14 @@ impl Encodable<u8> for MemNXSBarrierOpt {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::mc_memory::MockMemory;
     use crate::instruction_emitter::MockEmitter;
-    use crate::{stream_mock};
-    use crate::types::InstructionPointer;
-    use crate::instruction_stream::InstrStream;
     use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
+    use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::MockMemory;
+    use crate::stream_mock;
+    use crate::types::InstructionPointer;
+
+    use super::*;
 
     #[test]
     fn test_mem_barrier_opts() {
@@ -133,4 +132,3 @@ mod tests {
         })
     }
 }
-

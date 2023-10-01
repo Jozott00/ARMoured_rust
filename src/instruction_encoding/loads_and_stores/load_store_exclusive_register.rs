@@ -14,16 +14,25 @@
 //!  - [LDXR - Load Exclusive Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDXR--Load-Exclusive-Register-?lang=en)
 //!  - [LDAXR - Load Acquire Exclusive Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAXR--Load-Acquire-Exclusive-Register-?lang=en)
 
+use bit_seq::bseq_32;
+
+use crate::instruction_encoding::InstructionProcessor;
+use crate::types::Register;
+
 #[inline(always)]
-fn emit_ldr_str_excl_reg<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, l: u8, rs: Register, o0: u8, rt2: Register, rn: Register, rt: Register) -> T {
+fn emit_ldr_str_excl_reg<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    size: u8,
+    l: u8,
+    rs: Register,
+    o0: u8,
+    rt2: Register,
+    rn: Register,
+    rt: Register,
+) -> T {
     let r = bseq_32!(size:2 0010000 l:1 0 rs:5 o0:1 rt2:5 rn:5 rt:5);
     proc.process(r)
 }
-
-
-use bit_seq::bseq_32;
-use crate::instruction_encoding::InstructionProcessor;
-use crate::types::Register;
 
 /// # [Load/store exclusive register](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Loads-and-Stores?lang=en#ldstexclr)
 ///
@@ -55,7 +64,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
         emit_ldr_str_excl_reg(self, 0b00, 0, ws, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [STLXRB - Store Release Exclusive Register Byte](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLXRB--Store-Release-Exclusive-Register-Byte-?lang=en)
     ///
     /// Store-Release Exclusive Register Byte stores a byte from a 32-bit register to memory if the PE has exclusive access to the memory address, and returns a status value of 0 if the store was successful, or of 1 if no store was performed. See Synchronization and semaphores. The memory access is atomic. The instruction also has memory ordering semantics as described in Load-Acquire, Store-Release. For information about memory accesses see Load/Store addressing modes.
@@ -67,7 +75,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
     fn stlxrb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_ldr_str_excl_reg(self, 0b00, 0, ws, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [LDXRB - Load Exclusive Register Byte](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDXRB--Load-Exclusive-Register-Byte-?lang=en)
     ///
@@ -81,7 +88,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
         emit_ldr_str_excl_reg(self, 0b00, 1, 0b11111, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [LDAXRB - Load Acquire Exclusive Register Byte](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAXRB--Load-Acquire-Exclusive-Register-Byte-?lang=en)
     ///
     /// Load-Acquire Exclusive Register Byte derives an address from a base register value, loads a byte from memory, zero-extends it and writes it to a register. The memory access is atomic. The PE marks the physical address being accessed as an exclusive access. This exclusive access mark is checked by Store Exclusive instructions. See Synchronization and semaphores. The instruction also has memory ordering semantics as described in Load-Acquire, Store-Release. For information about memory accesses see Load/Store addressing modes.
@@ -93,7 +99,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
     fn ldaxrb(&mut self, wt: Register, xn_sp: Register) -> T {
         emit_ldr_str_excl_reg(self, 0b00, 1, 0b11111, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [STXRH - Store Exclusive Register Halfword](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STXRH--Store-Exclusive-Register-Halfword-?lang=en)
     ///
@@ -109,7 +114,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
         emit_ldr_str_excl_reg(self, 0b01, 0, ws, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [STLXRH - Store Release Exclusive Register Halfword](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLXRH--Store-Release-Exclusive-Register-Halfword-?lang=en)
     ///
     /// Store-Release Exclusive Register Halfword stores a halfword from a 32-bit register to memory if the PE has exclusive access to the memory address, and returns a status value of 0 if the store was successful, or of 1 if no store was performed. See Synchronization and semaphores. The memory access is atomic. The instruction also has memory ordering semantics as described in Load-Acquire, Store-Release. For information about memory accesses see Load/Store addressing modes.
@@ -121,7 +125,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
     fn stlxrh(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_ldr_str_excl_reg(self, 0b01, 0, ws, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [LDXRH - Load Exclusive Register Halfword](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDXRH--Load-Exclusive-Register-Halfword-?lang=en)
     ///
@@ -135,7 +138,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
         emit_ldr_str_excl_reg(self, 0b01, 1, 0b11111, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [LDAXRH - Load Acquire Exclusive Register Halfword](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAXRH--Load-Acquire-Exclusive-Register-Halfword-?lang=en)
     ///
     /// Load-Acquire Exclusive Register Halfword derives an address from a base register value, loads a halfword from memory, zero-extends it and writes it to a register. The memory access is atomic. The PE marks the physical address being accessed as an exclusive access. This exclusive access mark is checked by Store Exclusive instructions. See Synchronization and semaphores. The instruction also has memory ordering semantics as described in Load-Acquire, Store-Release. For information about memory accesses see Load/Store addressing modes.
@@ -147,7 +149,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
     fn ldaxrh(&mut self, wt: Register, xn_sp: Register) -> T {
         emit_ldr_str_excl_reg(self, 0b01, 1, 0b11111, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [STXR - Store Exclusive Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STXR--Store-Exclusive-Register-?lang=en)
     ///
@@ -161,7 +162,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
         emit_ldr_str_excl_reg(self, 0b10, 0, ws, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [STXR - Store Exclusive Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STXR--Store-Exclusive-Register-?lang=en)
     ///
     /// Store Exclusive Register stores a 32-bit word or a 64-bit doubleword from a register to memory if the PE has exclusive access to the memory address, and returns a status value of 0 if the store was successful, or of 1 if no store was performed. See Synchronization and semaphores. For information about memory accesses see Load/Store addressing modes.
@@ -173,7 +173,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
     fn stxr_64(&mut self, ws: Register, xt: Register, xn_sp: Register) -> T {
         emit_ldr_str_excl_reg(self, 0b11, 0, ws, 0, 0b11111, xn_sp, xt)
     }
-
 
     /// [STLXR - Store Release Exclusive Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLXR--Store-Release-Exclusive-Register-?lang=en)
     ///
@@ -187,7 +186,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
         emit_ldr_str_excl_reg(self, 0b10, 0, ws, 1, 0b11111, xn_sp, wt)
     }
 
-
     /// [STLXR - Store Release Exclusive Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLXR--Store-Release-Exclusive-Register-?lang=en)
     ///
     /// Store-Release Exclusive Register stores a 32-bit word or a 64-bit doubleword to memory if the PE has exclusive access to the memory address, from two registers, and returns a status value of 0 if the store was successful, or of 1 if no store was performed. See Synchronization and semaphores. The memory access is atomic. The instruction also has memory ordering semantics as described in Load-Acquire, Store-Release. For information about memory accesses see Load/Store addressing modes.
@@ -199,7 +197,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
     fn stlxr_64(&mut self, ws: Register, xt: Register, xn_sp: Register) -> T {
         emit_ldr_str_excl_reg(self, 0b11, 0, ws, 1, 0b11111, xn_sp, xt)
     }
-
 
     /// [LDXR - Load Exclusive Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDXR--Load-Exclusive-Register-?lang=en)
     ///
@@ -213,7 +210,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
         emit_ldr_str_excl_reg(self, 0b10, 1, 0b11111, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [LDXR - Load Exclusive Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDXR--Load-Exclusive-Register-?lang=en)
     ///
     /// Load Exclusive Register derives an address from a base register value, loads a 32-bit word or a 64-bit doubleword from memory, and writes it to a register. The memory access is atomic. The PE marks the physical address being accessed as an exclusive access. This exclusive access mark is checked by Store Exclusive instructions. See Synchronization and semaphores. For information about memory accesses see Load/Store addressing modes.
@@ -226,7 +222,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
         emit_ldr_str_excl_reg(self, 0b11, 1, 0b11111, 0, 0b11111, xn_sp, xt)
     }
 
-
     /// [LDAXR - Load Acquire Exclusive Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAXR--Load-Acquire-Exclusive-Register-?lang=en)
     ///
     /// Load-Acquire Exclusive Register derives an address from a base register value, loads a 32-bit word or 64-bit doubleword from memory, and writes it to a register. The memory access is atomic. The PE marks the physical address being accessed as an exclusive access. This exclusive access mark is checked by Store Exclusive instructions. See Synchronization and semaphores. The instruction also has memory ordering semantics as described in Load-Acquire, Store-Release. For information about memory accesses see Load/Store addressing modes.
@@ -238,7 +233,6 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
     fn ldaxr_32(&mut self, wt: Register, xn_sp: Register) -> T {
         emit_ldr_str_excl_reg(self, 0b10, 1, 0b11111, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [LDAXR - Load Acquire Exclusive Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAXR--Load-Acquire-Exclusive-Register-?lang=en)
     ///
@@ -255,8 +249,8 @@ pub trait LoadStoreExclusiveRegister<T>: InstructionProcessor<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::assert_panic;
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]
@@ -333,7 +327,6 @@ mod tests {
         let instr = prod.stxr_64(3, 4, 5);
         assert_eq!(instr, "stxr w3, x4, [x5]");
     }
-
 
     #[test]
     fn test_stlxr() {

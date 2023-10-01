@@ -3,18 +3,26 @@
 //! Implements the following instructions:
 //!  - [SETF8 - SETF16 - Evaluation of 8 or 16 bit flag values](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETF8--SETF16--Evaluation-of-8-or-16-bit-flag-values-?lang=en)
 
-
-
 use bit_seq::bseq_32;
+
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::Register;
 
 #[inline(always)]
-fn emit_eval_in_flags<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op: u8, s: u8, opcode2: u8, sz: u8, rn: Register, o3: u8, mask: u8) -> T {
+fn emit_eval_in_flags<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: u8,
+    op: u8,
+    s: u8,
+    opcode2: u8,
+    sz: u8,
+    rn: Register,
+    o3: u8,
+    mask: u8,
+) -> T {
     let i = bseq_32!(sf:1 op:1 s:1 11010000 opcode2:6 sz:1 0010 rn:5 o3:1 mask:4);
     proc.process(i)
 }
-
 
 /// # [Evaluate into flags](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Data-Processing----Register?lang=en#setf)
 ///
@@ -35,7 +43,6 @@ pub trait EvaluateIntoFlags<T>: InstructionProcessor<T> {
         emit_eval_in_flags(self, 0, 0, 1, 0, 0, wn, 0, 0b1101)
     }
 
-
     /// [SETF8 - SETF16 - Evaluation of 8 or 16 bit flag values](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SETF8--SETF16--Evaluation-of-8-or-16-bit-flag-values-?lang=en)
     ///
     /// Set the PSTATE.NZV flags based on the value in the specified general-purpose register. SETF8 treats the value as an 8 bit value, and SETF16 treats the value as an 16 bit value.
@@ -51,10 +58,10 @@ pub trait EvaluateIntoFlags<T>: InstructionProcessor<T> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]

@@ -14,14 +14,22 @@
 //!  - [LDLAR - Load LOAcquire Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDLAR--Load-LOAcquire-Register-?lang=en)
 //!  - [LDAR - Load Acquire Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAR--Load-Acquire-Register-?lang=en)
 
-
-
 use bit_seq::bseq_32;
+
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::Register;
 
 #[inline(always)]
-fn emit_ldr_str_ord<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, l: u8, rs: Register, o0: u8, rt2: Register, rn: Register, rt: Register) -> T {
+fn emit_ldr_str_ord<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    size: u8,
+    l: u8,
+    rs: Register,
+    o0: u8,
+    rt2: Register,
+    rn: Register,
+    rt: Register,
+) -> T {
     let r = bseq_32!(size:2 0010001 l:1 0 rs:5 o0:1 rt2:5 rn:5 rt:5);
     proc.process(r)
 }
@@ -54,7 +62,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
         emit_ldr_str_ord(self, 0b00, 0, 0b11111, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [STLRB - Store Release Register Byte](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLRB--Store-Release-Register-Byte-?lang=en)
     ///
     /// Store-Release Register Byte stores a byte from a 32-bit register to a memory location. The instruction also has memory ordering semantics as described in Load-Acquire, Store-Release. For information about memory accesses, see Load/Store addressing modes.
@@ -66,7 +73,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
     fn stlrb(&mut self, wt: Register, xn_sp: Register) -> T {
         emit_ldr_str_ord(self, 0b00, 0, 0b11111, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [LDLARB - Load LOAcquire Register Byte](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDLARB--Load-LOAcquire-Register-Byte-?lang=en)
     ///
@@ -80,7 +86,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
         emit_ldr_str_ord(self, 0b00, 1, 0b11111, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [LDARB - Load Acquire Register Byte](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDARB--Load-Acquire-Register-Byte-?lang=en)
     ///
     /// Load-Acquire Register Byte derives an address from a base register value, loads a byte from memory, zero-extends it and writes it to a register. The instruction also has memory ordering semantics as described in Load-Acquire, Store-Release. For information about memory accesses, see Load/Store addressing modes.
@@ -92,7 +97,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
     fn ldarb(&mut self, wt: Register, xn_sp: Register) -> T {
         emit_ldr_str_ord(self, 0b00, 1, 0b11111, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [STLLRH - Store LORelease Register Halfword](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLLRH--Store-LORelease-Register-Halfword-?lang=en)
     ///
@@ -106,7 +110,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
         emit_ldr_str_ord(self, 0b01, 0, 0b11111, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [STLRH - Store Release Register Halfword](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLRH--Store-Release-Register-Halfword-?lang=en)
     ///
     /// Store-Release Register Halfword stores a halfword from a 32-bit register to a memory location. The instruction also has memory ordering semantics as described in Load-Acquire, Store-Release. For information about memory accesses, see Load/Store addressing modes.
@@ -118,7 +121,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
     fn stlrh(&mut self, wt: Register, xn_sp: Register) -> T {
         emit_ldr_str_ord(self, 0b01, 0, 0b11111, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [LDLARH - Load LOAcquire Register Halfword](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDLARH--Load-LOAcquire-Register-Halfword-?lang=en)
     ///
@@ -132,7 +134,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
         emit_ldr_str_ord(self, 0b01, 1, 0b11111, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [LDARH - Load Acquire Register Halfword](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDARH--Load-Acquire-Register-Halfword-?lang=en)
     ///
     /// Load-Acquire Register Halfword derives an address from a base register value, loads a halfword from memory, zero-extends it, and writes it to a register. The instruction also has memory ordering semantics as described in Load-Acquire, Store-Release. For information about memory accesses, see Load/Store addressing modes.
@@ -144,7 +145,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
     fn ldarh(&mut self, wt: Register, xn_sp: Register) -> T {
         emit_ldr_str_ord(self, 0b01, 1, 0b11111, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [STLLR - Store LORelease Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLLR--Store-LORelease-Register-?lang=en)
     ///
@@ -158,7 +158,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
         emit_ldr_str_ord(self, 0b10, 0, 0b11111, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [STLLR - Store LORelease Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLLR--Store-LORelease-Register-?lang=en)
     ///
     /// Store LORelease Register stores a 32-bit word or a 64-bit doubleword to a memory location, from a register. The instruction also has memory ordering semantics as described in Load LOAcquire, Store LORelease. For information about memory accesses, see Load/Store addressing modes.
@@ -170,7 +169,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
     fn stllr_64(&mut self, xt: Register, xn_sp: Register) -> T {
         emit_ldr_str_ord(self, 0b11, 0, 0b11111, 0, 0b11111, xn_sp, xt)
     }
-
 
     /// [STLR - Store Release Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLR--Store-Release-Register-?lang=en)
     ///
@@ -184,7 +182,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
         emit_ldr_str_ord(self, 0b10, 0, 0b11111, 1, 0b11111, xn_sp, wt)
     }
 
-
     /// [STLR - Store Release Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLR--Store-Release-Register-?lang=en)
     ///
     /// Store-Release Register stores a 32-bit word or a 64-bit doubleword to a memory location, from a register. The instruction also has memory ordering semantics as described in Load-Acquire, Store-Release. For information about memory accesses, see Load/Store addressing modes.
@@ -196,7 +193,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
     fn stlr_64(&mut self, xt: Register, xn_sp: Register) -> T {
         emit_ldr_str_ord(self, 0b11, 0, 0b11111, 1, 0b11111, xn_sp, xt)
     }
-
 
     /// [LDLAR - Load LOAcquire Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDLAR--Load-LOAcquire-Register-?lang=en)
     ///
@@ -210,7 +206,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
         emit_ldr_str_ord(self, 0b10, 1, 0b11111, 0, 0b11111, xn_sp, wt)
     }
 
-
     /// [LDLAR - Load LOAcquire Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDLAR--Load-LOAcquire-Register-?lang=en)
     ///
     /// Load LOAcquire Register loads a 32-bit word or 64-bit doubleword from memory, and writes it to a register. The instruction also has memory ordering semantics as described in Load LOAcquire, Store LORelease. For information about memory accesses, see Load/Store addressing modes.
@@ -223,7 +218,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
         emit_ldr_str_ord(self, 0b11, 1, 0b11111, 0, 0b11111, xn_sp, xt)
     }
 
-
     /// [LDAR - Load Acquire Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAR--Load-Acquire-Register-?lang=en)
     ///
     /// Load-Acquire Register derives an address from a base register value, loads a 32-bit word or 64-bit doubleword from memory, and writes it to a register. The instruction also has memory ordering semantics as described in Load-Acquire, Store-Release. For information about memory accesses, see Load/Store addressing modes.
@@ -235,7 +229,6 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
     fn ldar_32(&mut self, wt: Register, xn_sp: Register) -> T {
         emit_ldr_str_ord(self, 0b10, 1, 0b11111, 1, 0b11111, xn_sp, wt)
     }
-
 
     /// [LDAR - Load Acquire Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAR--Load-Acquire-Register-?lang=en)
     ///
@@ -252,8 +245,8 @@ pub trait LoadStoreOrdered<T>: InstructionProcessor<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::assert_panic;
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]

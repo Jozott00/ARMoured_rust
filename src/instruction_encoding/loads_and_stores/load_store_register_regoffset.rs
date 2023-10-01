@@ -14,16 +14,25 @@
 //!  - [LDRSW - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRSW--register---Load-Register-Signed-Word--register--?lang=en)
 //!  - [PRFM - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PRFM--register---Prefetch-Memory--register--?lang=en)
 
-
-
 use bit_seq::bseq_32;
+
 use crate::instruction_encoding::InstructionProcessor;
-use crate::types::extends::{RegExtend, RegExtendLSL};
 use crate::types::{Register, UImm1, UImm2, UImm3, UImm5};
+use crate::types::extends::{RegExtend, RegExtendLSL};
 use crate::types::prefetch_memory::PrfOp;
 
 #[inline(always)]
-fn emit_ld_st_reg_off<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, v: u8, opc: u8, rm: Register, option: u8, s: u8, rn: Register, rt: Register) -> T {
+fn emit_ld_st_reg_off<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    size: u8,
+    v: u8,
+    opc: u8,
+    rm: Register,
+    option: u8,
+    s: u8,
+    rn: Register,
+    rt: Register,
+) -> T {
     let r = bseq_32!(size:2 111 v:1 00 opc:2 1 rm:5 option:3 s:1 10 rn:5 rt:5);
     proc.process(r)
 }
@@ -56,11 +65,31 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     ///
     /// *Note:* whether `wm_xm` is `Wm` or `Xm` depends on the used extend.
     #[inline(always)]
-    fn strb_reg_extend_reg(&mut self, wt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtend, amount: bool) -> T {
-        debug_assert!([RegExtend::UXTW, RegExtend::SXTW, RegExtend::SXTX].contains(&extend), "extend must be one of uxtw, sxtw and sxtx, was {}", extend);
-        emit_ld_st_reg_off(self, 0b00, 0, 0b00, wm_xm, extend.into(), amount.into(), xn_sp, wt)
+    fn strb_reg_extend_reg(
+        &mut self,
+        wt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtend,
+        amount: bool,
+    ) -> T {
+        debug_assert!(
+            [RegExtend::UXTW, RegExtend::SXTW, RegExtend::SXTX].contains(&extend),
+            "extend must be one of uxtw, sxtw and sxtx, was {}",
+            extend
+        );
+        emit_ld_st_reg_off(
+            self,
+            0b00,
+            0,
+            0b00,
+            wm_xm,
+            extend.into(),
+            amount.into(),
+            xn_sp,
+            wt,
+        )
     }
-
 
     /// [STRB - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STRB--register---Store-Register-Byte--register--?lang=en)
     ///
@@ -72,10 +101,15 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// STRB <Wt>, [<Xn|SP>, <Xm>{, LSL <amount>}]
     /// ```
     #[inline(always)]
-    fn strb_reg_shift_reg(&mut self, wt: Register, xn_sp: Register, xm: Register, amount: bool) -> T {
+    fn strb_reg_shift_reg(
+        &mut self,
+        wt: Register,
+        xn_sp: Register,
+        xm: Register,
+        amount: bool,
+    ) -> T {
         emit_ld_st_reg_off(self, 0b00, 0, 0b00, xm, 0b011, amount.into(), xn_sp, wt)
     }
-
 
     /// [LDRB - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRB--register---Load-Register-Byte--register--?lang=en)
     ///
@@ -85,11 +119,31 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDRB <Wt>, [<Xn|SP>, (<Wm>|<Xm>), <extend> {<amount>}]
     /// ```
     #[inline(always)]
-    fn ldrb_reg_extend_reg(&mut self, wt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtend, amount: bool) -> T {
-        debug_assert!([RegExtend::UXTW, RegExtend::SXTW, RegExtend::SXTX].contains(&extend), "extend must be one of uxtw, sxtw and sxtx, was {}", extend);
-        emit_ld_st_reg_off(self, 0b00, 0, 0b01, wm_xm, extend.into(), amount.into(), xn_sp, wt)
+    fn ldrb_reg_extend_reg(
+        &mut self,
+        wt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtend,
+        amount: bool,
+    ) -> T {
+        debug_assert!(
+            [RegExtend::UXTW, RegExtend::SXTW, RegExtend::SXTX].contains(&extend),
+            "extend must be one of uxtw, sxtw and sxtx, was {}",
+            extend
+        );
+        emit_ld_st_reg_off(
+            self,
+            0b00,
+            0,
+            0b01,
+            wm_xm,
+            extend.into(),
+            amount.into(),
+            xn_sp,
+            wt,
+        )
     }
-
 
     /// [LDRB - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRB--register---Load-Register-Byte--register--?lang=en)
     ///
@@ -99,10 +153,15 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDRB <Wt>, [<Xn|SP>, <Xm>{, LSL <amount>}]
     /// ```
     #[inline(always)]
-    fn ldrb_reg_shift_reg(&mut self, wt: Register, xn_sp: Register, xm: Register, amount: bool) -> T {
+    fn ldrb_reg_shift_reg(
+        &mut self,
+        wt: Register,
+        xn_sp: Register,
+        xm: Register,
+        amount: bool,
+    ) -> T {
         emit_ld_st_reg_off(self, 0b00, 0, 0b01, xm, 0b011, amount.into(), xn_sp, wt)
     }
-
 
     /// [LDRSB - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRSB--register---Load-Register-Signed-Byte--register--?lang=en)
     ///
@@ -112,11 +171,31 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDRSB <Wt>, [<Xn|SP>, (<Wm>|<Xm>), <extend> {<amount>}]
     /// ```
     #[inline(always)]
-    fn ldrsb_32_reg_extend_reg(&mut self, wt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtend, amount: bool) -> T {
-        debug_assert!([RegExtend::UXTW, RegExtend::SXTW, RegExtend::SXTX].contains(&extend), "extend must be one of uxtw, sxtw and sxtx, was {}", extend);
-        emit_ld_st_reg_off(self, 0b00, 0, 0b11, wm_xm, extend.into(), amount.into(), xn_sp, wt)
+    fn ldrsb_32_reg_extend_reg(
+        &mut self,
+        wt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtend,
+        amount: bool,
+    ) -> T {
+        debug_assert!(
+            [RegExtend::UXTW, RegExtend::SXTW, RegExtend::SXTX].contains(&extend),
+            "extend must be one of uxtw, sxtw and sxtx, was {}",
+            extend
+        );
+        emit_ld_st_reg_off(
+            self,
+            0b00,
+            0,
+            0b11,
+            wm_xm,
+            extend.into(),
+            amount.into(),
+            xn_sp,
+            wt,
+        )
     }
-
 
     /// [LDRSB - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRSB--register---Load-Register-Signed-Byte--register--?lang=en)
     ///
@@ -126,10 +205,15 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDRSB <Wt>, [<Xn|SP>, <Xm>{, LSL <amount>}]
     /// ```
     #[inline(always)]
-    fn ldrsb_32_reg_shift_reg(&mut self, wt: Register, xn_sp: Register, xm: Register, amount: bool) -> T {
+    fn ldrsb_32_reg_shift_reg(
+        &mut self,
+        wt: Register,
+        xn_sp: Register,
+        xm: Register,
+        amount: bool,
+    ) -> T {
         emit_ld_st_reg_off(self, 0b00, 0, 0b11, xm, 0b011, amount.into(), xn_sp, wt)
     }
-
 
     /// [LDRSB - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRSB--register---Load-Register-Signed-Byte--register--?lang=en)
     ///
@@ -139,11 +223,31 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDRSB <Xt>, [<Xn|SP>, (<Wm>|<Xm>), <extend> {<amount>}]
     /// ```
     #[inline(always)]
-    fn ldrsb_64_reg_extend_reg(&mut self, xt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtend, amount: bool) -> T {
-        debug_assert!([RegExtend::UXTW, RegExtend::SXTW, RegExtend::SXTX].contains(&extend), "extend must be one of uxtw, sxtw and sxtx, was {}", extend);
-        emit_ld_st_reg_off(self, 0b00, 0, 0b10, wm_xm, extend.into(), amount.into(), xn_sp, xt)
+    fn ldrsb_64_reg_extend_reg(
+        &mut self,
+        xt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtend,
+        amount: bool,
+    ) -> T {
+        debug_assert!(
+            [RegExtend::UXTW, RegExtend::SXTW, RegExtend::SXTX].contains(&extend),
+            "extend must be one of uxtw, sxtw and sxtx, was {}",
+            extend
+        );
+        emit_ld_st_reg_off(
+            self,
+            0b00,
+            0,
+            0b10,
+            wm_xm,
+            extend.into(),
+            amount.into(),
+            xn_sp,
+            xt,
+        )
     }
-
 
     /// [LDRSB - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRSB--register---Load-Register-Signed-Byte--register--?lang=en)
     ///
@@ -153,10 +257,15 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDRSB <Xt>, [<Xn|SP>, <Xm>{, LSL <amount>}]
     /// ```
     #[inline(always)]
-    fn ldrsb_64_reg_shift_reg(&mut self, xt: Register, xn_sp: Register, xm: Register, amount: bool) -> T {
+    fn ldrsb_64_reg_shift_reg(
+        &mut self,
+        xt: Register,
+        xn_sp: Register,
+        xm: Register,
+        amount: bool,
+    ) -> T {
         emit_ld_st_reg_off(self, 0b00, 0, 0b10, xm, 0b011, amount.into(), xn_sp, xt)
     }
-
 
     /// [STR - register - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/STR--register--SIMD-FP---Store-SIMD-FP-register--register-offset--?lang=en)
     ///
@@ -168,11 +277,31 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// STR <Bt>, [<Xn|SP>, (<Wm>|<Xm>), <extend> {<amount>}]
     /// ```
     #[inline(always)]
-    fn str_8_simd_reg_extend_reg(&mut self, bt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtend, amount: bool) -> T {
-        debug_assert!([RegExtend::UXTW, RegExtend::SXTW, RegExtend::SXTX].contains(&extend), "extend must be one of uxtw, sxtw and sxtx, was {}", extend);
-        emit_ld_st_reg_off(self, 0b00, 1, 0b00, wm_xm, extend.into(), amount.into(), xn_sp, bt)
+    fn str_8_simd_reg_extend_reg(
+        &mut self,
+        bt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtend,
+        amount: bool,
+    ) -> T {
+        debug_assert!(
+            [RegExtend::UXTW, RegExtend::SXTW, RegExtend::SXTX].contains(&extend),
+            "extend must be one of uxtw, sxtw and sxtx, was {}",
+            extend
+        );
+        emit_ld_st_reg_off(
+            self,
+            0b00,
+            1,
+            0b00,
+            wm_xm,
+            extend.into(),
+            amount.into(),
+            xn_sp,
+            bt,
+        )
     }
-
 
     /// [STR - register - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/STR--register--SIMD-FP---Store-SIMD-FP-register--register-offset--?lang=en)
     ///
@@ -184,10 +313,15 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// STR <Bt>, [<Xn|SP>, <Xm>{, LSL <amount>}]
     /// ```
     #[inline(always)]
-    fn str_8_simd_reg_shift_reg(&mut self, bt: Register, xn_sp: Register, xm: Register, amount: bool) -> T {
+    fn str_8_simd_reg_shift_reg(
+        &mut self,
+        bt: Register,
+        xn_sp: Register,
+        xm: Register,
+        amount: bool,
+    ) -> T {
         emit_ld_st_reg_off(self, 0b00, 1, 0b00, xm, 0b011, amount.into(), xn_sp, bt)
     }
-
 
     /// [STR - register - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/STR--register--SIMD-FP---Store-SIMD-FP-register--register-offset--?lang=en)
     ///
@@ -199,11 +333,21 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// STR <Ht>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn str_16_simd_reg(&mut self, ht: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm1) -> T {
-        debug_assert!([0, 1].contains(&amount), "amount must be either 0 or 1, was {}", amount);
+    fn str_16_simd_reg(
+        &mut self,
+        ht: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm1,
+    ) -> T {
+        debug_assert!(
+            [0, 1].contains(&amount),
+            "amount must be either 0 or 1, was {}",
+            amount
+        );
         emit_ld_st_reg_off(self, 0b01, 1, 0b00, wm_xm, extend.into(), amount, xn_sp, ht)
     }
-
 
     /// [STR - register - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/STR--register--SIMD-FP---Store-SIMD-FP-register--register-offset--?lang=en)
     ///
@@ -215,8 +359,19 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// STR <St>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn str_32_simd_reg(&mut self, st: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm2) -> T {
-        debug_assert!([0, 2].contains(&amount), "amount must be either 0 or 2, was {}", amount);
+    fn str_32_simd_reg(
+        &mut self,
+        st: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm2,
+    ) -> T {
+        debug_assert!(
+            [0, 2].contains(&amount),
+            "amount must be either 0 or 2, was {}",
+            amount
+        );
         let amount = amount / 2;
         emit_ld_st_reg_off(self, 0b10, 1, 0b00, wm_xm, extend.into(), amount, xn_sp, st)
     }
@@ -230,12 +385,22 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// STR <Dt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn str_64_simd_reg(&mut self, dt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm3) -> T {
-        debug_assert!([0, 3].contains(&amount), "amount must be either 0 or 3, was {}", amount);
+    fn str_64_simd_reg(
+        &mut self,
+        dt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm3,
+    ) -> T {
+        debug_assert!(
+            [0, 3].contains(&amount),
+            "amount must be either 0 or 3, was {}",
+            amount
+        );
         let amount = amount / 3;
         emit_ld_st_reg_off(self, 0b11, 1, 0b00, wm_xm, extend.into(), amount, xn_sp, dt)
     }
-
 
     /// [STR - register - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/STR--register--SIMD-FP---Store-SIMD-FP-register--register-offset--?lang=en)
     ///
@@ -247,8 +412,19 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// STR <Qt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn str_128_simd_reg(&mut self, qt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm1) -> T {
-        debug_assert!([0, 4].contains(&amount), "amount must be either 0 or 4, was {}", amount);
+    fn str_128_simd_reg(
+        &mut self,
+        qt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm1,
+    ) -> T {
+        debug_assert!(
+            [0, 4].contains(&amount),
+            "amount must be either 0 or 4, was {}",
+            amount
+        );
         let amount = amount / 4;
         emit_ld_st_reg_off(self, 0b00, 1, 0b10, wm_xm, extend.into(), amount, xn_sp, qt)
     }
@@ -263,11 +439,31 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDR <Bt>, [<Xn|SP>, (<Wm>|<Xm>), <extend> {<amount>}]
     /// ```
     #[inline(always)]
-    fn ldr_8_simd_reg_extend_reg(&mut self, bt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtend, amount: bool) -> T {
-        debug_assert!([RegExtend::UXTW, RegExtend::SXTW, RegExtend::SXTX].contains(&extend), "extend must be one of uxtw, sxtw and sxtx, was {}", extend);
-        emit_ld_st_reg_off(self, 0b00, 1, 0b01, wm_xm, extend.into(), amount.into(), xn_sp, bt)
+    fn ldr_8_simd_reg_extend_reg(
+        &mut self,
+        bt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtend,
+        amount: bool,
+    ) -> T {
+        debug_assert!(
+            [RegExtend::UXTW, RegExtend::SXTW, RegExtend::SXTX].contains(&extend),
+            "extend must be one of uxtw, sxtw and sxtx, was {}",
+            extend
+        );
+        emit_ld_st_reg_off(
+            self,
+            0b00,
+            1,
+            0b01,
+            wm_xm,
+            extend.into(),
+            amount.into(),
+            xn_sp,
+            bt,
+        )
     }
-
 
     /// [LDR - register - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LDR--register--SIMD-FP---Load-SIMD-FP-Register--register-offset--?lang=en)
     ///
@@ -279,10 +475,15 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDR <Bt>, [<Xn|SP>, <Xm>{, LSL <amount>}]
     /// ```
     #[inline(always)]
-    fn ldr_8_simd_reg_shift_reg(&mut self, bt: Register, xn_sp: Register, xm: Register, amount: bool) -> T {
+    fn ldr_8_simd_reg_shift_reg(
+        &mut self,
+        bt: Register,
+        xn_sp: Register,
+        xm: Register,
+        amount: bool,
+    ) -> T {
         emit_ld_st_reg_off(self, 0b00, 1, 0b01, xm, 0b011, amount.into(), xn_sp, bt)
     }
-
 
     /// [LDR - register - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LDR--register--SIMD-FP---Load-SIMD-FP-Register--register-offset--?lang=en)
     ///
@@ -294,11 +495,21 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDR <Ht>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn ldr_16_simd_reg(&mut self, ht: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm1) -> T {
-        debug_assert!([0, 1].contains(&amount), "amount must be either 0 or 1, was {}", amount);
+    fn ldr_16_simd_reg(
+        &mut self,
+        ht: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm1,
+    ) -> T {
+        debug_assert!(
+            [0, 1].contains(&amount),
+            "amount must be either 0 or 1, was {}",
+            amount
+        );
         emit_ld_st_reg_off(self, 0b01, 1, 0b01, wm_xm, extend.into(), amount, xn_sp, ht)
     }
-
 
     /// [LDR - register - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LDR--register--SIMD-FP---Load-SIMD-FP-Register--register-offset--?lang=en)
     ///
@@ -310,12 +521,22 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDR <St>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn ldr_32_simd_reg(&mut self, st: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm1) -> T {
-        debug_assert!([0, 2].contains(&amount), "amount must be either 0 or 2, was {}", amount);
+    fn ldr_32_simd_reg(
+        &mut self,
+        st: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm1,
+    ) -> T {
+        debug_assert!(
+            [0, 2].contains(&amount),
+            "amount must be either 0 or 2, was {}",
+            amount
+        );
         let amount = amount / 2;
         emit_ld_st_reg_off(self, 0b10, 1, 0b01, wm_xm, extend.into(), amount, xn_sp, st)
     }
-
 
     /// [LDR - register - SIMD FP](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LDR--register--SIMD-FP---Load-SIMD-FP-Register--register-offset--?lang=en)
     ///
@@ -327,8 +548,19 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDR <Dt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn ldr_64_simd_reg(&mut self, dt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm3) -> T {
-        debug_assert!([0, 3].contains(&amount), "amount must be either 0 or 3, was {}", amount);
+    fn ldr_64_simd_reg(
+        &mut self,
+        dt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm3,
+    ) -> T {
+        debug_assert!(
+            [0, 3].contains(&amount),
+            "amount must be either 0 or 3, was {}",
+            amount
+        );
         let amount = amount / 3;
         emit_ld_st_reg_off(self, 0b11, 1, 0b01, wm_xm, extend.into(), amount, xn_sp, dt)
     }
@@ -343,12 +575,22 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDR <Qt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn ldr_128_simd_reg(&mut self, qt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm1) -> T {
-        debug_assert!([0, 4].contains(&amount), "amount must be either 0 or 4, was {}", amount);
+    fn ldr_128_simd_reg(
+        &mut self,
+        qt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm1,
+    ) -> T {
+        debug_assert!(
+            [0, 4].contains(&amount),
+            "amount must be either 0 or 4, was {}",
+            amount
+        );
         let amount = amount / 4;
         emit_ld_st_reg_off(self, 0b00, 1, 0b11, wm_xm, extend.into(), amount, xn_sp, qt)
     }
-
 
     /// [STRH - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STRH--register---Store-Register-Halfword--register--?lang=en)
     ///
@@ -360,11 +602,21 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// STRH <Wt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn strh_reg(&mut self, wt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm1) -> T {
-        debug_assert!([0, 1].contains(&amount), "amount must be either 0 or 1, was {}", amount);
+    fn strh_reg(
+        &mut self,
+        wt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm1,
+    ) -> T {
+        debug_assert!(
+            [0, 1].contains(&amount),
+            "amount must be either 0 or 1, was {}",
+            amount
+        );
         emit_ld_st_reg_off(self, 0b01, 0, 0b00, wm_xm, extend.into(), amount, xn_sp, wt)
     }
-
 
     /// [LDRH - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRH--register---Load-Register-Halfword--register--?lang=en)
     ///
@@ -374,8 +626,19 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDRH <Wt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn ldrh_reg(&mut self, wt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm1) -> T {
-        debug_assert!([0, 1].contains(&amount), "amount must be either 0 or 1, was {}", amount);
+    fn ldrh_reg(
+        &mut self,
+        wt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm1,
+    ) -> T {
+        debug_assert!(
+            [0, 1].contains(&amount),
+            "amount must be either 0 or 1, was {}",
+            amount
+        );
         emit_ld_st_reg_off(self, 0b01, 0, 0b01, wm_xm, extend.into(), amount, xn_sp, wt)
     }
 
@@ -387,11 +650,21 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDRSH <Wt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn ldrsh_32_reg(&mut self, wt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm1) -> T {
-        debug_assert!([0, 1].contains(&amount), "amount must be either 0 or 1, was {}", amount);
+    fn ldrsh_32_reg(
+        &mut self,
+        wt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm1,
+    ) -> T {
+        debug_assert!(
+            [0, 1].contains(&amount),
+            "amount must be either 0 or 1, was {}",
+            amount
+        );
         emit_ld_st_reg_off(self, 0b01, 0, 0b11, wm_xm, extend.into(), amount, xn_sp, wt)
     }
-
 
     /// [LDRSH - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRSH--register---Load-Register-Signed-Halfword--register--?lang=en)
     ///
@@ -401,11 +674,21 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDRSH <Xt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn ldrsh_64_reg(&mut self, xt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm1) -> T {
-        debug_assert!([0, 1].contains(&amount), "amount must be either 0 or 1, was {}", amount);
+    fn ldrsh_64_reg(
+        &mut self,
+        xt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm1,
+    ) -> T {
+        debug_assert!(
+            [0, 1].contains(&amount),
+            "amount must be either 0 or 1, was {}",
+            amount
+        );
         emit_ld_st_reg_off(self, 0b01, 0, 0b10, wm_xm, extend.into(), amount, xn_sp, xt)
     }
-
 
     /// [STR - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STR--register---Store-Register--register--?lang=en)
     ///
@@ -417,12 +700,22 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// STR <Wt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn str_32_reg(&mut self, wt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm1) -> T {
-        debug_assert!([0, 2].contains(&amount), "amount must be either 0 or 2, was {}", amount);
+    fn str_32_reg(
+        &mut self,
+        wt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm1,
+    ) -> T {
+        debug_assert!(
+            [0, 2].contains(&amount),
+            "amount must be either 0 or 2, was {}",
+            amount
+        );
         let amount = amount / 2;
         emit_ld_st_reg_off(self, 0b10, 0, 0b00, wm_xm, extend.into(), amount, xn_sp, wt)
     }
-
 
     /// [STR - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STR--register---Store-Register--register--?lang=en)
     ///
@@ -434,12 +727,22 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// STR <Xt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn str_64_reg(&mut self, xt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm1) -> T {
-        debug_assert!([0, 3].contains(&amount), "amount must be either 0 or 3, was {}", amount);
+    fn str_64_reg(
+        &mut self,
+        xt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm1,
+    ) -> T {
+        debug_assert!(
+            [0, 3].contains(&amount),
+            "amount must be either 0 or 3, was {}",
+            amount
+        );
         let amount = amount / 3;
         emit_ld_st_reg_off(self, 0b11, 0, 0b00, wm_xm, extend.into(), amount, xn_sp, xt)
     }
-
 
     /// [LDR - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDR--register---Load-Register--register--?lang=en)
     ///
@@ -449,12 +752,22 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDR <Wt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn ldr_32_reg(&mut self, wt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm1) -> T {
-        debug_assert!([0, 2].contains(&amount), "amount must be either 0 or 2, was {}", amount);
+    fn ldr_32_reg(
+        &mut self,
+        wt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm1,
+    ) -> T {
+        debug_assert!(
+            [0, 2].contains(&amount),
+            "amount must be either 0 or 2, was {}",
+            amount
+        );
         let amount = amount / 2;
         emit_ld_st_reg_off(self, 0b10, 0, 0b01, wm_xm, extend.into(), amount, xn_sp, wt)
     }
-
 
     /// [LDR - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDR--register---Load-Register--register--?lang=en)
     ///
@@ -464,12 +777,22 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDR <Xt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn ldr_64_reg(&mut self, xt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm1) -> T {
-        debug_assert!([0, 3].contains(&amount), "amount must be either 0 or 3, was {}", amount);
+    fn ldr_64_reg(
+        &mut self,
+        xt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm1,
+    ) -> T {
+        debug_assert!(
+            [0, 3].contains(&amount),
+            "amount must be either 0 or 3, was {}",
+            amount
+        );
         let amount = amount / 3;
         emit_ld_st_reg_off(self, 0b11, 0, 0b01, wm_xm, extend.into(), amount, xn_sp, xt)
     }
-
 
     /// [LDRSW - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDRSW--register---Load-Register-Signed-Word--register--?lang=en)
     ///
@@ -479,12 +802,22 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// LDRSW <Xt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn ldrsw_reg(&mut self, xt: Register, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm2) -> T {
-        debug_assert!([0, 2].contains(&amount), "amount must be either 0 or 2, was {}", amount);
+    fn ldrsw_reg(
+        &mut self,
+        xt: Register,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm2,
+    ) -> T {
+        debug_assert!(
+            [0, 2].contains(&amount),
+            "amount must be either 0 or 2, was {}",
+            amount
+        );
         let amount = amount / 2;
         emit_ld_st_reg_off(self, 0b10, 0, 0b10, wm_xm, extend.into(), amount, xn_sp, xt)
     }
-
 
     /// [PRFM - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PRFM--register---Prefetch-Memory--register--?lang=en)
     ///
@@ -496,7 +829,14 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// PRFM (<prfop>|#<imm5>), [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn prfm_reg_prfop(&mut self, prfop: PrfOp, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm2) -> T {
+    fn prfm_reg_prfop(
+        &mut self,
+        prfop: PrfOp,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm2,
+    ) -> T {
         self.prfm_reg_custom(prfop.encode(), xn_sp, wm_xm, extend, amount)
     }
 
@@ -510,10 +850,31 @@ pub trait LoadStoreRegisterRegisterOffset<T>: InstructionProcessor<T> {
     /// PRFM #<imm5>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
     /// ```
     #[inline(always)]
-    fn prfm_reg_custom(&mut self, imm5: UImm5, xn_sp: Register, wm_xm: Register, extend: RegExtendLSL, amount: UImm2) -> T {
-        debug_assert!([0, 3].contains(&amount), "amount must be either 0 or 3, was {}", amount);
+    fn prfm_reg_custom(
+        &mut self,
+        imm5: UImm5,
+        xn_sp: Register,
+        wm_xm: Register,
+        extend: RegExtendLSL,
+        amount: UImm2,
+    ) -> T {
+        debug_assert!(
+            [0, 3].contains(&amount),
+            "amount must be either 0 or 3, was {}",
+            amount
+        );
         let amount = amount / 3;
-        emit_ld_st_reg_off(self, 0b11, 0, 0b10, wm_xm, extend.into(), amount, xn_sp, imm5)
+        emit_ld_st_reg_off(
+            self,
+            0b11,
+            0,
+            0b10,
+            wm_xm,
+            extend.into(),
+            amount,
+            xn_sp,
+            imm5,
+        )
     }
 }
 
@@ -522,6 +883,7 @@ mod tests {
     use crate::assert_panic;
     use crate::test_utils::test_producer::TestProducer;
     use crate::types::prefetch_memory::{PrfPolicy, PrfTarget, PrfType};
+
     use super::*;
 
     #[test]
@@ -598,7 +960,6 @@ mod tests {
         let instr = prod.str_8_simd_reg_shift_reg(2, 3, 4, true);
         assert_eq!(instr, "str b2, [x3, x4, lsl #0x0]");
 
-
         let instr = prod.str_16_simd_reg(2, 3, 4, RegExtendLSL::UXTW, 0);
         assert_eq!(instr, "str h2, [x3, w4, uxtw]");
 
@@ -606,7 +967,6 @@ mod tests {
         assert_eq!(instr, "str h2, [x3, x4, lsl #0x1]");
 
         assert_panic!("Should panic: invalid amount"; prod.str_16_simd_reg(2, 3, 4, RegExtendLSL::SXTW, 2));
-
 
         let instr = prod.str_32_simd_reg(2, 3, 4, RegExtendLSL::UXTW, 0);
         assert_eq!(instr, "str s2, [x3, w4, uxtw]");
@@ -616,7 +976,6 @@ mod tests {
 
         assert_panic!("Should panic: invalid amount"; prod.str_32_simd_reg(2, 3, 4, RegExtendLSL::SXTW, 1));
 
-
         let instr = prod.str_64_simd_reg(2, 3, 4, RegExtendLSL::UXTW, 0);
         assert_eq!(instr, "str d2, [x3, w4, uxtw]");
 
@@ -624,7 +983,6 @@ mod tests {
         assert_eq!(instr, "str d2, [x3, x4, lsl #0x3]");
 
         assert_panic!("Should panic: invalid amount"; prod.str_64_simd_reg(2, 3, 4, RegExtendLSL::SXTW, 1));
-
 
         let instr = prod.str_128_simd_reg(2, 3, 4, RegExtendLSL::UXTW, 0);
         assert_eq!(instr, "str q2, [x3, w4, uxtw]");
@@ -650,7 +1008,6 @@ mod tests {
         let instr = prod.ldr_8_simd_reg_shift_reg(2, 3, 4, true);
         assert_eq!(instr, "ldr b2, [x3, x4, lsl #0x0]");
 
-
         let instr = prod.ldr_16_simd_reg(2, 3, 4, RegExtendLSL::UXTW, 0);
         assert_eq!(instr, "ldr h2, [x3, w4, uxtw]");
 
@@ -658,7 +1015,6 @@ mod tests {
         assert_eq!(instr, "ldr h2, [x3, x4, lsl #0x1]");
 
         assert_panic!("Should panic: invalid amount"; prod.ldr_16_simd_reg(2, 3, 4, RegExtendLSL::SXTW, 2));
-
 
         let instr = prod.ldr_32_simd_reg(2, 3, 4, RegExtendLSL::UXTW, 0);
         assert_eq!(instr, "ldr s2, [x3, w4, uxtw]");
@@ -668,7 +1024,6 @@ mod tests {
 
         assert_panic!("Should panic: invalid amount"; prod.ldr_32_simd_reg(2, 3, 4, RegExtendLSL::SXTW, 1));
 
-
         let instr = prod.ldr_64_simd_reg(2, 3, 4, RegExtendLSL::UXTW, 0);
         assert_eq!(instr, "ldr d2, [x3, w4, uxtw]");
 
@@ -676,7 +1031,6 @@ mod tests {
         assert_eq!(instr, "ldr d2, [x3, x4, lsl #0x3]");
 
         assert_panic!("Should panic: invalid amount"; prod.ldr_64_simd_reg(2, 3, 4, RegExtendLSL::SXTW, 1));
-
 
         let instr = prod.ldr_128_simd_reg(2, 3, 4, RegExtendLSL::UXTW, 0);
         assert_eq!(instr, "ldr q2, [x3, w4, uxtw]");

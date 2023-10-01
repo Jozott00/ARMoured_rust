@@ -1,5 +1,4 @@
 use crate::instruction_encoding::data_proc_reg::add_sub_shift_reg::AddSubtractShiftedRegister;
-use crate::instruction_encoding::InstructionProcessor;
 use crate::types::Register;
 use crate::types::shifts::Shift3;
 
@@ -16,7 +15,6 @@ pub trait AliasInstructions<T>: AddSubtractShiftedRegister<T> {
         self.add_32_reg_shift(wd, wn, wm, Shift3::LSL(0))
     }
 
-
     /// [ADD - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADD--shifted-register---Add--shifted-register--?lang=en)
     ///
     /// Add adds a register value and a register value, and writes the result to the destination register.
@@ -28,7 +26,6 @@ pub trait AliasInstructions<T>: AddSubtractShiftedRegister<T> {
     fn add_64_reg(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         self.add_64_reg_shift(xd, xn, xm, Shift3::LSL(0))
     }
-
 
     /// [ADDS - shifted register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDS--shifted-register---Add--shifted-register---setting-flags-?lang=en)
     ///
@@ -44,7 +41,6 @@ pub trait AliasInstructions<T>: AddSubtractShiftedRegister<T> {
         self.adds_32_reg_shift(wd, wn, wm, Shift3::LSL(0))
     }
 
-
     /// [ADDS - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDS--shifted-register---Add--shifted-register---setting-flags-?lang=en)
     ///
     /// Add (shifted register), setting flags, adds a register value and a register value, and writes the result to the destination register. It updates the condition flags based on the result.
@@ -56,7 +52,6 @@ pub trait AliasInstructions<T>: AddSubtractShiftedRegister<T> {
     fn adds_64_reg(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         self.adds_64_reg_shift(xd, xn, xm, Shift3::LSL(0))
     }
-
 
     /// [SUB - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--shifted-register---Subtract--shifted-register--?lang=en)
     ///
@@ -70,7 +65,6 @@ pub trait AliasInstructions<T>: AddSubtractShiftedRegister<T> {
         self.sub_32_reg_shift(wd, wn, wm, Shift3::LSL(0))
     }
 
-
     /// [SUB - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--shifted-register---Subtract--shifted-register--?lang=en)
     ///
     /// Subtract (shifted register) subtracts a register value from a register value, and writes the result to the destination register.
@@ -83,7 +77,6 @@ pub trait AliasInstructions<T>: AddSubtractShiftedRegister<T> {
         self.sub_64_reg_shift(xd, xn, xm, Shift3::LSL(0))
     }
 
-
     /// [SUBS - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--shifted-register---Subtract--shifted-register--?lang=en)
     ///
     /// Subtract (shifted register) subtracts a register value from a register value, and writes the result to the destination register.
@@ -95,7 +88,6 @@ pub trait AliasInstructions<T>: AddSubtractShiftedRegister<T> {
     fn subs_32_reg(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         self.subs_32_reg_shift(wd, wn, wm, Shift3::LSL(0))
     }
-
 
     /// [SUBS - register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--shifted-register---Subtract--shifted-register---setting-flags-?lang=en)
     ///

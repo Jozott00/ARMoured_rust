@@ -37,7 +37,7 @@ impl PrfType {
         match self {
             PrfType::PLD => 0b00,
             PrfType::PLI => 0b01,
-            PrfType::PST => 0b10
+            PrfType::PST => 0b10,
         }
     }
 }
@@ -47,7 +47,7 @@ impl PrfTarget {
         match self {
             PrfTarget::L1 => 0b00,
             PrfTarget::L2 => 0b01,
-            PrfTarget::L3 => 0b10
+            PrfTarget::L3 => 0b10,
         }
     }
 }
