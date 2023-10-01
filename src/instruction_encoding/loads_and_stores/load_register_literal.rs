@@ -6,11 +6,9 @@
 
 use bit_seq::bseq_32;
 
-use crate::instruction_emitter::Emitter;
 use crate::instruction_encoding::{AddressableInstructionProcessor, InstructionProcessor};
-use crate::mc_memory::Memory;
-use crate::types::{Offset32, Register, UImm5};
 use crate::types::prefetch_memory::PrfOp;
+use crate::types::{Offset32, Register, UImm5};
 
 // Helper function -> Actual emits
 
@@ -19,11 +17,11 @@ use crate::types::prefetch_memory::PrfOp;
 fn emit_ldr_x<P: InstructionProcessor<T>, T>(
     proc: &mut P,
     opc: u8,
-    V: u8,
+    v: u8,
     imm19: u32,
     rt: Register,
 ) -> T {
-    let r = bseq_32!(opc:2 011 V:1 00 imm19:19 rt:5);
+    let r = bseq_32!(opc:2 011 v:1 00 imm19:19 rt:5);
     proc.process(r)
 }
 
@@ -32,7 +30,7 @@ fn emit_ldr_x<P: InstructionProcessor<T>, T>(
 fn emit_ldr_x_offset<P: InstructionProcessor<T>, T>(
     proc: &mut P,
     opc: u8,
-    V: u8,
+    v: u8,
     offset: Offset32,
     rt: Register,
 ) -> T {
@@ -42,7 +40,7 @@ fn emit_ldr_x_offset<P: InstructionProcessor<T>, T>(
     );
     debug_assert!(offset % 4 == 0, "Offset must be a multiply of 4!");
     let imm19 = offset / 4;
-    emit_ldr_x(proc, opc, V, imm19 as u32, rt)
+    emit_ldr_x(proc, opc, v, imm19 as u32, rt)
 }
 
 /// Calculates the offset from the program counter to the provided address, and then calls emit_ldr_x_offset to encode and emit the instruction.
@@ -50,14 +48,14 @@ fn emit_ldr_x_offset<P: InstructionProcessor<T>, T>(
 fn emit_ldr_x_addr<P: AddressableInstructionProcessor<T>, T>(
     proc: &mut P,
     opc: u8,
-    V: u8,
+    v: u8,
     addr: usize,
     rt: Register,
 ) -> T {
     debug_assert!(addr % 4 == 0, "Addr must be 4 byte aligned!");
 
     let offset = proc.intr_ptr_offset_to(addr);
-    emit_ldr_x_offset(proc, opc, V, offset, rt)
+    emit_ldr_x_offset(proc, opc, v, offset, rt)
 }
 
 // TODO: implement with label as soon as labels supported
@@ -184,14 +182,14 @@ pub trait LoadRegisterLiteralWithAddress<T>:
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_panic, stream_mock};
     use crate::instruction_emitter::MockEmitter;
     use crate::instruction_stream::InstrStream;
     use crate::mc_memory::MockMemory;
-    use crate::types::InstructionPointer;
     use crate::types::prefetch_memory::PrfPolicy::{KEEP, STRM};
     use crate::types::prefetch_memory::PrfTarget::{L1, L2};
     use crate::types::prefetch_memory::PrfType::{PLD, PLI};
+    use crate::types::InstructionPointer;
+    use crate::{assert_panic, stream_mock};
 
     use super::*;
 

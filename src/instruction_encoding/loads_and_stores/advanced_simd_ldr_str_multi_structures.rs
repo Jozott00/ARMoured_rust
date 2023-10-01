@@ -13,7 +13,7 @@
 use bit_seq::bseq_32;
 
 use crate::instruction_encoding::InstructionProcessor;
-use crate::types::ArrSpecifier::{ArrSpec, ArrSpec1, ArrSpecX};
+use crate::types::arr_specifier::{ArrSpec, ArrSpec1, ArrSpecX};
 use crate::types::Register;
 
 #[inline(always)]

@@ -16,21 +16,21 @@
 use bit_seq::bseq_32;
 
 use crate::instruction_encoding::InstructionProcessor;
-use crate::types::{Register, UImm12, UImm13, UImm14, UImm15, UImm16, UImm5};
 use crate::types::prefetch_memory::PrfOp;
+use crate::types::{Register, UImm12, UImm13, UImm14, UImm15, UImm16, UImm5};
 
 #[inline(always)]
 fn emit_load_store_offset<P: InstructionProcessor<T>, T>(
     proc: &mut P,
     size: u8,
-    V: u8,
+    v: u8,
     opc: u8,
     pimm: u16,
     rn: Register,
     rt: Register,
 ) -> T {
-    debug_assert!(0 <= pimm && pimm <= 4095, "pimm must be in range 0 to 4095");
-    let r = bseq_32!(size:2 111 V:1 01 opc:2 pimm:12 rn:5 rt:5);
+    debug_assert!(pimm <= 4095, "pimm must be in range 0 to 4095");
+    let r = bseq_32!(size:2 111 v:1 01 opc:2 pimm:12 rn:5 rt:5);
     proc.process(r)
 }
 
@@ -575,14 +575,14 @@ pub trait LoadStoreRegisterUnsignedImmediate<T>: InstructionProcessor<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_panic, stream_mock};
     use crate::instruction_emitter::MockEmitter;
     use crate::instruction_stream::InstrStream;
     use crate::mc_memory::MockMemory;
-    use crate::types::InstructionPointer;
     use crate::types::prefetch_memory::PrfPolicy::{KEEP, STRM};
     use crate::types::prefetch_memory::PrfTarget::{L1, L2, L3};
     use crate::types::prefetch_memory::PrfType::{PLD, PLI, PST};
+    use crate::types::InstructionPointer;
+    use crate::{assert_panic, stream_mock};
 
     use super::*;
 

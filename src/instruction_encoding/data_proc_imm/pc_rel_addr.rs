@@ -5,11 +5,8 @@
 //! - [ADRP](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADRP--Form-PC-relative-address-to-4KB-page-?lang=en)
 
 pub use bit_seq::{bseq_32, bseq_8};
-use num::Signed;
 
-use crate::instruction_emitter::Emitter;
 use crate::instruction_encoding::{AddressableInstructionProcessor, InstructionProcessor};
-use crate::mc_memory::Memory;
 use crate::types::{Offset32, Offset64, Register};
 
 /// Helper function to emit PC-relative addressing instructions.
@@ -128,11 +125,11 @@ pub trait PcRelAddressingWithAddress<T>: AddressableInstructionProcessor<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_panic, stream_mock};
     use crate::instruction_emitter::MockEmitter;
     use crate::instruction_stream::InstrStream;
     use crate::mc_memory::MockMemory;
     use crate::types::InstructionPointer;
+    use crate::{assert_panic, stream_mock};
 
     use super::*;
 

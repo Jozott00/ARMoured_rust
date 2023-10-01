@@ -15,9 +15,7 @@
 
 use bit_seq::bseq_32;
 
-use crate::instruction_emitter::Emitter;
 use crate::instruction_encoding::InstructionProcessor;
-use crate::mc_memory::Memory;
 use crate::types::{Imm9, Register};
 
 /// # Arguments
@@ -26,7 +24,7 @@ use crate::types::{Imm9, Register};
 fn emit_load_store_pre_post<P: InstructionProcessor<T>, T>(
     proc: &mut P,
     size: u8,
-    V: u8,
+    v: u8,
     opc: u8,
     simm: Imm9,
     mode: u8,
@@ -37,7 +35,7 @@ fn emit_load_store_pre_post<P: InstructionProcessor<T>, T>(
         -256 <= simm && simm <= 255,
         "simm must be in range -256 to 255"
     );
-    let r = bseq_32!(size:2 111 V:1 00 opc:2 0 simm:9 mode:2 xn_sp:5 wt:5);
+    let r = bseq_32!(size:2 111 v:1 00 opc:2 0 simm:9 mode:2 xn_sp:5 wt:5);
     proc.process(r)
 }
 
@@ -726,15 +724,15 @@ pub trait LoadStoreRegisterPrePostIndexed<T>: InstructionProcessor<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_panic, stream_mock};
     use crate::instruction_emitter::MockEmitter;
     use crate::instruction_stream::InstrStream;
     use crate::mc_memory::MockMemory;
     use crate::types::InstructionPointer;
+    use crate::{assert_panic, stream_mock};
 
     use super::*;
 
-// STRB Test Cases
+    // STRB Test Cases
 
     #[test]
     fn test_strb_pre_index() {

@@ -52,7 +52,7 @@ pub trait ExtractInstructions<T>: InstructionProcessor<T> {
     /// * `lsb` - The least significant bit number where the extraction starts.
     #[inline(always)]
     fn extr_32(&mut self, rd: Register, rn: Register, rm: Register, lsb: UImm5) -> T {
-        debug_assert!(0 <= lsb && lsb <= 31, "lsb must be in range 0 to 63");
+        debug_assert!(lsb <= 31, "lsb must be in range 0 to 63");
         emit_extr_x(self, 0, 0b00, 0, 0, rm, bseq_8!(0 lsb:5), rn, rd)
     }
 
@@ -76,7 +76,7 @@ pub trait ExtractInstructions<T>: InstructionProcessor<T> {
     /// * `lsb` - The least significant bit number where the extraction starts.
     #[inline(always)]
     fn extr_64(&mut self, rd: Register, rn: Register, rm: Register, lsb: UImm6) -> T {
-        debug_assert!(lsb >= 0 && lsb <= 63, "lsb must be in range 0 to 63");
+        debug_assert!(lsb <= 63, "lsb must be in range 0 to 63");
         emit_extr_x(self, 1, 0b00, 1, 0, rm, lsb, rn, rd)
     }
 }

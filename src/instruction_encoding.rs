@@ -54,6 +54,6 @@ pub trait InstructionSetWithAddress<T>:
 {
 }
 
-mod Constants {
+mod constants {
     pub const LOG2_TAG_GRANULE: u8 = 4u8;
 }

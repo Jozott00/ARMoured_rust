@@ -25,23 +25,11 @@ fn emit_bitfield<P: InstructionProcessor<T>, T>(
     rd: Register,
 ) -> T {
     if sf == 1 {
-        debug_assert!(
-            immr >= 0 && immr <= 63,
-            "Immr can only be in range of 0 to 63"
-        );
-        debug_assert!(
-            imms >= 0 && imms <= 63,
-            "Immr can only be in range of 0 to 63"
-        );
+        debug_assert!(immr <= 63, "Immr can only be in range of 0 to 63");
+        debug_assert!(imms <= 63, "Immr can only be in range of 0 to 63");
     } else {
-        debug_assert!(
-            immr >= 0 && immr <= 31,
-            "Immr can only be in range of 0 to 31"
-        );
-        debug_assert!(
-            imms >= 0 && imms <= 31,
-            "Immr can only be in range of 0 to 31"
-        );
+        debug_assert!(immr <= 31, "Immr can only be in range of 0 to 31");
+        debug_assert!(imms <= 31, "Immr can only be in range of 0 to 31");
     }
 
     let r = bseq_32!(sf:1 opc:2 100110 n:1 immr:6 imms:6 rn:5 rd:5);

@@ -12,7 +12,7 @@
 
 use bit_seq::bseq_32;
 
-use crate::instruction_encoding::Constants::LOG2_TAG_GRANULE;
+use crate::instruction_encoding::constants::LOG2_TAG_GRANULE;
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::{Imm13, Register};
 

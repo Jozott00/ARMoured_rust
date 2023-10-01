@@ -17,8 +17,8 @@
 use bit_seq::bseq_32;
 
 use crate::instruction_encoding::InstructionProcessor;
+use crate::types::arr_specifier::{ArrSpec, ArrSpec1};
 use crate::types::{Register, UImm1, UImm2, UImm3, UImm4};
-use crate::types::ArrSpecifier::{ArrSpec, ArrSpec1};
 
 #[inline(always)]
 fn emit_adv_ldr_str_all<P: InstructionProcessor<T>, T>(
@@ -167,15 +167,15 @@ fn emit_adv_ldxr_off_imm<P: InstructionProcessor<T>, T, A: ArrSpec>(
     )
 }
 
-#[inline(always)]
-fn get_imm_size(immediate: u8, smallest_imm: u8) -> u8 {
-    match immediate / smallest_imm {
-        1 => 0b00,
-        2 => 0b01,
-        4 => 0b10,
-        _ => 0b11,
-    }
-}
+// #[inline(always)]
+// fn get_imm_size(immediate: u8, smallest_imm: u8) -> u8 {
+//     match immediate / smallest_imm {
+//         1 => 0b00,
+//         2 => 0b01,
+//         4 => 0b10,
+//         _ => 0b11,
+//     }
+// }
 
 fn are_indices_sequential(indices: &[Register]) -> bool {
     for i in 0..(indices.len() - 1) {

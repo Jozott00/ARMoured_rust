@@ -135,7 +135,7 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
     /// ```asm
     /// LDAPURSH <Wt>, [<Xn|SP>{, #<simm>}]
     /// ```
-    #[inline(always)]
+
     #[inline(always)]
     fn ldapursh_32(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
         emit_ld_st_instr(self, 0b01, 0b11, simm as u16, xn_sp, wt)

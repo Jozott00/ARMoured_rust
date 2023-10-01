@@ -3,11 +3,7 @@ use std::{mem, slice};
 use bad64::disasm;
 
 use crate::instruction_emitter::{Emitter, InstrEmitter};
-use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
-use crate::instruction_encoding::AddressableInstructionProcessor;
 use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
-use crate::instruction_encoding::branch_exception_system::BranchExceptionSystem;
-use crate::instruction_encoding::branch_exception_system::BranchExceptionSystemWithAddress;
 use crate::instruction_encoding::branch_exception_system::compare_and_branch_imm::{
     CompareAndBranchImm, CompareAndBranchImmWithAddress,
 };
@@ -25,10 +21,9 @@ use crate::instruction_encoding::branch_exception_system::unconditional_branch_i
     UnconditionalBranchImmediate, UnconditionalBranchImmediateWithAddress,
 };
 use crate::instruction_encoding::branch_exception_system::unconditional_branch_register::UnconditionalBranchRegister;
+use crate::instruction_encoding::branch_exception_system::BranchExceptionSystem;
+use crate::instruction_encoding::branch_exception_system::BranchExceptionSystemWithAddress;
 use crate::instruction_encoding::common_aliases::CommonAliases;
-use crate::instruction_encoding::data_proc_imm::{
-    DataProcessingImmediate, DataProcessingImmediateWithAddress,
-};
 use crate::instruction_encoding::data_proc_imm::add_substract_imm::AddSubtractImmediate;
 use crate::instruction_encoding::data_proc_imm::bitfield::BitfieldInstructions;
 use crate::instruction_encoding::data_proc_imm::extract::ExtractInstructions;
@@ -36,6 +31,9 @@ use crate::instruction_encoding::data_proc_imm::logical_imm::LogicalImmediate;
 use crate::instruction_encoding::data_proc_imm::mov_wide_imm::MovWideImmediate;
 use crate::instruction_encoding::data_proc_imm::pc_rel_addr::{
     PcRelAddressing, PcRelAddressingWithAddress,
+};
+use crate::instruction_encoding::data_proc_imm::{
+    DataProcessingImmediate, DataProcessingImmediateWithAddress,
 };
 use crate::instruction_encoding::data_proc_reg::add_sub_carry::AddSubtractWithCarry;
 use crate::instruction_encoding::data_proc_reg::add_sub_ext_reg::AddSubtractExtendedRegister;
@@ -46,11 +44,10 @@ use crate::instruction_encoding::data_proc_reg::conditional_select::ConditionalS
 use crate::instruction_encoding::data_proc_reg::data_proc_one_src::DataProcessingOneSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_three_src::DataProcessingThreeSource;
 use crate::instruction_encoding::data_proc_reg::data_proc_two_src::DataProcessingTwoSource;
-use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::data_proc_reg::evaluate_into_flags::EvaluateIntoFlags;
 use crate::instruction_encoding::data_proc_reg::logical_shift_reg::LogicalShiftRegister;
 use crate::instruction_encoding::data_proc_reg::rotate_right_into_flags::RotateRightIntoFlags;
-use crate::instruction_encoding::InstructionSetWithAddress;
+use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_multi_structures::AdvancedSIMDLoadStoreMultipleStructures;
 use crate::instruction_encoding::loads_and_stores::advanced_simd_ldr_str_single_structures::AdvancedSIMDLoadStoreSingleStructures;
 use crate::instruction_encoding::loads_and_stores::atomic_memory_operations::AtomicMemoryOperatinos;
@@ -74,15 +71,18 @@ use crate::instruction_encoding::loads_and_stores::load_store_reg_unscaled_imm::
 use crate::instruction_encoding::loads_and_stores::load_store_register_pac::LoadStoreRegisterPac;
 use crate::instruction_encoding::loads_and_stores::load_store_register_regoffset::LoadStoreRegisterRegisterOffset;
 use crate::instruction_encoding::loads_and_stores::load_store_register_unsigned_imm::LoadStoreRegisterUnsignedImmediate;
+use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
 use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
 use crate::instruction_encoding::loads_and_stores::LoadsAndStoresWithAddress;
-use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::MemoryCopyAndMemorySet;
+use crate::instruction_encoding::AddressableInstructionProcessor;
+use crate::instruction_encoding::InstructionSetWithAddress;
+use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
 use crate::mc_memory::{McMemory, Memory};
-use crate::types::{Instruction, InstructionPointer};
 use crate::types::instruction::Instr;
 use crate::types::Offset32;
+use crate::types::{Instruction, InstructionPointer};
 
-pub type PatchFn<M: Memory, E: Emitter> = fn(&mut InstrStream<M, E>) -> ();
+pub type PatchFn<M, E> = fn(&mut InstrStream<M, E>) -> ();
 
 pub struct InstrStream<'mem, M: Memory, E: Emitter> {
     mem: &'mem mut M,
@@ -200,7 +200,7 @@ impl<'mem, M: Memory, E: Emitter> InstrStream<'mem, M, E> {
         unsafe { slice::from_raw_parts(ptr, len) }
     }
 
-    fn emit(&mut self, instr: Instruction) -> Instr {
+    pub fn emit(&mut self, instr: Instruction) -> Instr {
         debug_assert!(
             !self.mem.is_executable(),
             "Cannot emit instruction while memory is in execution mode"

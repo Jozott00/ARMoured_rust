@@ -7,10 +7,8 @@
 
 use bit_seq::bseq_32;
 
-use crate::instruction_emitter::Emitter;
 use crate::instruction_encoding::InstructionProcessor;
-use crate::mc_memory::Memory;
-use crate::types::{HW, Register, UImm16};
+use crate::types::{Register, UImm16, HW};
 
 /// Internal function used to encode `MOV` instructions with immediate values.
 /// Parameters:

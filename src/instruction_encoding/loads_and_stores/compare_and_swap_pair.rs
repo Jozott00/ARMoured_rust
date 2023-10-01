@@ -12,10 +12,7 @@
 
 use bit_seq::bseq_32;
 
-use crate::instruction_emitter::Emitter;
 use crate::instruction_encoding::InstructionProcessor;
-use crate::instruction_stream::InstrStream;
-use crate::mc_memory::Memory;
 use crate::types::Register;
 
 /// Helper method that emits the Compare and Swap Pair instruction for the supplied parameters.
@@ -23,7 +20,7 @@ use crate::types::Register;
 /// # Arguments
 ///
 /// * `sz` - Size flag. Determines if instruction is 32 or 64 bits wide.
-/// * `L` - Sequential or atomic access flag.
+/// * `l` - Sequential or atomic access flag.
 /// * `rs` - Source register pair.
 /// * `o0` - Load/Store order specifier.
 /// * `rn` - Base register. The memory address to be used for the operation is in this register.
@@ -32,13 +29,13 @@ use crate::types::Register;
 fn emit_casp_x<P: InstructionProcessor<T>, T>(
     proc: &mut P,
     sz: u8,
-    L: u8,
+    l: u8,
     rs: Register,
     o0: u8,
     rn: Register,
     rt: Register,
 ) -> T {
-    let r = bseq_32!(0 sz:1 0010000 L:1 1 rs:5 o0:1 !0:5 rn:5 rt:5);
+    let r = bseq_32!(0 sz:1 0010000 l:1 1 rs:5 o0:1 !0:5 rn:5 rt:5);
     proc.process(r)
 }
 
@@ -274,10 +271,11 @@ pub trait CompareAndSwapPair<T>: InstructionProcessor<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_panic, stream_mock};
     use crate::instruction_emitter::MockEmitter;
+    use crate::instruction_stream::InstrStream;
     use crate::mc_memory::MockMemory;
     use crate::types::InstructionPointer;
+    use crate::{assert_panic, stream_mock};
 
     use super::*;
 

@@ -9,8 +9,8 @@
 use bit_seq::bseq_32;
 
 use crate::instruction_encoding::InstructionProcessor;
-use crate::types::{Imm12, Register, UImm10, UImm4};
 use crate::types::shifts::Shift1;
+use crate::types::{Imm12, Register, UImm10, UImm4};
 
 /// The `add_sub_imm` function is a helper function to generate ADD/SUB instructions
 /// (with immediate value) according to the ARMv8 encoding rules. This is not intended to be used
@@ -38,7 +38,7 @@ fn emit_add_sub_imm_w_tags_x<P: InstructionProcessor<T>, T>(
     proc: &mut P,
     sf: u8,
     op: u8,
-    S: u8,
+    s: u8,
     o2: u8,
     uimm6: u8,
     op3: u8,
@@ -46,7 +46,7 @@ fn emit_add_sub_imm_w_tags_x<P: InstructionProcessor<T>, T>(
     rn: Register,
     rd: Register,
 ) -> T {
-    let r = bseq_32!(sf:1 op:1 S:1 100011 o2:1 uimm6:6 op3:2 uimm4:4 rn:5 rd:5);
+    let r = bseq_32!(sf:1 op:1 s:1 100011 o2:1 uimm6:6 op3:2 uimm4:4 rn:5 rd:5);
     proc.process(r)
 }
 
