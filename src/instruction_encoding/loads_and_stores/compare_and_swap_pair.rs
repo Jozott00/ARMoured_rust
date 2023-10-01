@@ -11,11 +11,8 @@
 //! - [CASPL 64bit](InstrStream::caspl_64)
 
 use bit_seq::bseq_32;
-use crate::instruction_emitter::Emitter;
+
 use crate::instruction_encoding::InstructionProcessor;
-use crate::instruction_stream::InstrStream;
-use crate::mc_memory::Memory;
-use crate::types::instruction::Instr;
 use crate::types::Register;
 
 /// Helper method that emits the Compare and Swap Pair instruction for the supplied parameters.
@@ -23,14 +20,22 @@ use crate::types::Register;
 /// # Arguments
 ///
 /// * `sz` - Size flag. Determines if instruction is 32 or 64 bits wide.
-/// * `L` - Sequential or atomic access flag.
+/// * `l` - Sequential or atomic access flag.
 /// * `rs` - Source register pair.
 /// * `o0` - Load/Store order specifier.
 /// * `rn` - Base register. The memory address to be used for the operation is in this register.
 /// * `rt` - Target register pair.
 #[inline(always)]
-fn emit_casp_x<P: InstructionProcessor<T>, T>(proc: &mut P, sz: u8, L: u8, rs: Register, o0: u8, rn: Register, rt: Register) -> T {
-    let r = bseq_32!(0 sz:1 0010000 L:1 1 rs:5 o0:1 !0:5 rn:5 rt:5);
+fn emit_casp_x<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sz: u8,
+    l: u8,
+    rs: Register,
+    o0: u8,
+    rn: Register,
+    rt: Register,
+) -> T {
+    let r = bseq_32!(0 sz:1 0010000 l:1 1 rs:5 o0:1 !0:5 rn:5 rt:5);
     proc.process(r)
 }
 
@@ -41,11 +46,24 @@ pub trait CompareAndSwapPair<T>: InstructionProcessor<T> {
     ///
     /// The method asserts that ws1 and wt1 registers are even and that ws2 and wt2 are the consecutive registers of ws1 and wt1.
     #[inline(always)]
-    fn casp_32(&mut self, ws1: Register, ws2: Register, wt1: Register, wt2: Register, xn: Register) -> T {
+    fn casp_32(
+        &mut self,
+        ws1: Register,
+        ws2: Register,
+        wt1: Register,
+        wt2: Register,
+        xn: Register,
+    ) -> T {
         debug_assert!(ws1 % 2 == 0, "ws1 must be even");
-        debug_assert!(ws2 == ws1 + 1, "ws2 must be the consecutive register of ws1");
+        debug_assert!(
+            ws2 == ws1 + 1,
+            "ws2 must be the consecutive register of ws1"
+        );
         debug_assert!(wt1 % 2 == 0, "wt1 must be even");
-        debug_assert!(wt2 == wt1 + 1, "wt2 must be the consecutive register of wt1");
+        debug_assert!(
+            wt2 == wt1 + 1,
+            "wt2 must be the consecutive register of wt1"
+        );
 
         emit_casp_x(self, 0, 0, ws1, 0, xn, wt1)
     }
@@ -56,11 +74,24 @@ pub trait CompareAndSwapPair<T>: InstructionProcessor<T> {
     ///
     /// The method asserts that xs1 and xt1 registers are even and that xs2 and xt2 are the consecutive registers of xs1 and xt1.
     #[inline(always)]
-    fn casp_64(&mut self, xs1: Register, xs2: Register, xt1: Register, xt2: Register, xn: Register) -> T {
+    fn casp_64(
+        &mut self,
+        xs1: Register,
+        xs2: Register,
+        xt1: Register,
+        xt2: Register,
+        xn: Register,
+    ) -> T {
         debug_assert!(xs1 % 2 == 0, "xs1 must be even");
-        debug_assert!(xs2 == xs1 + 1, "xs2 must be the consecutive register of xs1");
+        debug_assert!(
+            xs2 == xs1 + 1,
+            "xs2 must be the consecutive register of xs1"
+        );
         debug_assert!(xt1 % 2 == 0, "xt1 must be even");
-        debug_assert!(xt2 == xt1 + 1, "xt2 must be the consecutive register of xt1");
+        debug_assert!(
+            xt2 == xt1 + 1,
+            "xt2 must be the consecutive register of xt1"
+        );
 
         emit_casp_x(self, 1, 0, xs1, 0, xn, xt1)
     }
@@ -68,11 +99,24 @@ pub trait CompareAndSwapPair<T>: InstructionProcessor<T> {
     /// Emits a 32-bit wide Compare and Swap Pair Acquire (CASPA) instruction. The instruction provides a combining load/store operation
     /// that provides the necessary acquire semantics for synchronisation primitives.
     #[inline(always)]
-    fn caspa_32(&mut self, ws1: Register, ws2: Register, wt1: Register, wt2: Register, xn: Register) -> T {
+    fn caspa_32(
+        &mut self,
+        ws1: Register,
+        ws2: Register,
+        wt1: Register,
+        wt2: Register,
+        xn: Register,
+    ) -> T {
         debug_assert!(ws1 % 2 == 0, "ws1 must be even");
-        debug_assert!(ws2 == ws1 + 1, "ws2 must be the consecutive register of ws1");
+        debug_assert!(
+            ws2 == ws1 + 1,
+            "ws2 must be the consecutive register of ws1"
+        );
         debug_assert!(wt1 % 2 == 0, "wt1 must be even");
-        debug_assert!(wt2 == wt1 + 1, "wt2 must be the consecutive register of wt1");
+        debug_assert!(
+            wt2 == wt1 + 1,
+            "wt2 must be the consecutive register of wt1"
+        );
 
         emit_casp_x(self, 0, 1, ws1, 0, xn, wt1)
     }
@@ -80,11 +124,24 @@ pub trait CompareAndSwapPair<T>: InstructionProcessor<T> {
     /// Emits a 64-bit wide Compare and Swap Pair Acquire (CASPA) instruction. The instruction provides a combining load/store operation
     /// that provides the necessary acquire semantics for synchronisation primitives.
     #[inline(always)]
-    fn caspa_64(&mut self, xs1: Register, xs2: Register, xt1: Register, xt2: Register, xn: Register) -> T {
+    fn caspa_64(
+        &mut self,
+        xs1: Register,
+        xs2: Register,
+        xt1: Register,
+        xt2: Register,
+        xn: Register,
+    ) -> T {
         debug_assert!(xs1 % 2 == 0, "xs1 must be even");
-        debug_assert!(xs2 == xs1 + 1, "xs2 must be the consecutive register of xs1");
+        debug_assert!(
+            xs2 == xs1 + 1,
+            "xs2 must be the consecutive register of xs1"
+        );
         debug_assert!(xt1 % 2 == 0, "xt1 must be even");
-        debug_assert!(xt2 == xt1 + 1, "xt2 must be the consecutive register of xt1");
+        debug_assert!(
+            xt2 == xt1 + 1,
+            "xt2 must be the consecutive register of xt1"
+        );
 
         emit_casp_x(self, 1, 1, xs1, 0, xn, xt1)
     }
@@ -92,11 +149,24 @@ pub trait CompareAndSwapPair<T>: InstructionProcessor<T> {
     /// Emits a 32-bit wide Compare and Swap Pair Acquire, release (CASPAL) instruction. The instruction provides a combining load/store operation
     /// that provides the necessary acquire, release semantics for synchronisation primitives.
     #[inline(always)]
-    fn caspal_32(&mut self, ws1: Register, ws2: Register, wt1: Register, wt2: Register, xn: Register) -> T {
+    fn caspal_32(
+        &mut self,
+        ws1: Register,
+        ws2: Register,
+        wt1: Register,
+        wt2: Register,
+        xn: Register,
+    ) -> T {
         debug_assert!(ws1 % 2 == 0, "ws1 must be even");
-        debug_assert!(ws2 == ws1 + 1, "ws2 must be the consecutive register of ws1");
+        debug_assert!(
+            ws2 == ws1 + 1,
+            "ws2 must be the consecutive register of ws1"
+        );
         debug_assert!(wt1 % 2 == 0, "wt1 must be even");
-        debug_assert!(wt2 == wt1 + 1, "wt2 must be the consecutive register of wt1");
+        debug_assert!(
+            wt2 == wt1 + 1,
+            "wt2 must be the consecutive register of wt1"
+        );
 
         emit_casp_x(self, 0, 1, ws1, 1, xn, wt1)
     }
@@ -120,11 +190,24 @@ pub trait CompareAndSwapPair<T>: InstructionProcessor<T> {
     /// - Both source register pairs (xs1 and xs2, xt1 and xt2) should be consecutive and even-numbered.
     /// - The base register (xn) should contain a valid memory address.
     #[inline(always)]
-    fn caspal_64(&mut self, xs1: Register, xs2: Register, xt1: Register, xt2: Register, xn: Register) -> T {
+    fn caspal_64(
+        &mut self,
+        xs1: Register,
+        xs2: Register,
+        xt1: Register,
+        xt2: Register,
+        xn: Register,
+    ) -> T {
         debug_assert!(xs1 % 2 == 0, "xs1 must be even");
-        debug_assert!(xs2 == xs1 + 1, "xs2 must be the consecutive register of xs1");
+        debug_assert!(
+            xs2 == xs1 + 1,
+            "xs2 must be the consecutive register of xs1"
+        );
         debug_assert!(xt1 % 2 == 0, "xt1 must be even");
-        debug_assert!(xt2 == xt1 + 1, "xt2 must be the consecutive register of xt1");
+        debug_assert!(
+            xt2 == xt1 + 1,
+            "xt2 must be the consecutive register of xt1"
+        );
 
         emit_casp_x(self, 1, 1, xs1, 1, xn, xt1)
     }
@@ -135,11 +218,24 @@ pub trait CompareAndSwapPair<T>: InstructionProcessor<T> {
     /// CASPL is intended for use in constructing higher-level synchronization primitives and operations such as semaphore
     /// acquire and release, and monitor enter and exit operations in a multiprocessor system.
     #[inline(always)]
-    fn caspl_32(&mut self, ws1: Register, ws2: Register, wt1: Register, wt2: Register, xn: Register) -> T {
+    fn caspl_32(
+        &mut self,
+        ws1: Register,
+        ws2: Register,
+        wt1: Register,
+        wt2: Register,
+        xn: Register,
+    ) -> T {
         debug_assert!(ws1 % 2 == 0, "ws1 must be even");
-        debug_assert!(ws2 == ws1 + 1, "ws2 must be the consecutive register of ws1");
+        debug_assert!(
+            ws2 == ws1 + 1,
+            "ws2 must be the consecutive register of ws1"
+        );
         debug_assert!(wt1 % 2 == 0, "wt1 must be even");
-        debug_assert!(wt2 == wt1 + 1, "wt2 must be the consecutive register of wt1");
+        debug_assert!(
+            wt2 == wt1 + 1,
+            "wt2 must be the consecutive register of wt1"
+        );
 
         emit_casp_x(self, 0, 0, ws1, 1, xn, wt1)
     }
@@ -150,11 +246,24 @@ pub trait CompareAndSwapPair<T>: InstructionProcessor<T> {
     /// CASPL is intended for use in constructing higher-level synchronization primitives and operations such as semaphore
     /// acquire and release, and monitor enter and exit operations in a multiprocessor system.
     #[inline(always)]
-    fn caspl_64(&mut self, xs1: Register, xs2: Register, xt1: Register, xt2: Register, xn: Register) -> T {
+    fn caspl_64(
+        &mut self,
+        xs1: Register,
+        xs2: Register,
+        xt1: Register,
+        xt2: Register,
+        xn: Register,
+    ) -> T {
         debug_assert!(xs1 % 2 == 0, "xs1 must be even");
-        debug_assert!(xs2 == xs1 + 1, "xs2 must be the consecutive register of xs1");
+        debug_assert!(
+            xs2 == xs1 + 1,
+            "xs2 must be the consecutive register of xs1"
+        );
         debug_assert!(xt1 % 2 == 0, "xt1 must be even");
-        debug_assert!(xt2 == xt1 + 1, "xt2 must be the consecutive register of xt1");
+        debug_assert!(
+            xt2 == xt1 + 1,
+            "xt2 must be the consecutive register of xt1"
+        );
 
         emit_casp_x(self, 1, 0, xs1, 1, xn, xt1)
     }
@@ -162,12 +271,13 @@ pub trait CompareAndSwapPair<T>: InstructionProcessor<T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::mc_memory::MockMemory;
     use crate::instruction_emitter::MockEmitter;
-    use crate::{stream_mock, assert_panic};
+    use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::MockMemory;
     use crate::types::InstructionPointer;
+    use crate::{assert_panic, stream_mock};
 
+    use super::*;
 
     #[test]
     fn test_casp() {
@@ -177,7 +287,6 @@ mod tests {
 
             let instr = stream.casp_64(0, 1, 4, 5, 0);
             assert_eq!(instr.to_string(), "casp x0, x1, x4, x5, [x0]");
-
 
             // panic 32
             assert_panic!("Should panic because of odd ws1"; {
@@ -193,7 +302,6 @@ mod tests {
                 stream.casp_32(0, 2, 4, 6, 0)
             });
 
-
             // panic 64
             assert_panic!("Should panic because of odd ws1"; {
                 stream.casp_64(1, 2, 4, 5, 0)
@@ -207,7 +315,6 @@ mod tests {
             assert_panic!("Should panic because wt2 not wt1+1 "; {
                 stream.casp_64(0, 2, 4, 6, 0)
             });
-
         });
     }
 
@@ -219,7 +326,6 @@ mod tests {
 
             let instr = stream.caspa_64(0, 1, 4, 5, 0);
             assert_eq!(instr.to_string(), "caspa x0, x1, x4, x5, [x0]");
-
 
             // panic 32
             assert_panic!("Should panic because of odd ws1"; {
@@ -234,7 +340,6 @@ mod tests {
             assert_panic!("Should panic because wt2 not wt1+1 "; {
                 stream.caspa_32(0, 2, 4, 6, 0)
             });
-
 
             // panic 64
             assert_panic!("Should panic because of odd ws1"; {
@@ -261,7 +366,6 @@ mod tests {
             let instr = stream.caspal_64(0, 1, 4, 5, 0);
             assert_eq!(instr.to_string(), "caspal x0, x1, x4, x5, [x0]");
 
-
             // panic 32
             assert_panic!("Should panic because of odd ws1"; {
                 stream.caspal_32(1, 2, 4, 5, 0)
@@ -275,7 +379,6 @@ mod tests {
             assert_panic!("Should panic because wt2 not wt1+1 "; {
                 stream.caspal_32(0, 2, 4, 6, 0)
             });
-
 
             // panic 64
             assert_panic!("Should panic because of odd ws1"; {
@@ -302,7 +405,6 @@ mod tests {
             let instr = stream.caspl_64(0, 1, 4, 5, 0);
             assert_eq!(instr.to_string(), "caspl x0, x1, x4, x5, [x0]");
 
-
             // panic 32
             assert_panic!("Should panic because of odd ws1"; {
                 stream.caspl_32(1, 2, 4, 5, 0)
@@ -316,7 +418,6 @@ mod tests {
             assert_panic!("Should panic because wt2 not wt1+1 "; {
                 stream.caspl_32(0, 2, 4, 6, 0)
             });
-
 
             // panic 64
             assert_panic!("Should panic because of odd ws1"; {

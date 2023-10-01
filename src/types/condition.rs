@@ -1,6 +1,7 @@
+use Condition::*;
+
 use crate::types::encodable::Encodable;
 use crate::types::UImm4;
-use Condition::*;
 
 pub enum Condition {
     EQ,
@@ -48,13 +49,14 @@ impl Encodable<UImm4> for Condition {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::mc_memory::MockMemory;
     use crate::instruction_emitter::MockEmitter;
-    use crate::{stream_mock};
-    use crate::types::InstructionPointer;
-    use crate::instruction_stream::InstrStream;
     use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediateWithAddress;
+    use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::MockMemory;
+    use crate::stream_mock;
+    use crate::types::InstructionPointer;
+
+    use super::*;
 
     #[test]
     fn test_condition_encodings() {
@@ -112,8 +114,6 @@ mod tests {
 
             let instr = stream.b_cond_to_addr(NV, 0x0);
             assert_eq!(instr.to_string(), "b.nv 0x0");
-
         })
     }
 }
-

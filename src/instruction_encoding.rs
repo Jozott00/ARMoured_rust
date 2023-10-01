@@ -1,11 +1,5 @@
 //! Implementation of the ARM64 instruction set encodings
 
-pub mod branch_exception_system;
-pub mod common_aliases;
-pub mod data_proc_imm;
-pub mod data_proc_reg;
-pub mod loads_and_stores;
-
 use crate::instruction_encoding::branch_exception_system::{
     BranchExceptionSystem, BranchExceptionSystemWithAddress,
 };
@@ -16,6 +10,12 @@ use crate::instruction_encoding::data_proc_imm::{
 use crate::instruction_encoding::data_proc_reg::DataProcessingRegister;
 use crate::instruction_encoding::loads_and_stores::{LoadsAndStores, LoadsAndStoresWithAddress};
 use crate::types::{Instruction, Offset32};
+
+pub mod branch_exception_system;
+pub mod common_aliases;
+pub mod data_proc_imm;
+pub mod data_proc_reg;
+pub mod loads_and_stores;
 
 pub trait InstructionProcessor<T>: Sized {
     /// Processes the encoded instruction
@@ -54,6 +54,6 @@ pub trait InstructionSetWithAddress<T>:
 {
 }
 
-mod Constants {
+mod constants {
     pub const LOG2_TAG_GRANULE: u8 = 4u8;
 }

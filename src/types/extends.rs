@@ -1,4 +1,5 @@
 use std::fmt::{Display, Formatter};
+
 use crate::types::type_creation_macro::make_enum;
 use crate::types::UImm3;
 
@@ -25,7 +26,7 @@ impl From<UImm3> for RegExtend {
             0b101 => RegExtend::SXTH,
             0b110 => RegExtend::SXTW,
             0b111 => RegExtend::SXTX,
-            _ => panic!("wrong encoding for extend, was {value:#b}")
+            _ => panic!("wrong encoding for extend, was {value:#b}"),
         }
     }
 }
@@ -45,7 +46,6 @@ impl From<RegExtend> for u8 {
     }
 }
 
-
 impl Display for RegExtend {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -61,4 +61,7 @@ impl Display for RegExtend {
     }
 }
 
-make_enum!(RegExtendLSL, [(UXTW, 0b010), (LSL, 0b011), (SXTW, 0b110), (SXTX, 0b111)]);
+make_enum!(
+    RegExtendLSL,
+    [(UXTW, 0b010), (LSL, 0b011), (SXTW, 0b110), (SXTX, 0b111)]
+);

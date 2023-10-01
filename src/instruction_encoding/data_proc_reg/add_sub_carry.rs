@@ -6,14 +6,21 @@
 //!  - [SBC - Subtract with Carry](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SBC--Subtract-with-Carry-?lang=en)
 //!  - [SBCS - Subtract with Carry - setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SBCS--Subtract-with-Carry--setting-flags-?lang=en)
 
-
-
 use bit_seq::bseq_32;
-use crate::types::Register;
+
 use crate::instruction_encoding::InstructionProcessor;
+use crate::types::Register;
 
 #[inline(always)]
-fn emit_add_sub_carry<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op: u8, s: u8, rm: Register, rn: Register, rd: Register) -> T {
+fn emit_add_sub_carry<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: u8,
+    op: u8,
+    s: u8,
+    rm: Register,
+    rn: Register,
+    rd: Register,
+) -> T {
     let i = bseq_32!(sf:1 op:1 s:1 11010000 rm:5 0:6 rn:5 rd:5);
     proc.process(i)
 }
@@ -38,7 +45,6 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
         emit_add_sub_carry(self, 0, 0, 0, wm, wn, wd)
     }
 
-
     /// [ADC - Add with Carry](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADC--Add-with-Carry-?lang=en)
     ///
     /// Add with Carry adds two register values and the Carry flag value, and writes the result to the destination register.
@@ -51,7 +57,6 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
         emit_add_sub_carry(self, 1, 0, 0, xm, xn, xd)
     }
 
-
     /// [ADCS - Add with Carry - setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADCS--Add-with-Carry--setting-flags-?lang=en)
     ///
     /// Add with Carry, setting flags, adds two register values and the Carry flag value, and writes the result to the destination register. It updates the condition flags based on the result.
@@ -63,7 +68,6 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     fn adcs_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         emit_add_sub_carry(self, 0, 0, 1, wm, wn, wd)
     }
-
 
     /// [ADCS - Add with Carry - setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADCS--Add-with-Carry--setting-flags-?lang=en)
     ///
@@ -91,7 +95,6 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
         emit_add_sub_carry(self, 0, 1, 0, wm, wn, wd)
     }
 
-
     /// [SBC - Subtract with Carry](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SBC--Subtract-with-Carry-?lang=en)
     ///
     /// Subtract with Carry subtracts a register value and the value of NOT (Carry flag) from a register value, and writes the result to the destination register.
@@ -106,7 +109,6 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
         emit_add_sub_carry(self, 1, 1, 0, xm, xn, xd)
     }
 
-
     /// [SBCS - Subtract with Carry - setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SBCS--Subtract-with-Carry--setting-flags-?lang=en)
     ///
     /// Subtract with Carry, setting flags, subtracts a register value and the value of NOT (Carry flag) from a register value, and writes the result to the destination register. It updates the condition flags based on the result.
@@ -120,7 +122,6 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     fn sbcs_32(&mut self, wd: Register, wn: Register, wm: Register) -> T {
         emit_add_sub_carry(self, 0, 1, 1, wm, wn, wd)
     }
-
 
     /// [SBCS - Subtract with Carry - setting flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SBCS--Subtract-with-Carry--setting-flags-?lang=en)
     ///
@@ -137,10 +138,10 @@ pub trait AddSubtractWithCarry<T>: InstructionProcessor<T> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]

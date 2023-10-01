@@ -4,43 +4,59 @@
 //! - LDRSW \<Xt>, \<imm32> - offset instead of label
 //! - LDRSW \<Xt>, \<imm32> - addr instead of label
 
-use bit_seq::{bseq_32};
-use crate::instruction_emitter::Emitter;
-use crate::instruction_encoding::{AddressableInstructionProcessor, InstructionProcessor};
-use crate::instruction_stream::InstrStream;
-use crate::mc_memory::Memory;
-use crate::types::instruction::Instr;
-use crate::types::{Imm6, Imm9, Offset32, Register, UImm12, UImm5};
-use crate::types::prefetch_memory::PrfOp;
+use bit_seq::bseq_32;
 
+use crate::instruction_encoding::{AddressableInstructionProcessor, InstructionProcessor};
+use crate::types::prefetch_memory::PrfOp;
+use crate::types::{Offset32, Register, UImm5};
 
 // Helper function -> Actual emits
 
 /// Encodes and emits an instruction for Load Register(LDR) using its parameters.
 #[inline(always)]
-fn emit_ldr_x<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, V: u8, imm19: u32, rt: Register) -> T {
-    let r = bseq_32!(opc:2 011 V:1 00 imm19:19 rt:5);
+fn emit_ldr_x<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    opc: u8,
+    v: u8,
+    imm19: u32,
+    rt: Register,
+) -> T {
+    let r = bseq_32!(opc:2 011 v:1 00 imm19:19 rt:5);
     proc.process(r)
 }
 
 /// Uses the provided offset to calculate the immediate for the LDR instruction and then calls emit_ldr_x to encode and emit the instruction.
 #[inline(always)]
-fn emit_ldr_x_offset<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, V: u8, offset: Offset32, rt: Register) -> T {
-    debug_assert!(-(1 << 20) <= offset && offset < (1 << 20), "Offset must be within ±1MB");
+fn emit_ldr_x_offset<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    opc: u8,
+    v: u8,
+    offset: Offset32,
+    rt: Register,
+) -> T {
+    debug_assert!(
+        -(1 << 20) <= offset && offset < (1 << 20),
+        "Offset must be within ±1MB"
+    );
     debug_assert!(offset % 4 == 0, "Offset must be a multiply of 4!");
     let imm19 = offset / 4;
-    emit_ldr_x(proc, opc, V, imm19 as u32, rt)
+    emit_ldr_x(proc, opc, v, imm19 as u32, rt)
 }
 
 /// Calculates the offset from the program counter to the provided address, and then calls emit_ldr_x_offset to encode and emit the instruction.
 #[inline(always)]
-fn emit_ldr_x_addr<P: AddressableInstructionProcessor<T>, T>(proc: &mut P, opc: u8, V: u8, addr: usize, rt: Register) -> T {
+fn emit_ldr_x_addr<P: AddressableInstructionProcessor<T>, T>(
+    proc: &mut P,
+    opc: u8,
+    v: u8,
+    addr: usize,
+    rt: Register,
+) -> T {
     debug_assert!(addr % 4 == 0, "Addr must be 4 byte aligned!");
 
     let offset = proc.intr_ptr_offset_to(addr);
-    emit_ldr_x_offset(proc, opc, V, offset, rt)
+    emit_ldr_x_offset(proc, opc, v, offset, rt)
 }
-
 
 // TODO: implement with label as soon as labels supported
 pub trait LoadRegisterLiteral<T>: InstructionProcessor<T> {
@@ -101,8 +117,9 @@ pub trait LoadRegisterLiteral<T>: InstructionProcessor<T> {
     }
 }
 
-pub trait LoadRegisterLiteralWithAddress<T>: LoadRegisterLiteral<T> + AddressableInstructionProcessor<T> {
-
+pub trait LoadRegisterLiteralWithAddress<T>:
+    LoadRegisterLiteral<T> + AddressableInstructionProcessor<T>
+{
     // LDRSW (literal)
 
     /// Emits an LDRSW (Load Register Signed Word) instruction with a literal from the program counter to a provided address.
@@ -112,7 +129,6 @@ pub trait LoadRegisterLiteralWithAddress<T>: LoadRegisterLiteral<T> + Addressabl
     }
 
     // PRFM (literal)
-
 
     /// Emits a PRFM (Prefetch Memory) instruction using a provided prefetch operation and an address.
     #[inline(always)]
@@ -166,14 +182,16 @@ pub trait LoadRegisterLiteralWithAddress<T>: LoadRegisterLiteral<T> + Addressabl
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::mc_memory::MockMemory;
     use crate::instruction_emitter::MockEmitter;
-    use crate::{stream_mock, assert_panic};
-    use crate::types::InstructionPointer;
+    use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::MockMemory;
     use crate::types::prefetch_memory::PrfPolicy::{KEEP, STRM};
     use crate::types::prefetch_memory::PrfTarget::{L1, L2};
     use crate::types::prefetch_memory::PrfType::{PLD, PLI};
+    use crate::types::InstructionPointer;
+    use crate::{assert_panic, stream_mock};
+
+    use super::*;
 
     #[test]
     fn test_ldrsw_pc_rel_from_x() {
@@ -181,7 +199,7 @@ mod tests {
             let instr = stream.ldrsw_pc_rel_from_byte_offset(0, -(1 << 20));
             assert_eq!(instr.to_string(), "ldrsw x0, 0xfffffffffff00000");
 
-            let instr = stream.ldrsw_pc_rel_from_addr(0, (1 << 20)-4);
+            let instr = stream.ldrsw_pc_rel_from_addr(0, (1 << 20) - 4);
             assert_eq!(instr.to_string(), "ldrsw x0, 0xffffc");
         })
     }
@@ -194,7 +212,7 @@ mod tests {
             assert_eq!(instr.to_string(), "prfm pldl1keep, 0xfffffffffff00000");
 
             let prfop = PrfOp(PLI, L2, STRM);
-            let instr = stream.prfm_pc_rel_prfop_from_addr(prfop, (1 << 20)-4);
+            let instr = stream.prfm_pc_rel_prfop_from_addr(prfop, (1 << 20) - 4);
             assert_eq!(instr.to_string(), "prfm plil2strm, 0xffffc");
         })
     }
@@ -251,7 +269,7 @@ mod tests {
             let instr = stream.ldr_32_pc_rel_from_addr(0, 0x20);
             assert_eq!(instr.to_string(), "ldr w0, 0x20");
 
-            let instr = stream.ldr_64_pc_rel_from_addr(0, (1 << 20)-4);
+            let instr = stream.ldr_64_pc_rel_from_addr(0, (1 << 20) - 4);
             assert_eq!(instr.to_string(), "ldr x0, 0xffffc");
 
             assert_panic!("Should panic: addr not aligned"; {
@@ -261,7 +279,6 @@ mod tests {
             assert_panic!("Should panic: offset not withing 1MB"; {
                 stream.ldr_32_pc_rel_from_addr(0, 1 << 20);
             });
-
         })
     }
 
@@ -285,10 +302,10 @@ mod tests {
             let instr = stream.ldr_32_simd_pc_rel_from_addr(0, 0x20);
             assert_eq!(instr.to_string(), "ldr s0, 0x20");
 
-            let instr = stream.ldr_64_simd_pc_rel_from_addr(0, (1 << 20)-4);
+            let instr = stream.ldr_64_simd_pc_rel_from_addr(0, (1 << 20) - 4);
             assert_eq!(instr.to_string(), "ldr d0, 0xffffc");
 
-            let instr = stream.ldr_128_simd_pc_rel_from_addr(0, (1 << 20)-4);
+            let instr = stream.ldr_128_simd_pc_rel_from_addr(0, (1 << 20) - 4);
             assert_eq!(instr.to_string(), "ldr q0, 0xffffc");
 
             assert_panic!("Should panic: addr not aligned"; {
@@ -298,7 +315,6 @@ mod tests {
             assert_panic!("Should panic: offset not withing 1MB"; {
                 stream.ldr_32_simd_pc_rel_from_addr(0, 1 << 20);
             });
-
         })
     }
 }

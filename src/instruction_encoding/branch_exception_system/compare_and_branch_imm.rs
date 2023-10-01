@@ -4,9 +4,10 @@
 //!  - [CBZ - Compare and Branch on Zero](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CBZ--Compare-and-Branch-on-Zero-?lang=en)
 //!  - [CBNZ - Compare and Branch on Nonzero](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CBNZ--Compare-and-Branch-on-Nonzero-?lang=en)
 
-use crate::instruction_encoding::{AddressableInstructionProcessor, InstructionProcessor};
-use crate::types::{Imm19, Offset32, Register, UImm1, UImm19, UImm4};
 use bit_seq::bseq_32;
+
+use crate::instruction_encoding::{AddressableInstructionProcessor, InstructionProcessor};
+use crate::types::{Imm19, Offset32, Register, UImm1};
 
 #[inline(always)]
 fn emit_cmp_branch_imm<P: InstructionProcessor<T>, T>(
@@ -170,12 +171,13 @@ pub trait CompareAndBranchImmWithAddress<T>: AddressableInstructionProcessor<T> 
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::{assert_panic, stream_mock};
     use crate::instruction_emitter::MockEmitter;
     use crate::instruction_stream::InstrStream;
     use crate::mc_memory::MockMemory;
     use crate::types::InstructionPointer;
-    use crate::{assert_panic, stream_mock};
+
+    use super::*;
 
     #[test]
     fn test_cbz_x() {

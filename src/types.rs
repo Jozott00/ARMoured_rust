@@ -2,7 +2,7 @@ use crate::types::HW::{LSL0, LSL16, LSL32, LSL48};
 
 mod type_creation_macro;
 
-pub mod ArrSpecifier;
+pub mod arr_specifier;
 pub mod bitmask_immediate;
 pub mod condition;
 pub mod encodable;

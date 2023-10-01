@@ -11,15 +11,20 @@
 //!  - [LDAPUR - Load Acquire RCpc Register - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPUR--Load-Acquire-RCpc-Register--unscaled--?lang=en)
 //!  - [LDAPURSW - Load Acquire RCpc Register Signed Word - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPURSW--Load-Acquire-RCpc-Register-Signed-Word--unscaled--?lang=en)
 
-
-
 use bit_seq::bseq_32;
+
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::{Imm9, Register};
 
-
 #[inline(always)]
-fn emit_ld_st_instr<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, opc: u8, imm9: u16, rn: Register, rt: Register) -> T {
+fn emit_ld_st_instr<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    size: u8,
+    opc: u8,
+    imm9: u16,
+    rn: Register,
+    rt: Register,
+) -> T {
     let r = bseq_32!(size:2 011001 opc:2 0 imm9:9 00 rn:5 rt:5);
     proc.process(r)
 }
@@ -51,7 +56,6 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
         emit_ld_st_instr(self, 0, 0, simm as u16, xn_sp, wt)
     }
 
-
     /// [LDAPURB - Load Acquire RCpc Register Byte - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPURB--Load-Acquire-RCpc-Register-Byte--unscaled--?lang=en)
     ///
     /// Load-Acquire RCpc Register Byte (unscaled) calculates an address from a base register and an immediate offset, loads a byte from memory, zero-extends it, and writes it to a register.
@@ -65,7 +69,6 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
     fn ldapurb(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
         emit_ld_st_instr(self, 0b00, 0b01, simm as u16, xn_sp, wt)
     }
-
 
     /// [LDAPURSB - Load Acquire RCpc Register Signed Byte - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPURSB--Load-Acquire-RCpc-Register-Signed-Byte--unscaled--?lang=en)
     ///
@@ -81,7 +84,6 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
         emit_ld_st_instr(self, 0b00, 0b11, simm as u16, xn_sp, wt)
     }
 
-
     /// [LDAPURSB - Load Acquire RCpc Register Signed Byte - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPURSB--Load-Acquire-RCpc-Register-Signed-Byte--unscaled--?lang=en)
     ///
     /// Load-Acquire RCpc Register Signed Byte (unscaled) calculates an address from a base register and an immediate offset, loads a signed byte from memory, sign-extends it, and writes it to a register.
@@ -95,7 +97,6 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
     fn ldapursb_64(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> T {
         emit_ld_st_instr(self, 0b00, 0b10, simm as u16, xn_sp, xt)
     }
-
 
     /// [STLURH - Store Release Register Halfword - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLURH--Store-Release-Register-Halfword--unscaled--?lang=en)
     ///
@@ -111,7 +112,6 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
         emit_ld_st_instr(self, 0b01, 0b00, simm as u16, xn_sp, wt)
     }
 
-
     /// [LDAPURH - Load Acquire RCpc Register Halfword - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPURH--Load-Acquire-RCpc-Register-Halfword--unscaled--?lang=en)
     ///
     /// Load-Acquire RCpc Register Halfword (unscaled) calculates an address from a base register and an immediate offset, loads a halfword from memory, zero-extends it, and writes it to a register.
@@ -126,7 +126,6 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
         emit_ld_st_instr(self, 0b01, 0b01, simm as u16, xn_sp, wt)
     }
 
-
     /// [LDAPURSH - Load Acquire RCpc Register Signed Halfword - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPURSH--Load-Acquire-RCpc-Register-Signed-Halfword--unscaled--?lang=en)
     ///
     /// Load-Acquire RCpc Register Signed Halfword (unscaled) calculates an address from a base register and an immediate offset, loads a signed halfword from memory, sign-extends it, and writes it to a register.
@@ -136,12 +135,11 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
     /// ```asm
     /// LDAPURSH <Wt>, [<Xn|SP>{, #<simm>}]
     /// ```
-    #[inline(always)]
+
     #[inline(always)]
     fn ldapursh_32(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
         emit_ld_st_instr(self, 0b01, 0b11, simm as u16, xn_sp, wt)
     }
-
 
     /// [LDAPURSH - Load Acquire RCpc Register Signed Halfword - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPURSH--Load-Acquire-RCpc-Register-Signed-Halfword--unscaled--?lang=en)
     ///
@@ -157,7 +155,6 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
         emit_ld_st_instr(self, 0b01, 0b10, simm as u16, xn_sp, xt)
     }
 
-
     /// [STLUR - Store Release Register - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLUR--Store-Release-Register--unscaled--?lang=en)
     ///
     /// Store-Release Register (unscaled) calculates an address from a base register value and an immediate offset, and stores a 32-bit word or a 64-bit doubleword to the calculated address, from a register.
@@ -171,7 +168,6 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
     fn stlur_32(&mut self, wt: Register, xn_sp: Register, simm: Imm9) -> T {
         emit_ld_st_instr(self, 0b10, 0b00, simm as u16, xn_sp, wt)
     }
-
 
     /// [STLUR - Store Release Register - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/STLUR--Store-Release-Register--unscaled--?lang=en)
     ///
@@ -187,7 +183,6 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
         emit_ld_st_instr(self, 0b11, 0b00, simm as u16, xn_sp, xt)
     }
 
-
     /// [LDAPUR - Load Acquire RCpc Register - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPUR--Load-Acquire-RCpc-Register--unscaled--?lang=en)
     ///
     /// Load-Acquire RCpc Register (unscaled) calculates an address from a base register and an immediate offset, loads a 32-bit word or 64-bit doubleword from memory, zero-extends it, and writes it to a register.
@@ -202,7 +197,6 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
         emit_ld_st_instr(self, 0b10, 0b01, simm as u16, xn_sp, wt)
     }
 
-
     /// [LDAPUR - Load Acquire RCpc Register - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPUR--Load-Acquire-RCpc-Register--unscaled--?lang=en)
     ///
     /// Load-Acquire RCpc Register (unscaled) calculates an address from a base register and an immediate offset, loads a 32-bit word or 64-bit doubleword from memory, zero-extends it, and writes it to a register.
@@ -216,7 +210,6 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
     fn ldapur_64(&mut self, xt: Register, xn_sp: Register, simm: Imm9) -> T {
         emit_ld_st_instr(self, 0b11, 0b01, simm as u16, xn_sp, xt)
     }
-
 
     /// [LDAPURSW - Load Acquire RCpc Register Signed Word - unscaled - ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPURSW--Load-Acquire-RCpc-Register-Signed-Word--unscaled--?lang=en)
     ///
@@ -233,11 +226,10 @@ pub trait LdaprStlrUnscaleImmediate<T>: InstructionProcessor<T> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use crate::assert_panic;
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]

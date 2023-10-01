@@ -6,7 +6,6 @@ use libc::{MAP_ANON, MAP_PRIVATE, PROT_READ, PROT_WRITE};
 #[cfg(test)]
 use mockall::automock;
 
-
 #[cfg_attr(test, automock)]
 pub trait Memory {
     fn make_executable(&mut self);
@@ -31,7 +30,9 @@ pub struct McMemory {
 
 impl Drop for McMemory {
     fn drop(&mut self) {
-        unsafe { libc::munmap(self.addr, self.len); }
+        unsafe {
+            libc::munmap(self.addr, self.len);
+        }
     }
 }
 

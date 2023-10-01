@@ -1,12 +1,11 @@
-use std::{mem, ptr};
 use std::mem::size_of;
+use std::ptr;
 
 #[cfg(test)]
 use mockall::automock;
 
-use crate::mc_memory::{McMemory, Memory};
+use crate::mc_memory::Memory;
 use crate::types::{Instruction, InstructionPointer};
-
 
 // TODO: write documentation
 #[cfg_attr(test, automock)]
@@ -39,7 +38,8 @@ impl Emitter for InstrEmitter {
     fn emit(&mut self, instr: Instruction) {
         debug_assert!(
             self.in_bound(),
-            "Memory out of bound! Emitting an instruction would write out of memory bounds.");
+            "Memory out of bound! Emitting an instruction would write out of memory bounds."
+        );
 
         unsafe {
             ptr::write(self.iptr, instr);
@@ -51,7 +51,9 @@ impl Emitter for InstrEmitter {
         self.base_ptr
     }
 
-    fn instr_ptr(&self) -> InstructionPointer { self.iptr }
+    fn instr_ptr(&self) -> InstructionPointer {
+        self.iptr
+    }
 
     fn set_instr_ptr(&mut self, iptr: InstructionPointer) {
         self.iptr = iptr;

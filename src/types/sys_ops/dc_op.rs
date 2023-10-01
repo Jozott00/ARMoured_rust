@@ -32,7 +32,6 @@ pub enum DcOp {
     CIGDVAC,
 }
 
-
 impl Encodable<(u8, u8, u8)> for DcOp {
     fn encode(&self) -> (u8, u8, u8) {
         match self {

@@ -14,25 +14,29 @@
 //! - [TLBI](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/TLBI--TLB-Invalidate-operation--an-alias-of-SYS-?lang=en)
 
 use bit_seq::{bseq_32, bseq_8};
-use crate::instruction_emitter::Emitter;
+
 use crate::instruction_encoding::InstructionProcessor;
-use crate::instruction_stream::InstrStream;
-use crate::mc_memory::Memory;
-use crate::types::instruction::Instr;
-use crate::types::{Register, UImm16, UImm3, UImm4};
+use crate::types::{Register, UImm3, UImm4};
 use crate::types::encodable::Encodable;
 use crate::types::sys_ops::at_op::AtOp;
 use crate::types::sys_ops::dc_op::DcOp;
 use crate::types::sys_ops::ic_op::IcOp;
 
 #[inline(always)]
-fn emit_system_instruction<P: InstructionProcessor<T>, T>(proc: &mut P, l: u8, op1: u8, crn: u8, crm: u8, op2: u8, rt: Register) -> T {
+fn emit_system_instruction<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    l: u8,
+    op1: u8,
+    crn: u8,
+    crm: u8,
+    op2: u8,
+    rt: Register,
+) -> T {
     let i = bseq_32!(1101010100 l:1 01 op1:3 crn:4 crm:4 op2:3 rt:5);
     proc.process(i)
 }
 
 pub trait SystemInstructions<T>: InstructionProcessor<T> {
-
     // instructions
 
     /// [SYS - System instruction](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SYS--System-instruction-?lang=en)
@@ -56,7 +60,6 @@ pub trait SystemInstructions<T>: InstructionProcessor<T> {
     }
 
     // aliases
-
 
     /// [AT](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AT--Address-Translate--an-alias-of-SYS-?lang=en)
     ///
@@ -129,11 +132,13 @@ pub trait SystemInstructions<T>: InstructionProcessor<T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::mc_memory::MockMemory;
     use crate::instruction_emitter::MockEmitter;
-    use crate::{stream_mock};
+    use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::MockMemory;
+    use crate::stream_mock;
     use crate::types::InstructionPointer;
+
+    use super::*;
 
     #[test]
     fn test_sys() {

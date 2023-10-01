@@ -6,27 +6,33 @@
 //! - [UBFM](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/UBFM--Unsigned-Bitfield-Move-?lang=en)
 
 use bit_seq::bseq_32;
-use crate::instruction_emitter::Emitter;
-use crate::instruction_encoding::InstructionProcessor;
-use crate::instruction_stream::InstrStream;
-use crate::mc_memory::Memory;
-use crate::types::{UImm6, Register};
 
+use crate::instruction_encoding::InstructionProcessor;
+use crate::types::{Register, UImm6};
 
 /// Generates the base instruction for a bitfield operation.
-/// `sf`, `opc`, `N`, `immr`, `imms`, `rn`, and `rd` parameters are used to construct the instruction.
+/// `sf`, `opc`, `n`, `immr`, `imms`, `rn`, and `rd` parameters are used to construct the instruction.
 /// Note that the details of the instruction encoding should be checked with the ARM documentation.
 #[inline(always)]
-fn emit_bitfield<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, opc: u8, N: u8, immr: UImm6, imms: UImm6, rn: Register, rd: Register) -> T {
+fn emit_bitfield<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: u8,
+    opc: u8,
+    n: u8,
+    immr: UImm6,
+    imms: UImm6,
+    rn: Register,
+    rd: Register,
+) -> T {
     if sf == 1 {
-        debug_assert!(0 <= immr && immr <= 63, "Immr can only be in range of 0 to 63");
-        debug_assert!(0 <= imms && imms <= 63, "Immr can only be in range of 0 to 63");
+        debug_assert!(immr <= 63, "Immr can only be in range of 0 to 63");
+        debug_assert!(imms <= 63, "Immr can only be in range of 0 to 63");
     } else {
-        debug_assert!(0 <= immr && immr <= 31, "Immr can only be in range of 0 to 31");
-        debug_assert!(0 <= imms && imms <= 31, "Immr can only be in range of 0 to 31");
+        debug_assert!(immr <= 31, "Immr can only be in range of 0 to 31");
+        debug_assert!(imms <= 31, "Immr can only be in range of 0 to 31");
     }
 
-    let r = bseq_32!(sf:1 opc:2 100110 N:1 immr:6 imms:6 rn:5 rd:5);
+    let r = bseq_32!(sf:1 opc:2 100110 n:1 immr:6 imms:6 rn:5 rd:5);
     proc.process(r)
 }
 
@@ -123,6 +129,7 @@ pub trait BitfieldInstructions<T>: InstructionProcessor<T> {
 mod tests {
     use crate::assert_panic;
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]

@@ -6,12 +6,10 @@
 //! - [EOR](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/EOR--immediate---Bitwise-Exclusive-OR--immediate--?lang=en)
 //! - [ANDS](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ANDS--immediate---Bitwise-AND--immediate---setting-flags-?lang=en)
 
-use bit_seq::{bseq_32, bseq_64, bseq_8};
-use crate::instruction_emitter::Emitter;
+use bit_seq::{bseq_32, bseq_64};
+
 use crate::instruction_encoding::InstructionProcessor;
-use crate::instruction_stream::InstrStream;
-use crate::mc_memory::Memory;
-use crate::types::{Imm12, Imm13, Imm32, Imm6, Imm64, Register, UImm32, UImm64};
+use crate::types::{Register, UImm32, UImm64};
 use crate::types::bitmask_immediate::BitmaskImmediate;
 
 /// Encodes and emits a logical instruction with an immediate value.
@@ -25,7 +23,14 @@ use crate::types::bitmask_immediate::BitmaskImmediate;
 /// * `rn` - The source register.
 /// * `rd` - The destination register, where the result of the operation will be stored.
 #[inline(always)]
-fn emit_logical_imm<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, opc: u8, bit_mask: &BitmaskImmediate, rn: Register, rd: Register) -> T {
+fn emit_logical_imm<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: u8,
+    opc: u8,
+    bit_mask: &BitmaskImmediate,
+    rn: Register,
+    rd: Register,
+) -> T {
     let nrs_mask = bit_mask.as_u16();
     let r = bseq_32!(sf:1 opc:2 100100 nrs_mask:13 rn:5 rd:5);
     proc.process(r)
@@ -231,11 +236,10 @@ pub trait LogicalImmediate<T>: InstructionProcessor<T> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use crate::assert_panic;
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]

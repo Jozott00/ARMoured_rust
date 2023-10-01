@@ -1,3 +1,5 @@
+use bad64::decode;
+
 use crate::instruction_encoding::branch_exception_system::barriers::Barriers;
 use crate::instruction_encoding::branch_exception_system::compare_and_branch_imm::CompareAndBranchImm;
 use crate::instruction_encoding::branch_exception_system::conditional_branch_imm::ConditionalBranchImmediate;
@@ -56,13 +58,13 @@ use crate::instruction_encoding::loads_and_stores::memory_copy_and_memory_set::M
 use crate::instruction_encoding::loads_and_stores::LoadsAndStores;
 use crate::instruction_encoding::{InstructionProcessor, InstructionSet};
 use crate::types::Instruction;
-use bad64::decode;
 
 type InstrRes = String;
 
 pub struct TestProducer {}
 
 impl TestProducer {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         TestProducer {}
     }

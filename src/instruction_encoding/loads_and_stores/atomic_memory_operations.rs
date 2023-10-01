@@ -36,17 +36,29 @@
 //!  - [ST64B - Single copy Atomic 64 byte Store without Return](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ST64B--Single-copy-Atomic-64-byte-Store-without-Return-?lang=en)
 //!  - [LD64B - Single copy Atomic 64 byte Load](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LD64B--Single-copy-Atomic-64-byte-Load-?lang=en)
 
-use bit_seq::bseq_32;
 use crate::instruction_encoding::InstructionProcessor;
+#[allow(unused_imports)]
 use crate::types::Register;
+#[allow(unused_imports)]
+use bit_seq::bseq_32;
 
 #[inline(always)]
 #[cfg(feature = "arm_feat_lse")]
-fn emit_atomic_mem_op<P: InstructionProcessor<T>, T>(proc: &mut P, size: u8, v: u8, a: u8, r: u8, rs: Register, o3: u8, opc: u8, rn: Register, rt: Register) -> T {
+fn emit_atomic_mem_op<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    size: u8,
+    v: u8,
+    a: u8,
+    r: u8,
+    rs: Register,
+    o3: u8,
+    opc: u8,
+    rn: Register,
+    rt: Register,
+) -> T {
     let r = bseq_32!(size:2 111 v:1 00 a:1 r:1 1 rs:5 o3:1 opc:3 00 rn:5 rt:5);
     proc.process(r)
 }
-
 
 /// # [Atomic memory operations](https://developer.arm.com/documentation/ddi0596/2021-12/Index-by-Encoding/Loads-and-Stores?lang=en#memop)
 ///
@@ -101,7 +113,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 1, 0, ws, 0, 0, xn_sp, wt)
     }
 
-
     /// [LDADDALB - Atomic add on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADDB--LDADDAB--LDADDALB--LDADDLB--Atomic-add-on-byte-in-memory-?lang=en)
     ///
     /// Atomic add on byte in memory atomically loads an 8-bit byte from memory, adds the value held in a register to it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -116,7 +127,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldaddalb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 1, 1, ws, 0, 0, xn_sp, wt)
     }
-
 
     /// [LDADDB - Atomic add on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADDB--LDADDAB--LDADDALB--LDADDLB--Atomic-add-on-byte-in-memory-?lang=en)
     ///
@@ -133,7 +143,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 0, 0, ws, 0, 0, xn_sp, wt)
     }
 
-
     /// [LDADDLB - Atomic add on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADDB--LDADDAB--LDADDALB--LDADDLB--Atomic-add-on-byte-in-memory-?lang=en)
     ///
     /// Atomic add on byte in memory atomically loads an 8-bit byte from memory, adds the value held in a register to it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -148,7 +157,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldaddlb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 0, 1, ws, 0, 0, xn_sp, wt)
     }
-
 
     /// [LDCLRAB - Atomic bit clear on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLRB--LDCLRAB--LDCLRALB--LDCLRLB--Atomic-bit-clear-on-byte-in-memory-?lang=en)
     ///
@@ -165,7 +173,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 1, 0, ws, 0, 1, xn_sp, wt)
     }
 
-
     /// [LDCLRALB - Atomic bit clear on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLRB--LDCLRAB--LDCLRALB--LDCLRLB--Atomic-bit-clear-on-byte-in-memory-?lang=en)
     ///
     /// Atomic bit clear on byte in memory atomically loads an 8-bit byte from memory, performs a bitwise AND with the complement of the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -180,7 +187,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldclralb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 1, 1, ws, 0, 1, xn_sp, wt)
     }
-
 
     /// [LDCLRB - Atomic bit clear on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLRB--LDCLRAB--LDCLRALB--LDCLRLB--Atomic-bit-clear-on-byte-in-memory-?lang=en)
     ///
@@ -197,7 +203,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 0, 0, ws, 0, 1, xn_sp, wt)
     }
 
-
     /// [LDCLRLB - Atomic bit clear on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLRB--LDCLRAB--LDCLRALB--LDCLRLB--Atomic-bit-clear-on-byte-in-memory-?lang=en)
     ///
     /// Atomic bit clear on byte in memory atomically loads an 8-bit byte from memory, performs a bitwise AND with the complement of the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -212,7 +217,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldclrlb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 0, 1, ws, 0, 1, xn_sp, wt)
     }
-
 
     /// [LDEORAB - Atomic exclusive OR on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEORB--LDEORAB--LDEORALB--LDEORLB--Atomic-exclusive-OR-on-byte-in-memory-?lang=en)
     ///
@@ -229,7 +233,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 1, 0, ws, 0, 0b10, xn_sp, wt)
     }
 
-
     /// [LDEORALB - Atomic exclusive OR on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEORB--LDEORAB--LDEORALB--LDEORLB--Atomic-exclusive-OR-on-byte-in-memory-?lang=en)
     ///
     /// Atomic exclusive OR on byte in memory atomically loads an 8-bit byte from memory, performs an exclusive OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -244,7 +247,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldeoralb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 1, 1, ws, 0, 0b10, xn_sp, wt)
     }
-
 
     /// [LDEORB - Atomic exclusive OR on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEORB--LDEORAB--LDEORALB--LDEORLB--Atomic-exclusive-OR-on-byte-in-memory-?lang=en)
     ///
@@ -261,7 +263,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 0, 0, ws, 0, 0b10, xn_sp, wt)
     }
 
-
     /// [LDEORLB - Atomic exclusive OR on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEORB--LDEORAB--LDEORALB--LDEORLB--Atomic-exclusive-OR-on-byte-in-memory-?lang=en)
     ///
     /// Atomic exclusive OR on byte in memory atomically loads an 8-bit byte from memory, performs an exclusive OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -276,7 +277,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldeorlb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 0, 1, ws, 0, 0b10, xn_sp, wt)
     }
-
 
     /// [LDSETAB - Atomic bit set on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSETB--LDSETAB--LDSETALB--LDSETLB--Atomic-bit-set-on-byte-in-memory-?lang=en)
     ///
@@ -293,7 +293,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 1, 0, ws, 0, 0b11, xn_sp, wt)
     }
 
-
     /// [LDSETALB - Atomic bit set on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSETB--LDSETAB--LDSETALB--LDSETLB--Atomic-bit-set-on-byte-in-memory-?lang=en)
     ///
     /// Atomic bit set on byte in memory atomically loads an 8-bit byte from memory, performs a bitwise OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -308,7 +307,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsetalb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 1, 1, ws, 0, 0b11, xn_sp, wt)
     }
-
 
     /// [LDSETB - Atomic bit set on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSETB--LDSETAB--LDSETALB--LDSETLB--Atomic-bit-set-on-byte-in-memory-?lang=en)
     ///
@@ -325,7 +323,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 0, 0, ws, 0, 0b11, xn_sp, wt)
     }
 
-
     /// [LDSETLB - Atomic bit set on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSETB--LDSETAB--LDSETALB--LDSETLB--Atomic-bit-set-on-byte-in-memory-?lang=en)
     ///
     /// Atomic bit set on byte in memory atomically loads an 8-bit byte from memory, performs a bitwise OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -340,7 +337,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsetlb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 0, 1, ws, 0, 0b11, xn_sp, wt)
     }
-
 
     /// [LDSMAXAB - Atomic signed maximum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAXB--LDSMAXAB--LDSMAXALB--LDSMAXLB--Atomic-signed-maximum-on-byte-in-memory-?lang=en)
     ///
@@ -357,7 +353,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 1, 0, ws, 0, 0b100, xn_sp, wt)
     }
 
-
     /// [LDSMAXALB - Atomic signed maximum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAXB--LDSMAXAB--LDSMAXALB--LDSMAXLB--Atomic-signed-maximum-on-byte-in-memory-?lang=en)
     ///
     /// Atomic signed maximum on byte in memory atomically loads an 8-bit byte from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -372,7 +367,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsmaxalb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 1, 1, ws, 0, 0b100, xn_sp, wt)
     }
-
 
     /// [LDSMAXB - Atomic signed maximum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAXB--LDSMAXAB--LDSMAXALB--LDSMAXLB--Atomic-signed-maximum-on-byte-in-memory-?lang=en)
     ///
@@ -389,7 +383,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 0, 0, ws, 0, 0b100, xn_sp, wt)
     }
 
-
     /// [LDSMAXLB - Atomic signed maximum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAXB--LDSMAXAB--LDSMAXALB--LDSMAXLB--Atomic-signed-maximum-on-byte-in-memory-?lang=en)
     ///
     /// Atomic signed maximum on byte in memory atomically loads an 8-bit byte from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -404,7 +397,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsmaxlb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 0, 1, ws, 0, 0b100, xn_sp, wt)
     }
-
 
     /// [LDSMINAB - Atomic signed minimum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMINB--LDSMINAB--LDSMINALB--LDSMINLB--Atomic-signed-minimum-on-byte-in-memory-?lang=en)
     ///
@@ -421,7 +413,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 1, 0, ws, 0, 0b101, xn_sp, wt)
     }
 
-
     /// [LDSMINALB - Atomic signed minimum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMINB--LDSMINAB--LDSMINALB--LDSMINLB--Atomic-signed-minimum-on-byte-in-memory-?lang=en)
     ///
     /// Atomic signed minimum on byte in memory atomically loads an 8-bit byte from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -436,7 +427,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsminalb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 1, 1, ws, 0, 0b101, xn_sp, wt)
     }
-
 
     /// [LDSMINB - Atomic signed minimum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMINB--LDSMINAB--LDSMINALB--LDSMINLB--Atomic-signed-minimum-on-byte-in-memory-?lang=en)
     ///
@@ -453,7 +443,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 0, 0, ws, 0, 0b101, xn_sp, wt)
     }
 
-
     /// [LDSMINLB - Atomic signed minimum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMINB--LDSMINAB--LDSMINALB--LDSMINLB--Atomic-signed-minimum-on-byte-in-memory-?lang=en)
     ///
     /// Atomic signed minimum on byte in memory atomically loads an 8-bit byte from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -468,7 +457,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsminlb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 0, 1, ws, 0, 0b101, xn_sp, wt)
     }
-
 
     /// [LDUMAXAB - Atomic unsigned maximum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAXB--LDUMAXAB--LDUMAXALB--LDUMAXLB--Atomic-unsigned-maximum-on-byte-in-memory-?lang=en)
     ///
@@ -485,7 +473,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 1, 0, ws, 0, 0b110, xn_sp, wt)
     }
 
-
     /// [LDUMAXALB - Atomic unsigned maximum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAXB--LDUMAXAB--LDUMAXALB--LDUMAXLB--Atomic-unsigned-maximum-on-byte-in-memory-?lang=en)
     ///
     /// Atomic unsigned maximum on byte in memory atomically loads an 8-bit byte from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -500,7 +487,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldumaxalb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 1, 1, ws, 0, 0b110, xn_sp, wt)
     }
-
 
     /// [LDUMAXB - Atomic unsigned maximum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAXB--LDUMAXAB--LDUMAXALB--LDUMAXLB--Atomic-unsigned-maximum-on-byte-in-memory-?lang=en)
     ///
@@ -517,7 +503,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 0, 0, ws, 0, 0b110, xn_sp, wt)
     }
 
-
     /// [LDUMAXLB - Atomic unsigned maximum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAXB--LDUMAXAB--LDUMAXALB--LDUMAXLB--Atomic-unsigned-maximum-on-byte-in-memory-?lang=en)
     ///
     /// Atomic unsigned maximum on byte in memory atomically loads an 8-bit byte from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -532,7 +517,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldumaxlb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 0, 1, ws, 0, 0b110, xn_sp, wt)
     }
-
 
     /// [LDUMINAB - Atomic unsigned minimum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMINB--LDUMINAB--LDUMINALB--LDUMINLB--Atomic-unsigned-minimum-on-byte-in-memory-?lang=en)
     ///
@@ -549,7 +533,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 1, 0, ws, 0, 0b111, xn_sp, wt)
     }
 
-
     /// [LDUMINALB - Atomic unsigned minimum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMINB--LDUMINAB--LDUMINALB--LDUMINLB--Atomic-unsigned-minimum-on-byte-in-memory-?lang=en)
     ///
     /// Atomic unsigned minimum on byte in memory atomically loads an 8-bit byte from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -564,7 +547,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn lduminalb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 1, 1, ws, 0, 0b111, xn_sp, wt)
     }
-
 
     /// [LDUMINB - Atomic unsigned minimum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMINB--LDUMINAB--LDUMINALB--LDUMINLB--Atomic-unsigned-minimum-on-byte-in-memory-?lang=en)
     ///
@@ -581,7 +563,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 0, 0, ws, 0, 0b111, xn_sp, wt)
     }
 
-
     /// [LDUMINLB - Atomic unsigned minimum on byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMINB--LDUMINAB--LDUMINALB--LDUMINLB--Atomic-unsigned-minimum-on-byte-in-memory-?lang=en)
     ///
     /// Atomic unsigned minimum on byte in memory atomically loads an 8-bit byte from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -596,7 +577,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn lduminlb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 0, 1, ws, 0, 0b111, xn_sp, wt)
     }
-
 
     /// [SWPAB - Swap byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWPB--SWPAB--SWPALB--SWPLB--Swap-byte-in-memory-?lang=en)
     ///
@@ -613,7 +593,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 1, 0, ws, 1, 0b000, xn_sp, wt)
     }
 
-
     /// [SWPALB - Swap byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWPB--SWPAB--SWPALB--SWPLB--Swap-byte-in-memory-?lang=en)
     ///
     /// Swap byte in memory atomically loads an 8-bit byte from a memory location, and stores the value held in a register back to the same memory location. The value initially loaded from memory is returned in the destination register.
@@ -628,7 +607,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn swpalb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 1, 1, ws, 1, 0b000, xn_sp, wt)
     }
-
 
     /// [SWPB - Swap byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWPB--SWPAB--SWPALB--SWPLB--Swap-byte-in-memory-?lang=en)
     ///
@@ -645,7 +623,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 0, 0, ws, 1, 0b000, xn_sp, wt)
     }
 
-
     /// [SWPLB - Swap byte in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWPB--SWPAB--SWPALB--SWPLB--Swap-byte-in-memory-?lang=en)
     ///
     /// Swap byte in memory atomically loads an 8-bit byte from a memory location, and stores the value held in a register back to the same memory location. The value initially loaded from memory is returned in the destination register.
@@ -660,7 +637,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn swplb(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0, 0, 0, 1, ws, 1, 0b000, xn_sp, wt)
     }
-
 
     /// [LDAPRB - Load Acquire RCpc Register Byte](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPRB--Load-Acquire-RCpc-Register-Byte-?lang=en)
     ///
@@ -677,7 +653,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0, 0, 1, 0, 0b11111, 1, 0b100, xn_sp, wt)
     }
 
-
     /// [LDADDAH - Atomic add on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADDH--LDADDAH--LDADDALH--LDADDLH--Atomic-add-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic add on halfword in memory atomically loads a 16-bit halfword from memory, adds the value held in a register to it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -692,7 +667,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldaddah(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 1, 0, ws, 0, 0b000, xn_sp, wt)
     }
-
 
     /// [LDADDALH - Atomic add on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADDH--LDADDAH--LDADDALH--LDADDLH--Atomic-add-on-halfword-in-memory-?lang=en)
     ///
@@ -709,7 +683,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 1, 1, ws, 0, 0b000, xn_sp, wt)
     }
 
-
     /// [LDADDH - Atomic add on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADDH--LDADDAH--LDADDALH--LDADDLH--Atomic-add-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic add on halfword in memory atomically loads a 16-bit halfword from memory, adds the value held in a register to it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -724,7 +697,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldaddh(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 0, 0, ws, 0, 0b000, xn_sp, wt)
     }
-
 
     /// [LDADDLH - Atomic add on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADDH--LDADDAH--LDADDALH--LDADDLH--Atomic-add-on-halfword-in-memory-?lang=en)
     ///
@@ -741,7 +713,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 0, 1, ws, 0, 0b000, xn_sp, wt)
     }
 
-
     /// [LDCLRAH - Atomic bit clear on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLRH--LDCLRAH--LDCLRALH--LDCLRLH--Atomic-bit-clear-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic bit clear on halfword in memory atomically loads a 16-bit halfword from memory, performs a bitwise AND with the complement of the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -756,7 +727,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldclrah(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 1, 0, ws, 0, 0b001, xn_sp, wt)
     }
-
 
     /// [LDCLRALH - Atomic bit clear on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLRH--LDCLRAH--LDCLRALH--LDCLRLH--Atomic-bit-clear-on-halfword-in-memory-?lang=en)
     ///
@@ -773,7 +743,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 1, 1, ws, 0, 0b001, xn_sp, wt)
     }
 
-
     /// [LDCLRH - Atomic bit clear on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLRH--LDCLRAH--LDCLRALH--LDCLRLH--Atomic-bit-clear-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic bit clear on halfword in memory atomically loads a 16-bit halfword from memory, performs a bitwise AND with the complement of the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -788,7 +757,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldclrh(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 0, 0, ws, 0, 0b001, xn_sp, wt)
     }
-
 
     /// [LDCLRLH - Atomic bit clear on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLRH--LDCLRAH--LDCLRALH--LDCLRLH--Atomic-bit-clear-on-halfword-in-memory-?lang=en)
     ///
@@ -805,7 +773,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 0, 1, ws, 0, 0b001, xn_sp, wt)
     }
 
-
     /// [LDEORAH - Atomic exclusive OR on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEORH--LDEORAH--LDEORALH--LDEORLH--Atomic-exclusive-OR-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic exclusive OR on halfword in memory atomically loads a 16-bit halfword from memory, performs an exclusive OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -820,7 +787,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldeorah(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 1, 0, ws, 0, 0b010, xn_sp, wt)
     }
-
 
     /// [LDEORALH - Atomic exclusive OR on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEORH--LDEORAH--LDEORALH--LDEORLH--Atomic-exclusive-OR-on-halfword-in-memory-?lang=en)
     ///
@@ -837,7 +803,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 1, 1, ws, 0, 0b010, xn_sp, wt)
     }
 
-
     /// [LDEORH - Atomic exclusive OR on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEORH--LDEORAH--LDEORALH--LDEORLH--Atomic-exclusive-OR-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic exclusive OR on halfword in memory atomically loads a 16-bit halfword from memory, performs an exclusive OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -852,7 +817,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldeorh(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 0, 0, ws, 0, 0b010, xn_sp, wt)
     }
-
 
     /// [LDEORLH - Atomic exclusive OR on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEORH--LDEORAH--LDEORALH--LDEORLH--Atomic-exclusive-OR-on-halfword-in-memory-?lang=en)
     ///
@@ -869,7 +833,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 0, 1, ws, 0, 0b010, xn_sp, wt)
     }
 
-
     /// [LDSETAH - Atomic bit set on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSETH--LDSETAH--LDSETALH--LDSETLH--Atomic-bit-set-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic bit set on halfword in memory atomically loads a 16-bit halfword from memory, performs a bitwise OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -884,7 +847,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsetah(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 1, 0, ws, 0, 0b011, xn_sp, wt)
     }
-
 
     /// [LDSETALH - Atomic bit set on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSETH--LDSETAH--LDSETALH--LDSETLH--Atomic-bit-set-on-halfword-in-memory-?lang=en)
     ///
@@ -901,7 +863,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 1, 1, ws, 0, 0b011, xn_sp, wt)
     }
 
-
     /// [LDSETH - Atomic bit set on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSETH--LDSETAH--LDSETALH--LDSETLH--Atomic-bit-set-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic bit set on halfword in memory atomically loads a 16-bit halfword from memory, performs a bitwise OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -916,7 +877,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldseth(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 0, 0, ws, 0, 0b011, xn_sp, wt)
     }
-
 
     /// [LDSETLH - Atomic bit set on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSETH--LDSETAH--LDSETALH--LDSETLH--Atomic-bit-set-on-halfword-in-memory-?lang=en)
     ///
@@ -933,7 +893,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 0, 1, ws, 0, 0b011, xn_sp, wt)
     }
 
-
     /// [LDSMAXAH - Atomic signed maximum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAXH--LDSMAXAH--LDSMAXALH--LDSMAXLH--Atomic-signed-maximum-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic signed maximum on halfword in memory atomically loads a 16-bit halfword from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -948,7 +907,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsmaxah(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 1, 0, ws, 0, 0b100, xn_sp, wt)
     }
-
 
     /// [LDSMAXALH - Atomic signed maximum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAXH--LDSMAXAH--LDSMAXALH--LDSMAXLH--Atomic-signed-maximum-on-halfword-in-memory-?lang=en)
     ///
@@ -965,7 +923,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 1, 1, ws, 0, 0b100, xn_sp, wt)
     }
 
-
     /// [LDSMAXH - Atomic signed maximum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAXH--LDSMAXAH--LDSMAXALH--LDSMAXLH--Atomic-signed-maximum-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic signed maximum on halfword in memory atomically loads a 16-bit halfword from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -980,7 +937,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsmaxh(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 0, 0, ws, 0, 0b100, xn_sp, wt)
     }
-
 
     /// [LDSMAXLH - Atomic signed maximum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAXH--LDSMAXAH--LDSMAXALH--LDSMAXLH--Atomic-signed-maximum-on-halfword-in-memory-?lang=en)
     ///
@@ -997,7 +953,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 0, 1, ws, 0, 0b100, xn_sp, wt)
     }
 
-
     /// [LDSMINAH - Atomic signed minimum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMINH--LDSMINAH--LDSMINALH--LDSMINLH--Atomic-signed-minimum-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic signed minimum on halfword in memory atomically loads a 16-bit halfword from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -1012,7 +967,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsminah(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 1, 0, ws, 0, 0b101, xn_sp, wt)
     }
-
 
     /// [LDSMINALH - Atomic signed minimum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMINH--LDSMINAH--LDSMINALH--LDSMINLH--Atomic-signed-minimum-on-halfword-in-memory-?lang=en)
     ///
@@ -1029,7 +983,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 1, 1, ws, 0, 0b101, xn_sp, wt)
     }
 
-
     /// [LDSMINH - Atomic signed minimum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMINH--LDSMINAH--LDSMINALH--LDSMINLH--Atomic-signed-minimum-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic signed minimum on halfword in memory atomically loads a 16-bit halfword from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -1044,7 +997,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsminh(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 0, 0, ws, 0, 0b101, xn_sp, wt)
     }
-
 
     /// [LDSMINLH - Atomic signed minimum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMINH--LDSMINAH--LDSMINALH--LDSMINLH--Atomic-signed-minimum-on-halfword-in-memory-?lang=en)
     ///
@@ -1061,7 +1013,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 0, 1, ws, 0, 0b101, xn_sp, wt)
     }
 
-
     /// [LDUMAXAH - Atomic unsigned maximum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAXH--LDUMAXAH--LDUMAXALH--LDUMAXLH--Atomic-unsigned-maximum-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic unsigned maximum on halfword in memory atomically loads a 16-bit halfword from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -1076,7 +1027,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldumaxah(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 1, 0, ws, 0, 0b110, xn_sp, wt)
     }
-
 
     /// [LDUMAXALH - Atomic unsigned maximum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAXH--LDUMAXAH--LDUMAXALH--LDUMAXLH--Atomic-unsigned-maximum-on-halfword-in-memory-?lang=en)
     ///
@@ -1093,7 +1043,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 1, 1, ws, 0, 0b110, xn_sp, wt)
     }
 
-
     /// [LDUMAXH - Atomic unsigned maximum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAXH--LDUMAXAH--LDUMAXALH--LDUMAXLH--Atomic-unsigned-maximum-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic unsigned maximum on halfword in memory atomically loads a 16-bit halfword from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -1108,7 +1057,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldumaxh(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 0, 0, ws, 0, 0b110, xn_sp, wt)
     }
-
 
     /// [LDUMAXLH - Atomic unsigned maximum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAXH--LDUMAXAH--LDUMAXALH--LDUMAXLH--Atomic-unsigned-maximum-on-halfword-in-memory-?lang=en)
     ///
@@ -1125,7 +1073,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 0, 1, ws, 0, 0b110, xn_sp, wt)
     }
 
-
     /// [LDUMINAH - Atomic unsigned minimum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMINH--LDUMINAH--LDUMINALH--LDUMINLH--Atomic-unsigned-minimum-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic unsigned minimum on halfword in memory atomically loads a 16-bit halfword from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -1140,7 +1087,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn lduminah(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 1, 0, ws, 0, 0b111, xn_sp, wt)
     }
-
 
     /// [LDUMINALH - Atomic unsigned minimum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMINH--LDUMINAH--LDUMINALH--LDUMINLH--Atomic-unsigned-minimum-on-halfword-in-memory-?lang=en)
     ///
@@ -1157,7 +1103,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 1, 1, ws, 0, 0b111, xn_sp, wt)
     }
 
-
     /// [LDUMINH - Atomic unsigned minimum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMINH--LDUMINAH--LDUMINALH--LDUMINLH--Atomic-unsigned-minimum-on-halfword-in-memory-?lang=en)
     ///
     /// Atomic unsigned minimum on halfword in memory atomically loads a 16-bit halfword from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -1172,7 +1117,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn lduminh(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 0, 0, ws, 0, 0b111, xn_sp, wt)
     }
-
 
     /// [LDUMINLH - Atomic unsigned minimum on halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMINH--LDUMINAH--LDUMINALH--LDUMINLH--Atomic-unsigned-minimum-on-halfword-in-memory-?lang=en)
     ///
@@ -1189,7 +1133,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 0, 1, ws, 0, 0b111, xn_sp, wt)
     }
 
-
     /// [SWPAH - Swap halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWPH--SWPAH--SWPALH--SWPLH--Swap-halfword-in-memory-?lang=en)
     ///
     /// Swap halfword in memory atomically loads a 16-bit halfword from a memory location, and stores the value held in a register back to the same memory location. The value initially loaded from memory is returned in the destination register.
@@ -1204,7 +1147,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn swpah(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 1, 0, ws, 1, 0b000, xn_sp, wt)
     }
-
 
     /// [SWPALH - Swap halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWPH--SWPAH--SWPALH--SWPLH--Swap-halfword-in-memory-?lang=en)
     ///
@@ -1221,7 +1163,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 1, 1, ws, 1, 0b000, xn_sp, wt)
     }
 
-
     /// [SWPH - Swap halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWPH--SWPAH--SWPALH--SWPLH--Swap-halfword-in-memory-?lang=en)
     ///
     /// Swap halfword in memory atomically loads a 16-bit halfword from a memory location, and stores the value held in a register back to the same memory location. The value initially loaded from memory is returned in the destination register.
@@ -1237,7 +1178,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 0, 0, ws, 1, 0b000, xn_sp, wt)
     }
 
-
     /// [SWPLH - Swap halfword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWPH--SWPAH--SWPALH--SWPLH--Swap-halfword-in-memory-?lang=en)
     ///
     /// Swap halfword in memory atomically loads a 16-bit halfword from a memory location, and stores the value held in a register back to the same memory location. The value initially loaded from memory is returned in the destination register.
@@ -1252,7 +1192,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn swplh(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b01, 0, 0, 1, ws, 1, 0b000, xn_sp, wt)
     }
-
 
     /// [LDAPRH - Load Acquire RCpc Register Halfword](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPRH--Load-Acquire-RCpc-Register-Halfword-?lang=en)
     ///
@@ -1270,7 +1209,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b01, 0, 1, 0, 0b11111, 1, 0b100, xn_sp, wt)
     }
 
-
     /// [LDADD - Atomic add on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADD--LDADDA--LDADDAL--LDADDL--Atomic-add-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic add on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, adds the value held in a register to it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1285,7 +1223,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldadd_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 0, 0, ws, 0, 0b000, xn_sp, wt)
     }
-
 
     /// [LDADDA - Atomic add on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADD--LDADDA--LDADDAL--LDADDL--Atomic-add-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1302,7 +1239,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 1, 0, ws, 0, 0b000, xn_sp, wt)
     }
 
-
     /// [LDADDAL - Atomic add on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADD--LDADDA--LDADDAL--LDADDL--Atomic-add-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic add on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, adds the value held in a register to it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1317,7 +1253,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldaddal_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 1, 1, ws, 0, 0b000, xn_sp, wt)
     }
-
 
     /// [LDADDL - Atomic add on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADD--LDADDA--LDADDAL--LDADDL--Atomic-add-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1334,7 +1269,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 0, 1, ws, 0, 0b000, xn_sp, wt)
     }
 
-
     /// [LDADD - Atomic add on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADD--LDADDA--LDADDAL--LDADDL--Atomic-add-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic add on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, adds the value held in a register to it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1349,7 +1283,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldadd_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 0, 0, xs, 0, 0b000, xn_sp, xt)
     }
-
 
     /// [LDADDA - Atomic add on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADD--LDADDA--LDADDAL--LDADDL--Atomic-add-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1366,7 +1299,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 1, 0, xs, 0, 0b000, xn_sp, xt)
     }
 
-
     /// [LDADDAL - Atomic add on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADD--LDADDA--LDADDAL--LDADDL--Atomic-add-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic add on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, adds the value held in a register to it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1381,7 +1313,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldaddal_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 1, 1, xs, 0, 0b000, xn_sp, xt)
     }
-
 
     /// [LDADDL - Atomic add on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDADD--LDADDA--LDADDAL--LDADDL--Atomic-add-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1398,7 +1329,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 0, 1, xs, 0, 0b000, xn_sp, xt)
     }
 
-
     /// [LDCLR - Atomic bit clear on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLR--LDCLRA--LDCLRAL--LDCLRL--Atomic-bit-clear-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic bit clear on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, performs a bitwise AND with the complement of the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1413,7 +1343,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldclr_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 0, 0, ws, 0, 0b001, xn_sp, wt)
     }
-
 
     /// [LDCLRA - Atomic bit clear on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLR--LDCLRA--LDCLRAL--LDCLRL--Atomic-bit-clear-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1430,7 +1359,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 1, 0, ws, 0, 0b001, xn_sp, wt)
     }
 
-
     /// [LDCLRAL - Atomic bit clear on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLR--LDCLRA--LDCLRAL--LDCLRL--Atomic-bit-clear-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic bit clear on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, performs a bitwise AND with the complement of the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1445,7 +1373,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldclral_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 1, 1, ws, 0, 0b001, xn_sp, wt)
     }
-
 
     /// [LDCLRL - Atomic bit clear on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLR--LDCLRA--LDCLRAL--LDCLRL--Atomic-bit-clear-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1462,7 +1389,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 0, 1, ws, 0, 0b001, xn_sp, wt)
     }
 
-
     /// [LDCLR - Atomic bit clear on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLR--LDCLRA--LDCLRAL--LDCLRL--Atomic-bit-clear-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic bit clear on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, performs a bitwise AND with the complement of the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1477,7 +1403,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldclr_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 0, 0, xs, 0, 0b001, xn_sp, xt)
     }
-
 
     /// [LDCLRA - Atomic bit clear on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLR--LDCLRA--LDCLRAL--LDCLRL--Atomic-bit-clear-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1494,7 +1419,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 1, 0, xs, 0, 0b001, xn_sp, xt)
     }
 
-
     /// [LDCLRAL - Atomic bit clear on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLR--LDCLRA--LDCLRAL--LDCLRL--Atomic-bit-clear-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic bit clear on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, performs a bitwise AND with the complement of the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1509,7 +1433,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldclral_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 1, 1, xs, 0, 0b001, xn_sp, xt)
     }
-
 
     /// [LDCLRL - Atomic bit clear on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDCLR--LDCLRA--LDCLRAL--LDCLRL--Atomic-bit-clear-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1526,7 +1449,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 0, 1, xs, 0, 0b001, xn_sp, xt)
     }
 
-
     /// [LDEOR - Atomic exclusive OR on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEOR--LDEORA--LDEORAL--LDEORL--Atomic-exclusive-OR-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic exclusive OR on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, performs an exclusive OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1541,7 +1463,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldeor_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 0, 0, ws, 0, 0b010, xn_sp, wt)
     }
-
 
     /// [LDEORA - Atomic exclusive OR on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEOR--LDEORA--LDEORAL--LDEORL--Atomic-exclusive-OR-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1558,7 +1479,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 1, 0, ws, 0, 0b010, xn_sp, wt)
     }
 
-
     /// [LDEORAL - Atomic exclusive OR on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEOR--LDEORA--LDEORAL--LDEORL--Atomic-exclusive-OR-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic exclusive OR on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, performs an exclusive OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1573,7 +1493,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldeoral_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 1, 1, ws, 0, 0b010, xn_sp, wt)
     }
-
 
     /// [LDEORL - Atomic exclusive OR on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEOR--LDEORA--LDEORAL--LDEORL--Atomic-exclusive-OR-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1590,7 +1509,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 0, 1, ws, 0, 0b010, xn_sp, wt)
     }
 
-
     /// [LDEOR - Atomic exclusive OR on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEOR--LDEORA--LDEORAL--LDEORL--Atomic-exclusive-OR-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic exclusive OR on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, performs an exclusive OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1605,7 +1523,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldeor_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 0, 0, xs, 0, 0b010, xn_sp, xt)
     }
-
 
     /// [LDEORA - Atomic exclusive OR on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEOR--LDEORA--LDEORAL--LDEORL--Atomic-exclusive-OR-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1622,7 +1539,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 1, 0, xs, 0, 0b010, xn_sp, xt)
     }
 
-
     /// [LDEORAL - Atomic exclusive OR on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEOR--LDEORA--LDEORAL--LDEORL--Atomic-exclusive-OR-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic exclusive OR on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, performs an exclusive OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1637,7 +1553,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldeoral_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 1, 1, xs, 0, 0b010, xn_sp, xt)
     }
-
 
     /// [LDEORL - Atomic exclusive OR on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDEOR--LDEORA--LDEORAL--LDEORL--Atomic-exclusive-OR-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1654,7 +1569,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 0, 1, xs, 0, 0b010, xn_sp, xt)
     }
 
-
     /// [LDSET - Atomic bit set on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSET--LDSETA--LDSETAL--LDSETL--Atomic-bit-set-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic bit set on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, performs a bitwise OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1669,7 +1583,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldset_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 0, 0, ws, 0, 0b011, xn_sp, wt)
     }
-
 
     /// [LDSETA - Atomic bit set on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSET--LDSETA--LDSETAL--LDSETL--Atomic-bit-set-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1686,7 +1599,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 1, 0, ws, 0, 0b011, xn_sp, wt)
     }
 
-
     /// [LDSETAL - Atomic bit set on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSET--LDSETA--LDSETAL--LDSETL--Atomic-bit-set-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic bit set on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, performs a bitwise OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1701,7 +1613,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsetal_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 1, 1, ws, 0, 0b011, xn_sp, wt)
     }
-
 
     /// [LDSETL - Atomic bit set on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSET--LDSETA--LDSETAL--LDSETL--Atomic-bit-set-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1718,7 +1629,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 0, 1, ws, 0, 0b011, xn_sp, wt)
     }
 
-
     /// [LDSET - Atomic bit set on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSET--LDSETA--LDSETAL--LDSETL--Atomic-bit-set-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic bit set on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, performs a bitwise OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1733,7 +1643,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldset_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 0, 0, xs, 0, 0b011, xn_sp, xt)
     }
-
 
     /// [LDSETA - Atomic bit set on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSET--LDSETA--LDSETAL--LDSETL--Atomic-bit-set-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1750,7 +1659,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 1, 0, xs, 0, 0b011, xn_sp, xt)
     }
 
-
     /// [LDSETAL - Atomic bit set on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSET--LDSETA--LDSETAL--LDSETL--Atomic-bit-set-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic bit set on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, performs a bitwise OR with the value held in a register on it, and stores the result back to memory. The value initially loaded from memory is returned in the destination register.
@@ -1765,7 +1673,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsetal_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 1, 1, xs, 0, 0b011, xn_sp, xt)
     }
-
 
     /// [LDSETL - Atomic bit set on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSET--LDSETA--LDSETAL--LDSETL--Atomic-bit-set-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1782,7 +1689,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 0, 1, xs, 0, 0b011, xn_sp, xt)
     }
 
-
     /// [LDSMAX - Atomic signed maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAX--LDSMAXA--LDSMAXAL--LDSMAXL--Atomic-signed-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic signed maximum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -1797,7 +1703,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsmax_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 0, 0, ws, 0, 0b100, xn_sp, wt)
     }
-
 
     /// [LDSMAXA - Atomic signed maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAX--LDSMAXA--LDSMAXAL--LDSMAXL--Atomic-signed-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1814,7 +1719,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 1, 0, ws, 0, 0b100, xn_sp, wt)
     }
 
-
     /// [LDSMAXAL - Atomic signed maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAX--LDSMAXA--LDSMAXAL--LDSMAXL--Atomic-signed-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic signed maximum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -1829,7 +1733,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsmaxal_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 1, 1, ws, 0, 0b100, xn_sp, wt)
     }
-
 
     /// [LDSMAXL - Atomic signed maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAX--LDSMAXA--LDSMAXAL--LDSMAXL--Atomic-signed-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1846,7 +1749,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 0, 1, ws, 0, 0b100, xn_sp, wt)
     }
 
-
     /// [LDSMAX - Atomic signed maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAX--LDSMAXA--LDSMAXAL--LDSMAXL--Atomic-signed-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic signed maximum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -1861,7 +1763,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsmax_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 0, 0, xs, 0, 0b100, xn_sp, xt)
     }
-
 
     /// [LDSMAXA - Atomic signed maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAX--LDSMAXA--LDSMAXAL--LDSMAXL--Atomic-signed-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1878,7 +1779,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 1, 0, xs, 0, 0b100, xn_sp, xt)
     }
 
-
     /// [LDSMAXAL - Atomic signed maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAX--LDSMAXA--LDSMAXAL--LDSMAXL--Atomic-signed-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic signed maximum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -1893,7 +1793,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsmaxal_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 1, 1, xs, 0, 0b100, xn_sp, xt)
     }
-
 
     /// [LDSMAXL - Atomic signed maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMAX--LDSMAXA--LDSMAXAL--LDSMAXL--Atomic-signed-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1910,7 +1809,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 0, 1, xs, 0, 0b100, xn_sp, xt)
     }
 
-
     /// [LDSMIN - Atomic signed minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMIN--LDSMINA--LDSMINAL--LDSMINL--Atomic-signed-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic signed minimum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -1925,7 +1823,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsmin_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 0, 0, ws, 0, 0b101, xn_sp, wt)
     }
-
 
     /// [LDSMINA - Atomic signed minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMIN--LDSMINA--LDSMINAL--LDSMINL--Atomic-signed-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1942,7 +1839,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 1, 0, ws, 0, 0b101, xn_sp, wt)
     }
 
-
     /// [LDSMINAL - Atomic signed minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMIN--LDSMINA--LDSMINAL--LDSMINL--Atomic-signed-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic signed minimum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -1957,7 +1853,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsminal_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 1, 1, ws, 0, 0b101, xn_sp, wt)
     }
-
 
     /// [LDSMINL - Atomic signed minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMIN--LDSMINA--LDSMINAL--LDSMINL--Atomic-signed-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -1974,7 +1869,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 0, 1, ws, 0, 0b101, xn_sp, wt)
     }
 
-
     /// [LDSMIN - Atomic signed minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMIN--LDSMINA--LDSMINAL--LDSMINL--Atomic-signed-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic signed minimum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -1989,7 +1883,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsmin_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 0, 0, xs, 0, 0b101, xn_sp, xt)
     }
-
 
     /// [LDSMINA - Atomic signed minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMIN--LDSMINA--LDSMINAL--LDSMINL--Atomic-signed-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2006,7 +1899,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 1, 0, xs, 0, 0b101, xn_sp, xt)
     }
 
-
     /// [LDSMINAL - Atomic signed minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMIN--LDSMINA--LDSMINAL--LDSMINL--Atomic-signed-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic signed minimum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as signed numbers. The value initially loaded from memory is returned in the destination register.
@@ -2021,7 +1913,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldsminal_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 1, 1, xs, 0, 0b101, xn_sp, xt)
     }
-
 
     /// [LDSMINL - Atomic signed minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDSMIN--LDSMINA--LDSMINAL--LDSMINL--Atomic-signed-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2038,7 +1929,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 0, 1, xs, 0, 0b101, xn_sp, xt)
     }
 
-
     /// [LDUMAX - Atomic unsigned maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAX--LDUMAXA--LDUMAXAL--LDUMAXL--Atomic-unsigned-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic unsigned maximum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -2053,7 +1943,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldumax_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 0, 0, ws, 0, 0b110, xn_sp, wt)
     }
-
 
     /// [LDUMAXA - Atomic unsigned maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAX--LDUMAXA--LDUMAXAL--LDUMAXL--Atomic-unsigned-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2070,7 +1959,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 1, 0, ws, 0, 0b110, xn_sp, wt)
     }
 
-
     /// [LDUMAXAL - Atomic unsigned maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAX--LDUMAXA--LDUMAXAL--LDUMAXL--Atomic-unsigned-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic unsigned maximum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -2085,7 +1973,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldumaxal_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 1, 1, ws, 0, 0b110, xn_sp, wt)
     }
-
 
     /// [LDUMAXL - Atomic unsigned maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAX--LDUMAXA--LDUMAXAL--LDUMAXL--Atomic-unsigned-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2102,7 +1989,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 0, 1, ws, 0, 0b110, xn_sp, wt)
     }
 
-
     /// [LDUMAX - Atomic unsigned maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAX--LDUMAXA--LDUMAXAL--LDUMAXL--Atomic-unsigned-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic unsigned maximum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -2117,7 +2003,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldumax_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 0, 0, xs, 0, 0b110, xn_sp, xt)
     }
-
 
     /// [LDUMAXA - Atomic unsigned maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAX--LDUMAXA--LDUMAXAL--LDUMAXL--Atomic-unsigned-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2134,7 +2019,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 1, 0, xs, 0, 0b110, xn_sp, xt)
     }
 
-
     /// [LDUMAXAL - Atomic unsigned maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAX--LDUMAXA--LDUMAXAL--LDUMAXL--Atomic-unsigned-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic unsigned maximum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the larger value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -2149,7 +2033,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldumaxal_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 1, 1, xs, 0, 0b110, xn_sp, xt)
     }
-
 
     /// [LDUMAXL - Atomic unsigned maximum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMAX--LDUMAXA--LDUMAXAL--LDUMAXL--Atomic-unsigned-maximum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2166,7 +2049,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 0, 1, xs, 0, 0b110, xn_sp, xt)
     }
 
-
     /// [LDUMIN - Atomic unsigned minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMIN--LDUMINA--LDUMINAL--LDUMINL--Atomic-unsigned-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic unsigned minimum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -2181,7 +2063,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldumin_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 0, 0, ws, 0, 0b111, xn_sp, wt)
     }
-
 
     /// [LDUMINA - Atomic unsigned minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMIN--LDUMINA--LDUMINAL--LDUMINL--Atomic-unsigned-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2198,7 +2079,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 1, 0, ws, 0, 0b111, xn_sp, wt)
     }
 
-
     /// [LDUMINAL - Atomic unsigned minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMIN--LDUMINA--LDUMINAL--LDUMINL--Atomic-unsigned-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic unsigned minimum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -2213,7 +2093,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn lduminal_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 1, 1, ws, 0, 0b111, xn_sp, wt)
     }
-
 
     /// [LDUMINL - Atomic unsigned minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMIN--LDUMINA--LDUMINAL--LDUMINL--Atomic-unsigned-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2230,7 +2109,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 0, 1, ws, 0, 0b111, xn_sp, wt)
     }
 
-
     /// [LDUMIN - Atomic unsigned minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMIN--LDUMINA--LDUMINAL--LDUMINL--Atomic-unsigned-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic unsigned minimum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -2245,7 +2123,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldumin_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 0, 0, xs, 0, 0b111, xn_sp, xt)
     }
-
 
     /// [LDUMINA - Atomic unsigned minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMIN--LDUMINA--LDUMINAL--LDUMINL--Atomic-unsigned-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2262,7 +2139,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 1, 0, xs, 0, 0b111, xn_sp, xt)
     }
 
-
     /// [LDUMINAL - Atomic unsigned minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMIN--LDUMINA--LDUMINAL--LDUMINL--Atomic-unsigned-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Atomic unsigned minimum on word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from memory, compares it against the value held in a register, and stores the smaller value back to memory, treating the values as unsigned numbers. The value initially loaded from memory is returned in the destination register.
@@ -2277,7 +2153,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn lduminal_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 1, 1, xs, 0, 0b111, xn_sp, xt)
     }
-
 
     /// [LDUMINL - Atomic unsigned minimum on word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDUMIN--LDUMINA--LDUMINAL--LDUMINL--Atomic-unsigned-minimum-on-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2294,7 +2169,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 0, 1, xs, 0, 0b111, xn_sp, xt)
     }
 
-
     /// [SWP - Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWP--SWPA--SWPAL--SWPL--Swap-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Swap word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from a memory location, and stores the value held in a register back to the same memory location. The value initially loaded from memory is returned in the destination register.
@@ -2309,7 +2183,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn swp_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 0, 0, ws, 1, 0b000, xn_sp, wt)
     }
-
 
     /// [SWPA - Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWP--SWPA--SWPAL--SWPL--Swap-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2326,7 +2199,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 1, 0, ws, 1, 0b000, xn_sp, wt)
     }
 
-
     /// [SWPAL- Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWP--SWPA--SWPAL--SWPL--Swap-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Swap word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from a memory location, and stores the value held in a register back to the same memory location. The value initially loaded from memory is returned in the destination register.
@@ -2341,7 +2213,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn swpal_32(&mut self, ws: Register, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 1, 1, ws, 1, 0b000, xn_sp, wt)
     }
-
 
     /// [SWPL - Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWP--SWPA--SWPAL--SWPL--Swap-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2358,7 +2229,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b10, 0, 0, 1, ws, 1, 0b000, xn_sp, wt)
     }
 
-
     /// [SWP - Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWP--SWPA--SWPAL--SWPL--Swap-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Swap word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from a memory location, and stores the value held in a register back to the same memory location. The value initially loaded from memory is returned in the destination register.
@@ -2373,7 +2243,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn swp_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 0, 0, xs, 1, 0b000, xn_sp, xt)
     }
-
 
     /// [SWPA - Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWP--SWPA--SWPAL--SWPL--Swap-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2390,7 +2259,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 1, 0, xs, 1, 0b000, xn_sp, xt)
     }
 
-
     /// [SWPAL - Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWP--SWPA--SWPAL--SWPL--Swap-word-or-doubleword-in-memory-?lang=en)
     ///
     /// Swap word or doubleword in memory atomically loads a 32-bit word or 64-bit doubleword from a memory location, and stores the value held in a register back to the same memory location. The value initially loaded from memory is returned in the destination register.
@@ -2405,7 +2273,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn swpal_64(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 1, 1, xs, 1, 0b000, xn_sp, xt)
     }
-
 
     /// [SWPL - Swap word or doubleword in memory](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SWP--SWPA--SWPAL--SWPL--Swap-word-or-doubleword-in-memory-?lang=en)
     ///
@@ -2422,7 +2289,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 0, 1, xs, 1, 0b000, xn_sp, xt)
     }
 
-
     /// [LDAPR - Load Acquire RCpc Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPR--Load-Acquire-RCpc-Register-?lang=en)
     ///
     /// Load-Acquire RCpc Register derives an address from a base register value, loads a 32-bit word or 64-bit doubleword from the derived address in memory, and writes it to a register.
@@ -2437,7 +2303,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn ldapr_32(&mut self, wt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b10, 0, 1, 0, 0b11111, 1, 0b100, xn_sp, wt)
     }
-
 
     /// [LDAPR - Load Acquire RCpc Register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDAPR--Load-Acquire-RCpc-Register-?lang=en)
     ///
@@ -2454,7 +2319,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 1, 0, 0b11111, 1, 0b100, xn_sp, xt)
     }
 
-
     /// [ST64BV0 - Single copy Atomic 64 byte EL0 Store with Return](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ST64BV0--Single-copy-Atomic-64-byte-EL0-Store-with-Return-?lang=en)
     ///
     /// Single-copy Atomic 64-byte EL0 Store with Return stores eight 64-bit doublewords from consecutive registers, Xt to X(t+7), to a memory location, with the bottom 32 bits taken from ACCDATA_EL1, and writes the status result of the store to a register. The data that is stored is atomic and is required to be 64-byte aligned.
@@ -2469,7 +2333,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn st64bv0(&mut self, xs: Register, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 0, 0, xs, 1, 0b010, xn_sp, xt)
     }
-
 
     /// [ST64BV - Single copy Atomic 64 byte Store with Return](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ST64BV--Single-copy-Atomic-64-byte-Store-with-Return-?lang=en)
     ///
@@ -2486,7 +2349,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
         emit_atomic_mem_op(self, 0b11, 0, 0, 0, xs, 1, 0b011, xn_sp, xt)
     }
 
-
     /// [ST64B - Single copy Atomic 64 byte Store without Return](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ST64B--Single-copy-Atomic-64-byte-Store-without-Return-?lang=en)
     ///
     /// Single-copy Atomic 64-byte Store without Return stores eight 64-bit doublewords from consecutive registers, Xt to X(t+7), to a memory location. The data that is stored is atomic and is required to be 64-byte-aligned.
@@ -2501,7 +2363,6 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
     fn st64b(&mut self, xt: Register, xn_sp: Register) -> T {
         emit_atomic_mem_op(self, 0b11, 0, 0, 0, 0b11111, 1, 0b001, xn_sp, xt)
     }
-
 
     /// [LD64B - Single copy Atomic 64 byte Load](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LD64B--Single-copy-Atomic-64-byte-Load-?lang=en)
     ///
@@ -2522,6 +2383,7 @@ pub trait AtomicMemoryOperatinos<T>: InstructionProcessor<T> {
 #[cfg(test)]
 mod tests {
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[cfg(feature = "arm_feat_lse")]

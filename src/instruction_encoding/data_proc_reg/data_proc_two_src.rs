@@ -19,13 +19,21 @@
 //! - [PACGA - Pointer Authentication Code - using Generic key](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/PACGA--Pointer-Authentication-Code--using-Generic-key-?lang=en)
 //! - [SUBPS - Subtract Pointer - setting Flags](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBPS--Subtract-Pointer--setting-Flags-?lang=en)
 
-
 use bit_seq::{bseq_32, bseq_8};
+
 use crate::instruction_encoding::InstructionProcessor;
 use crate::types::Register;
 
 #[inline(always)]
-fn emit_data_proc_two<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, s: u8, rm: Register, opcode: u8, rn: Register, rd: Register) -> T {
+fn emit_data_proc_two<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: u8,
+    s: u8,
+    rm: Register,
+    opcode: u8,
+    rn: Register,
+    rd: Register,
+) -> T {
     let i = bseq_32!(sf:1 0 s:1 11010110 rm:5 opcode:6 rn:5 rd:5);
     proc.process(i)
 }
@@ -74,7 +82,6 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     fn udiv_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         emit_data_proc_two(self, 1, 0, xm, 0b10, xn, xd)
     }
-
 
     /// [SDIV - Signed Divide](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SDIV--Signed-Divide-?lang=en)
     ///
@@ -172,7 +179,6 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
         emit_data_proc_two(self, 1, 0, xm, 0b1010, xn, xd)
     }
 
-
     /// [RORV - Rotate Right Variable](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/RORV--Rotate-Right-Variable-?lang=en)
     ///
     /// Rotate Right Variable provides the value of the contents of a register rotated by a variable number of bits. The bits that are rotated off the right end are inserted into the vacated bit positions on the left. The remainder obtained by dividing the second source register by the data size defines the number of bits by which the first source register is right-shifted.
@@ -196,7 +202,6 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
     fn rorv_64(&mut self, xd: Register, xn: Register, xm: Register) -> T {
         emit_data_proc_two(self, 1, 0, xm, 0b1011, xn, xd)
     }
-
 
     /// [CRC32B - checksum](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/CRC32B--CRC32H--CRC32W--CRC32X--CRC32-checksum-?lang=en)
     ///
@@ -378,7 +383,6 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
         emit_data_proc_two(self, 1, 1, xm_sp, 0, xn_sp, xd)
     }
 
-
     // aliases
 
     /// [LSL - Logical Shift Left (register)](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LSL--register---Logical-Shift-Left--register---an-alias-of-LSLV-?lang=en)
@@ -481,6 +485,7 @@ pub trait DataProcessingTwoSource<T>: InstructionProcessor<T> {
 #[cfg(test)]
 mod tests {
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]
@@ -666,5 +671,4 @@ mod tests {
         let instr = prod.subps(3, 4, 2);
         assert_eq!(instr, "subps x3, x4, x2");
     }
-
 }

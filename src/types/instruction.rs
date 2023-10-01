@@ -1,4 +1,5 @@
 use bad64::decode;
+
 use crate::types::{Instruction, InstructionPointer};
 
 #[derive(Debug)]

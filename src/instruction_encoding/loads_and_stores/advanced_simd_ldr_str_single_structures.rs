@@ -14,71 +14,169 @@
 //!  - [LD2R - Load single 2 element structure and Replicate to all lanes of two registers](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2R--Load-single-2-element-structure-and-Replicate-to-all-lanes-of-two-registers-?lang=en)
 //!  - [LD4R - Load single 4 element structure and Replicate to all lanes of four registers](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4R--Load-single-4-element-structure-and-Replicate-to-all-lanes-of-four-registers-?lang=en)
 
-
-
 use bit_seq::bseq_32;
+
 use crate::instruction_encoding::InstructionProcessor;
-use crate::types::{Register, UImm1, UImm2, UImm3, UImm4, UImm5};
-use crate::types::ArrSpecifier::{ArrSpec, ArrSpec1};
+use crate::types::arr_specifier::{ArrSpec, ArrSpec1};
+use crate::types::{Register, UImm1, UImm2, UImm3, UImm4};
 
 #[inline(always)]
-fn emit_adv_ldr_str_all<P: InstructionProcessor<T>, T>(proc: &mut P, q: u8, with_offset: bool, l: u8, r: u8, rm: Register, opcode: u8, s: u8, size: u8, rn: Register, rt: Register) -> T {
+fn emit_adv_ldr_str_all<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    q: u8,
+    with_offset: bool,
+    l: u8,
+    r: u8,
+    rm: Register,
+    opcode: u8,
+    s: u8,
+    size: u8,
+    rn: Register,
+    rt: Register,
+) -> T {
     let op = with_offset as u8;
     let r = bseq_32!(0 q:1 001101 op:1 l:1 r:1 rm:5 opcode:3 s:1 size:2 rn:5 rt:5);
     proc.process(r)
 }
 
 #[inline(always)]
-fn emit_adv_ldr_str_plain<P: InstructionProcessor<T>, T>(proc: &mut P, l: u8, r: u8, opcode: u8, op_size: u8, index: u8, rn: Register, vts: &[Register]) -> T {
-    debug_assert!(are_indices_sequential(vts), "vector registers must be sequential, were {:?}", vts);
+fn emit_adv_ldr_str_plain<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    l: u8,
+    r: u8,
+    opcode: u8,
+    op_size: u8,
+    index: u8,
+    rn: Register,
+    vts: &[Register],
+) -> T {
+    debug_assert!(
+        are_indices_sequential(vts),
+        "vector registers must be sequential, were {:?}",
+        vts
+    );
     let (q, s, size) = q_s_size(index, op_size);
     emit_adv_ldr_str_all(proc, q, false, l, r, 0, opcode, s, size, rn, vts[0])
 }
 
 #[inline(always)]
-fn emit_adv_ldr_str_off_reg<P: InstructionProcessor<T>, T>(proc: &mut P, l: u8, r: u8, rm: Register, opcode: u8, op_size: u8, index: u8, rn: Register, vts: &[Register]) -> T {
-    debug_assert!(are_indices_sequential(vts), "vector registers must be sequential, were {:?}", vts);
+fn emit_adv_ldr_str_off_reg<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    l: u8,
+    r: u8,
+    rm: Register,
+    opcode: u8,
+    op_size: u8,
+    index: u8,
+    rn: Register,
+    vts: &[Register],
+) -> T {
+    debug_assert!(
+        are_indices_sequential(vts),
+        "vector registers must be sequential, were {:?}",
+        vts
+    );
     let (q, s, size) = q_s_size(index, op_size);
     emit_adv_ldr_str_all(proc, q, true, l, r, rm, opcode, s, size, rn, vts[0])
 }
 
-
 #[inline(always)]
-fn emit_adv_ldr_str_off_imm<P: InstructionProcessor<T>, T>(proc: &mut P, l: u8, r: u8, opcode: u8, op_size: u8, index: u8, rn: Register, vts: &[Register]) -> T {
-    debug_assert!(are_indices_sequential(vts), "vector registers must be sequential, were {:?}", vts);
+fn emit_adv_ldr_str_off_imm<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    l: u8,
+    r: u8,
+    opcode: u8,
+    op_size: u8,
+    index: u8,
+    rn: Register,
+    vts: &[Register],
+) -> T {
+    debug_assert!(
+        are_indices_sequential(vts),
+        "vector registers must be sequential, were {:?}",
+        vts
+    );
     let (q, s, size) = q_s_size(index, op_size);
     emit_adv_ldr_str_all(proc, q, true, l, r, 0b11111, opcode, s, size, rn, vts[0])
 }
 
 #[inline(always)]
-fn emit_adv_ldxr_plain<P: InstructionProcessor<T>, T, A: ArrSpec>(proc: &mut P, l: u8, r: u8, opcode: u8, t: A, rn: Register, vts: &[Register]) -> T {
-    debug_assert!(are_indices_sequential(vts), "vector registers must be sequential, were {:?}", vts);
+fn emit_adv_ldxr_plain<P: InstructionProcessor<T>, T, A: ArrSpec>(
+    proc: &mut P,
+    l: u8,
+    r: u8,
+    opcode: u8,
+    t: A,
+    rn: Register,
+    vts: &[Register],
+) -> T {
+    debug_assert!(
+        are_indices_sequential(vts),
+        "vector registers must be sequential, were {:?}",
+        vts
+    );
     emit_adv_ldr_str_all(proc, t.q(), false, l, r, 0, opcode, 0, t.size(), rn, vts[0])
 }
 
 #[inline(always)]
-fn emit_adv_ldxr_off_reg<P: InstructionProcessor<T>, T, A: ArrSpec>(proc: &mut P, l: u8, r: u8, rm: Register, opcode: u8, t: A, rn: Register, vts: &[Register]) -> T {
-    debug_assert!(are_indices_sequential(vts), "vector registers must be sequential, were {:?}", vts);
+fn emit_adv_ldxr_off_reg<P: InstructionProcessor<T>, T, A: ArrSpec>(
+    proc: &mut P,
+    l: u8,
+    r: u8,
+    rm: Register,
+    opcode: u8,
+    t: A,
+    rn: Register,
+    vts: &[Register],
+) -> T {
+    debug_assert!(
+        are_indices_sequential(vts),
+        "vector registers must be sequential, were {:?}",
+        vts
+    );
     emit_adv_ldr_str_all(proc, t.q(), true, l, r, rm, opcode, 0, t.size(), rn, vts[0])
 }
 
 #[inline(always)]
-fn emit_adv_ldxr_off_imm<P: InstructionProcessor<T>, T, A: ArrSpec>(proc: &mut P, l: u8, r: u8, opcode: u8, t: A, rn: Register, vts: &[Register]) -> T {
-    debug_assert!(are_indices_sequential(vts), "vector registers must be sequential, were {:?}", vts);
-    emit_adv_ldr_str_all(proc, t.q(), true, l, r, 0b11111, opcode, 0, t.size(), rn, vts[0])
+fn emit_adv_ldxr_off_imm<P: InstructionProcessor<T>, T, A: ArrSpec>(
+    proc: &mut P,
+    l: u8,
+    r: u8,
+    opcode: u8,
+    t: A,
+    rn: Register,
+    vts: &[Register],
+) -> T {
+    debug_assert!(
+        are_indices_sequential(vts),
+        "vector registers must be sequential, were {:?}",
+        vts
+    );
+    emit_adv_ldr_str_all(
+        proc,
+        t.q(),
+        true,
+        l,
+        r,
+        0b11111,
+        opcode,
+        0,
+        t.size(),
+        rn,
+        vts[0],
+    )
 }
 
-#[inline(always)]
-fn get_imm_size(immediate: u8, smallest_imm: u8) -> u8 {
-    match immediate / smallest_imm {
-        1 => 0b00,
-        2 => 0b01,
-        4 => 0b10,
-        _ => 0b11
-    }
-}
+// #[inline(always)]
+// fn get_imm_size(immediate: u8, smallest_imm: u8) -> u8 {
+//     match immediate / smallest_imm {
+//         1 => 0b00,
+//         2 => 0b01,
+//         4 => 0b10,
+//         _ => 0b11,
+//     }
+// }
 
-#[cfg(debug_assertions)]
 fn are_indices_sequential(indices: &[Register]) -> bool {
     for i in 0..(indices.len() - 1) {
         if (indices[i] + 1) % 32 != indices[(i + 1) % indices.len()] {
@@ -136,7 +234,6 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
         emit_adv_ldr_str_plain(self, 0, 0, 0b00, 8, index, xn_sp, &[vt])
     }
 
-
     /// [ST1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--single-structure---Store-a-single-element-structure-from-one-lane-of-one-register-?lang=en)
     ///
     /// Store a single-element structure from one lane of one register. This instruction stores the specified element of a SIMD&FP register to memory.
@@ -150,7 +247,6 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     fn st1_single_struct_half_words(&mut self, vt: Register, index: UImm3, xn_sp: Register) -> T {
         emit_adv_ldr_str_plain(self, 0, 0, 0b010, 16, index, xn_sp, &[vt])
     }
-
 
     /// [ST1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--single-structure---Store-a-single-element-structure-from-one-lane-of-one-register-?lang=en)
     ///
@@ -166,7 +262,6 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
         emit_adv_ldr_str_plain(self, 0, 0, 0b100, 32, index, xn_sp, &[vt])
     }
 
-
     /// [ST1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--single-structure---Store-a-single-element-structure-from-one-lane-of-one-register-?lang=en)
     ///
     /// Store a single-element structure from one lane of one register. This instruction stores the specified element of a SIMD&FP register to memory.
@@ -181,7 +276,6 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
         emit_adv_ldr_str_plain(self, 0, 0, 0b100, 64, index, xn_sp, &[vt])
     }
 
-
     /// [ST1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--single-structure---Store-a-single-element-structure-from-one-lane-of-one-register-?lang=en)
     ///
     /// Store a single-element structure from one lane of one register. This instruction stores the specified element of a SIMD&FP register to memory.
@@ -192,10 +286,14 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.B }[<index>], [<Xn|SP>], #1
     /// ```
     #[inline(always)]
-    fn st1_single_struct_bytes_offset_imm(&mut self, vt: Register, index: UImm4, xn_sp: Register) -> T {
+    fn st1_single_struct_bytes_offset_imm(
+        &mut self,
+        vt: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0, 0b000, 8, index, xn_sp, &[vt])
     }
-
 
     /// [ST1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--single-structure---Store-a-single-element-structure-from-one-lane-of-one-register-?lang=en)
     ///
@@ -207,10 +305,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.B }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st1_single_struct_bytes_offset_reg(&mut self, vt: Register, index: UImm4, xn_sp: Register, xm: Register) -> T {
+    fn st1_single_struct_bytes_offset_reg(
+        &mut self,
+        vt: Register,
+        index: UImm4,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0, xm, 0b000, 8, index, xn_sp, &[vt])
     }
-
 
     /// [ST1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--single-structure---Store-a-single-element-structure-from-one-lane-of-one-register-?lang=en)
     ///
@@ -222,10 +325,14 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.H }[<index>], [<Xn|SP>], #2
     /// ```
     #[inline(always)]
-    fn st1_single_struct_half_words_offset_imm(&mut self, vt: Register, index: UImm3, xn_sp: Register) -> T {
+    fn st1_single_struct_half_words_offset_imm(
+        &mut self,
+        vt: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0, 0b010, 16, index, xn_sp, &[vt])
     }
-
 
     /// [ST1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--single-structure---Store-a-single-element-structure-from-one-lane-of-one-register-?lang=en)
     ///
@@ -237,10 +344,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.H }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st1_single_struct_half_words_offset_reg(&mut self, vt: Register, index: UImm3, xn_sp: Register, xm: Register) -> T {
+    fn st1_single_struct_half_words_offset_reg(
+        &mut self,
+        vt: Register,
+        index: UImm3,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0, xm, 0b010, 16, index, xn_sp, &[vt])
     }
-
 
     /// [ST1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--single-structure---Store-a-single-element-structure-from-one-lane-of-one-register-?lang=en)
     ///
@@ -252,10 +364,14 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.S }[<index>], [<Xn|SP>], #4
     /// ```
     #[inline(always)]
-    fn st1_single_struct_single_words_offset_imm(&mut self, vt: Register, index: UImm2, xn_sp: Register) -> T {
+    fn st1_single_struct_single_words_offset_imm(
+        &mut self,
+        vt: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0, 0b100, 32, index, xn_sp, &[vt])
     }
-
 
     /// [ST1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--single-structure---Store-a-single-element-structure-from-one-lane-of-one-register-?lang=en)
     ///
@@ -267,10 +383,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.S }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st1_single_struct_single_words_offset_reg(&mut self, vt: Register, index: UImm2, xn_sp: Register, xm: Register) -> T {
+    fn st1_single_struct_single_words_offset_reg(
+        &mut self,
+        vt: Register,
+        index: UImm2,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0, xm, 0b100, 32, index, xn_sp, &[vt])
     }
-
 
     /// [ST1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--single-structure---Store-a-single-element-structure-from-one-lane-of-one-register-?lang=en)
     ///
@@ -282,10 +403,14 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.D }[<index>], [<Xn|SP>], #8
     /// ```
     #[inline(always)]
-    fn st1_single_struct_double_words_offset_imm(&mut self, vt: Register, index: UImm1, xn_sp: Register) -> T {
+    fn st1_single_struct_double_words_offset_imm(
+        &mut self,
+        vt: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0, 0b100, 64, index, xn_sp, &[vt])
     }
-
 
     /// [ST1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--single-structure---Store-a-single-element-structure-from-one-lane-of-one-register-?lang=en)
     ///
@@ -297,10 +422,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.D }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st1_single_struct_double_words_offset_reg(&mut self, vt: Register, index: UImm1, xn_sp: Register, xm: Register) -> T {
+    fn st1_single_struct_double_words_offset_reg(
+        &mut self,
+        vt: Register,
+        index: UImm1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0, xm, 0b100, 64, index, xn_sp, &[vt])
     }
-
 
     /// [ST3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--single-structure---Store-single-3-element-structure-from-one-lane-of-three-registers-?lang=en)
     ///
@@ -312,10 +442,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.B, <Vt2>.B, <Vt3>.B }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st3_single_struct_bytes(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm4, xn_sp: Register) -> T {
+    fn st3_single_struct_bytes(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 0, 0b001, 8, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--single-structure---Store-single-3-element-structure-from-one-lane-of-three-registers-?lang=en)
     ///
@@ -327,10 +463,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.H, <Vt2>.H, <Vt3>.H }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st3_single_struct_half_words(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm3, xn_sp: Register) -> T {
+    fn st3_single_struct_half_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 0, 0b011, 16, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--single-structure---Store-single-3-element-structure-from-one-lane-of-three-registers-?lang=en)
     ///
@@ -342,10 +484,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.S, <Vt2>.S, <Vt3>.S }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st3_single_struct_single_words(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm2, xn_sp: Register) -> T {
+    fn st3_single_struct_single_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 0, 0b101, 32, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--single-structure---Store-single-3-element-structure-from-one-lane-of-three-registers-?lang=en)
     ///
@@ -357,10 +505,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.D, <Vt2>.D, <Vt3>.D }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st3_single_struct_double_words(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm1, xn_sp: Register) -> T {
+    fn st3_single_struct_double_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 0, 0b101, 64, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--single-structure---Store-single-3-element-structure-from-one-lane-of-three-registers-?lang=en)
     ///
@@ -372,10 +526,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.B, <Vt2>.B, <Vt3>.B }[<index>], [<Xn|SP>], #3
     /// ```
     #[inline(always)]
-    fn st3_single_struct_bytes_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm4, xn_sp: Register) -> T {
+    fn st3_single_struct_bytes_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0, 0b001, 8, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--single-structure---Store-single-3-element-structure-from-one-lane-of-three-registers-?lang=en)
     ///
@@ -387,10 +547,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.B, <Vt2>.B, <Vt3>.B }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st3_single_struct_bytes_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm4, xn_sp: Register, xm: Register) -> T {
+    fn st3_single_struct_bytes_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm4,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0, xm, 0b001, 8, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--single-structure---Store-single-3-element-structure-from-one-lane-of-three-registers-?lang=en)
     ///
@@ -402,10 +569,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.H, <Vt2>.H, <Vt3>.H }[<index>], [<Xn|SP>], #6
     /// ```
     #[inline(always)]
-    fn st3_single_struct_half_words_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm3, xn_sp: Register) -> T {
+    fn st3_single_struct_half_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0, 0b011, 16, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--single-structure---Store-single-3-element-structure-from-one-lane-of-three-registers-?lang=en)
     ///
@@ -417,10 +590,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.H, <Vt2>.H, <Vt3>.H }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st3_single_struct_half_words_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm3, xn_sp: Register, xm: Register) -> T {
+    fn st3_single_struct_half_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm3,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0, xm, 0b011, 16, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--single-structure---Store-single-3-element-structure-from-one-lane-of-three-registers-?lang=en)
     ///
@@ -432,10 +612,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.S, <Vt2>.S, <Vt3>.S }[<index>], [<Xn|SP>], #12
     /// ```
     #[inline(always)]
-    fn st3_single_struct_single_words_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm2, xn_sp: Register) -> T {
+    fn st3_single_struct_single_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0, 0b101, 32, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--single-structure---Store-single-3-element-structure-from-one-lane-of-three-registers-?lang=en)
     ///
@@ -447,10 +633,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.S, <Vt2>.S, <Vt3>.S }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st3_single_struct_single_words_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm2, xn_sp: Register, xm: Register) -> T {
+    fn st3_single_struct_single_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm2,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0, xm, 0b101, 32, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--single-structure---Store-single-3-element-structure-from-one-lane-of-three-registers-?lang=en)
     ///
@@ -462,10 +655,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.D, <Vt2>.D, <Vt3>.D }[<index>], [<Xn|SP>], #24
     /// ```
     #[inline(always)]
-    fn st3_single_struct_double_words_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm1, xn_sp: Register) -> T {
+    fn st3_single_struct_double_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0, 0b101, 64, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--single-structure---Store-single-3-element-structure-from-one-lane-of-three-registers-?lang=en)
     ///
@@ -477,10 +676,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.D, <Vt2>.D, <Vt3>.D }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st3_single_struct_double_words_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm1, xn_sp: Register, xm: Register) -> T {
+    fn st3_single_struct_double_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0, xm, 0b101, 64, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--single-structure---Store-single-2-element-structure-from-one-lane-of-two-registers-?lang=en)
     ///
@@ -492,10 +698,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.B, <Vt2>.B }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st2_single_struct_bytes(&mut self, vt: Register, vt2: Register, index: UImm4, xn_sp: Register) -> T {
+    fn st2_single_struct_bytes(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 1, 0b00, 8, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--single-structure---Store-single-2-element-structure-from-one-lane-of-two-registers-?lang=en)
     ///
@@ -507,10 +718,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.H, <Vt2>.H }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st2_single_struct_half_words(&mut self, vt: Register, vt2: Register, index: UImm3, xn_sp: Register) -> T {
+    fn st2_single_struct_half_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 1, 0b010, 16, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--single-structure---Store-single-2-element-structure-from-one-lane-of-two-registers-?lang=en)
     ///
@@ -522,10 +738,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.S, <Vt2>.S }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st2_single_struct_single_words(&mut self, vt: Register, vt2: Register, index: UImm2, xn_sp: Register) -> T {
+    fn st2_single_struct_single_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 1, 0b100, 32, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--single-structure---Store-single-2-element-structure-from-one-lane-of-two-registers-?lang=en)
     ///
@@ -537,10 +758,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.D, <Vt2>.D }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st2_single_struct_double_words(&mut self, vt: Register, vt2: Register, index: UImm1, xn_sp: Register) -> T {
+    fn st2_single_struct_double_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 1, 0b100, 64, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--single-structure---Store-single-2-element-structure-from-one-lane-of-two-registers-?lang=en)
     ///
@@ -552,10 +778,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.B, <Vt2>.B }[<index>], [<Xn|SP>], #2
     /// ```
     #[inline(always)]
-    fn st2_single_struct_bytes_offset_imm(&mut self, vt: Register, vt2: Register, index: UImm4, xn_sp: Register) -> T {
+    fn st2_single_struct_bytes_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 1, 0b000, 8, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--single-structure---Store-single-2-element-structure-from-one-lane-of-two-registers-?lang=en)
     ///
@@ -567,10 +798,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.B, <Vt2>.B }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st2_single_struct_bytes_offset_reg(&mut self, vt: Register, vt2: Register, index: UImm4, xn_sp: Register, xm: Register) -> T {
+    fn st2_single_struct_bytes_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm4,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 1, xm, 0b000, 8, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--single-structure---Store-single-2-element-structure-from-one-lane-of-two-registers-?lang=en)
     ///
@@ -582,10 +819,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.H, <Vt2>.H }[<index>], [<Xn|SP>], #4
     /// ```
     #[inline(always)]
-    fn st2_single_struct_half_words_offset_imm(&mut self, vt: Register, vt2: Register, index: UImm3, xn_sp: Register) -> T {
+    fn st2_single_struct_half_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 1, 0b010, 16, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--single-structure---Store-single-2-element-structure-from-one-lane-of-two-registers-?lang=en)
     ///
@@ -597,10 +839,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.H, <Vt2>.H }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st2_single_struct_half_words_offset_reg(&mut self, vt: Register, vt2: Register, index: UImm3, xn_sp: Register, xm: Register) -> T {
+    fn st2_single_struct_half_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm3,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 1, xm, 0b010, 16, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--single-structure---Store-single-2-element-structure-from-one-lane-of-two-registers-?lang=en)
     ///
@@ -612,10 +860,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.S, <Vt2>.S }[<index>], [<Xn|SP>], #8
     /// ```
     #[inline(always)]
-    fn st2_single_struct_single_words_offset_imm(&mut self, vt: Register, vt2: Register, index: UImm2, xn_sp: Register) -> T {
+    fn st2_single_struct_single_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 1, 0b100, 32, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--single-structure---Store-single-2-element-structure-from-one-lane-of-two-registers-?lang=en)
     ///
@@ -627,10 +880,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.S, <Vt2>.S }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st2_single_struct_single_words_offset_reg(&mut self, vt: Register, vt2: Register, index: UImm2, xn_sp: Register, xm: Register) -> T {
+    fn st2_single_struct_single_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm2,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 1, xm, 0b100, 32, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--single-structure---Store-single-2-element-structure-from-one-lane-of-two-registers-?lang=en)
     ///
@@ -642,10 +901,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.D, <Vt2>.D }[<index>], [<Xn|SP>], #16
     /// ```
     #[inline(always)]
-    fn st2_single_struct_double_words_offset_imm(&mut self, vt: Register, vt2: Register, index: UImm1, xn_sp: Register) -> T {
+    fn st2_single_struct_double_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 1, 0b100, 64, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--single-structure---Store-single-2-element-structure-from-one-lane-of-two-registers-?lang=en)
     ///
@@ -657,10 +921,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.D, <Vt2>.D }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st2_single_struct_double_words_offset_reg(&mut self, vt: Register, vt2: Register, index: UImm1, xn_sp: Register, xm: Register) -> T {
+    fn st2_single_struct_double_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 1, xm, 0b100, 64, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--single-structure---Store-single-4-element-structure-from-one-lane-of-four-registers-?lang=en)
     ///
@@ -672,10 +942,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.B, <Vt2>.B, <Vt3>.B, <Vt4>.B }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st4_single_struct_bytes(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm4, xn_sp: Register) -> T {
+    fn st4_single_struct_bytes(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 1, 0b001, 8, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--single-structure---Store-single-4-element-structure-from-one-lane-of-four-registers-?lang=en)
     ///
@@ -687,10 +964,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.H, <Vt2>.H, <Vt3>.H, <Vt4>.H }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st4_single_struct_half_words(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm3, xn_sp: Register) -> T {
+    fn st4_single_struct_half_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 1, 0b011, 16, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--single-structure---Store-single-4-element-structure-from-one-lane-of-four-registers-?lang=en)
     ///
@@ -702,10 +986,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.S, <Vt2>.S, <Vt3>.S, <Vt4>.S }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st4_single_struct_single_words(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm2, xn_sp: Register) -> T {
+    fn st4_single_struct_single_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 1, 0b101, 32, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--single-structure---Store-single-4-element-structure-from-one-lane-of-four-registers-?lang=en)
     ///
@@ -717,10 +1008,18 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.B, <Vt2>.B, <Vt3>.B, <Vt4>.B }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st4_single_struct_bytes_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm4, xn_sp: Register, xm: Register) -> T {
+    fn st4_single_struct_bytes_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm4,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 1, xm, 0b001, 8, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--single-structure---Store-single-4-element-structure-from-one-lane-of-four-registers-?lang=en)
     ///
@@ -732,10 +1031,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.D, <Vt2>.D, <Vt3>.D, <Vt4>.D }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st4_single_struct_double_words(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm1, xn_sp: Register) -> T {
+    fn st4_single_struct_double_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 1, 0b101, 64, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--single-structure---Store-single-4-element-structure-from-one-lane-of-four-registers-?lang=en)
     ///
@@ -747,10 +1053,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.B, <Vt2>.B, <Vt3>.B, <Vt4>.B }[<index>], [<Xn|SP>], #4
     /// ```
     #[inline(always)]
-    fn st4_single_struct_bytes_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm4, xn_sp: Register) -> T {
+    fn st4_single_struct_bytes_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 1, 0b001, 8, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--single-structure---Store-single-4-element-structure-from-one-lane-of-four-registers-?lang=en)
     ///
@@ -762,10 +1075,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.H, <Vt2>.H, <Vt3>.H, <Vt4>.H }[<index>], [<Xn|SP>], #8
     /// ```
     #[inline(always)]
-    fn st4_single_struct_half_words_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm3, xn_sp: Register) -> T {
+    fn st4_single_struct_half_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 1, 0b011, 16, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--single-structure---Store-single-4-element-structure-from-one-lane-of-four-registers-?lang=en)
     ///
@@ -777,10 +1097,28 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.H, <Vt2>.H, <Vt3>.H, <Vt4>.H }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st4_single_struct_half_words_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm3, xn_sp: Register, xm: Register) -> T {
-        emit_adv_ldr_str_off_reg(self, 0, 1, xm, 0b011, 16, index, xn_sp, &[vt, vt2, vt3, vt4])
+    fn st4_single_struct_half_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm3,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
+        emit_adv_ldr_str_off_reg(
+            self,
+            0,
+            1,
+            xm,
+            0b011,
+            16,
+            index,
+            xn_sp,
+            &[vt, vt2, vt3, vt4],
+        )
     }
-
 
     /// [ST4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--single-structure---Store-single-4-element-structure-from-one-lane-of-four-registers-?lang=en)
     ///
@@ -792,10 +1130,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.S, <Vt2>.S, <Vt3>.S, <Vt4>.S }[<index>], [<Xn|SP>], #16
     /// ```
     #[inline(always)]
-    fn st4_single_struct_single_words_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm2, xn_sp: Register) -> T {
+    fn st4_single_struct_single_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 1, 0b101, 32, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--single-structure---Store-single-4-element-structure-from-one-lane-of-four-registers-?lang=en)
     ///
@@ -807,10 +1152,28 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.S, <Vt2>.S, <Vt3>.S, <Vt4>.S }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st4_single_struct_single_words_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm2, xn_sp: Register, xm: Register) -> T {
-        emit_adv_ldr_str_off_reg(self, 0, 1, xm, 0b101, 32, index, xn_sp, &[vt, vt2, vt3, vt4])
+    fn st4_single_struct_single_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm2,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
+        emit_adv_ldr_str_off_reg(
+            self,
+            0,
+            1,
+            xm,
+            0b101,
+            32,
+            index,
+            xn_sp,
+            &[vt, vt2, vt3, vt4],
+        )
     }
-
 
     /// [ST4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--single-structure---Store-single-4-element-structure-from-one-lane-of-four-registers-?lang=en)
     ///
@@ -822,10 +1185,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.D, <Vt2>.D, <Vt3>.D, <Vt4>.D }[<index>], [<Xn|SP>], #32
     /// ```
     #[inline(always)]
-    fn st4_single_struct_double_words_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm1, xn_sp: Register) -> T {
+    fn st4_single_struct_double_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 1, 0b101, 64, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--single-structure---Store-single-4-element-structure-from-one-lane-of-four-registers-?lang=en)
     ///
@@ -837,10 +1207,28 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.D, <Vt2>.D, <Vt3>.D, <Vt4>.D }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st4_single_struct_double_words_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm1, xn_sp: Register, xm: Register) -> T {
-        emit_adv_ldr_str_off_reg(self, 0, 1, xm, 0b101, 64, index, xn_sp, &[vt, vt2, vt3, vt4])
+    fn st4_single_struct_double_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
+        emit_adv_ldr_str_off_reg(
+            self,
+            0,
+            1,
+            xm,
+            0b101,
+            64,
+            index,
+            xn_sp,
+            &[vt, vt2, vt3, vt4],
+        )
     }
-
 
     /// [LD1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--single-structure---Load-one-single-element-structure-to-one-lane-of-one-register-?lang=en)
     ///
@@ -856,7 +1244,6 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
         emit_adv_ldr_str_plain(self, 1, 0, 0b00, 8, index, xn_sp, &[vt])
     }
 
-
     /// [LD1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--single-structure---Load-one-single-element-structure-to-one-lane-of-one-register-?lang=en)
     ///
     /// Load one single-element structure to one lane of one register. This instruction loads a single-element structure from memory and writes the result to the specified lane of the SIMD&FP register without affecting the other bits of the register.
@@ -870,7 +1257,6 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     fn ld1_single_struct_half_words(&mut self, vt: Register, index: UImm3, xn_sp: Register) -> T {
         emit_adv_ldr_str_plain(self, 1, 0, 0b010, 16, index, xn_sp, &[vt])
     }
-
 
     /// [LD1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--single-structure---Load-one-single-element-structure-to-one-lane-of-one-register-?lang=en)
     ///
@@ -886,7 +1272,6 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
         emit_adv_ldr_str_plain(self, 1, 0, 0b100, 32, index, xn_sp, &[vt])
     }
 
-
     /// [LD1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--single-structure---Load-one-single-element-structure-to-one-lane-of-one-register-?lang=en)
     ///
     /// Load one single-element structure to one lane of one register. This instruction loads a single-element structure from memory and writes the result to the specified lane of the SIMD&FP register without affecting the other bits of the register.
@@ -901,7 +1286,6 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
         emit_adv_ldr_str_plain(self, 1, 0, 0b100, 64, index, xn_sp, &[vt])
     }
 
-
     /// [LD1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--single-structure---Load-one-single-element-structure-to-one-lane-of-one-register-?lang=en)
     ///
     /// Load one single-element structure to one lane of one register. This instruction loads a single-element structure from memory and writes the result to the specified lane of the SIMD&FP register without affecting the other bits of the register.
@@ -912,10 +1296,14 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.B }[<index>], [<Xn|SP>], #1
     /// ```
     #[inline(always)]
-    fn ld1_single_struct_bytes_offset_imm(&mut self, vt: Register, index: UImm4, xn_sp: Register) -> T {
+    fn ld1_single_struct_bytes_offset_imm(
+        &mut self,
+        vt: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0, 0b000, 8, index, xn_sp, &[vt])
     }
-
 
     /// [LD1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--single-structure---Load-one-single-element-structure-to-one-lane-of-one-register-?lang=en)
     ///
@@ -927,10 +1315,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.B }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld1_single_struct_bytes_offset_reg(&mut self, vt: Register, index: UImm4, xn_sp: Register, xm: Register) -> T {
+    fn ld1_single_struct_bytes_offset_reg(
+        &mut self,
+        vt: Register,
+        index: UImm4,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0, xm, 0b000, 8, index, xn_sp, &[vt])
     }
-
 
     /// [LD1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--single-structure---Load-one-single-element-structure-to-one-lane-of-one-register-?lang=en)
     ///
@@ -942,10 +1335,14 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.H }[<index>], [<Xn|SP>], #2
     /// ```
     #[inline(always)]
-    fn ld1_single_struct_half_words_offset_imm(&mut self, vt: Register, index: UImm3, xn_sp: Register) -> T {
+    fn ld1_single_struct_half_words_offset_imm(
+        &mut self,
+        vt: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0, 0b010, 16, index, xn_sp, &[vt])
     }
-
 
     /// [LD1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--single-structure---Load-one-single-element-structure-to-one-lane-of-one-register-?lang=en)
     ///
@@ -957,10 +1354,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.H }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld1_single_struct_half_words_offset_reg(&mut self, vt: Register, index: UImm3, xn_sp: Register, xm: Register) -> T {
+    fn ld1_single_struct_half_words_offset_reg(
+        &mut self,
+        vt: Register,
+        index: UImm3,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0, xm, 0b010, 16, index, xn_sp, &[vt])
     }
-
 
     /// [LD1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--single-structure---Load-one-single-element-structure-to-one-lane-of-one-register-?lang=en)
     ///
@@ -972,10 +1374,14 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.S }[<index>], [<Xn|SP>], #4
     /// ```
     #[inline(always)]
-    fn ld1_single_struct_single_words_offset_imm(&mut self, vt: Register, index: UImm2, xn_sp: Register) -> T {
+    fn ld1_single_struct_single_words_offset_imm(
+        &mut self,
+        vt: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0, 0b100, 32, index, xn_sp, &[vt])
     }
-
 
     /// [LD1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--single-structure---Load-one-single-element-structure-to-one-lane-of-one-register-?lang=en)
     ///
@@ -987,10 +1393,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.S }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld1_single_struct_single_words_offset_reg(&mut self, vt: Register, index: UImm2, xn_sp: Register, xm: Register) -> T {
+    fn ld1_single_struct_single_words_offset_reg(
+        &mut self,
+        vt: Register,
+        index: UImm2,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0, xm, 0b100, 32, index, xn_sp, &[vt])
     }
-
 
     /// [LD1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--single-structure---Load-one-single-element-structure-to-one-lane-of-one-register-?lang=en)
     ///
@@ -1002,10 +1413,14 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.D }[<index>], [<Xn|SP>], #8
     /// ```
     #[inline(always)]
-    fn ld1_single_struct_double_words_offset_imm(&mut self, vt: Register, index: UImm1, xn_sp: Register) -> T {
+    fn ld1_single_struct_double_words_offset_imm(
+        &mut self,
+        vt: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0, 0b100, 64, index, xn_sp, &[vt])
     }
-
 
     /// [LD1 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--single-structure---Load-one-single-element-structure-to-one-lane-of-one-register-?lang=en)
     ///
@@ -1017,10 +1432,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.D }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld1_single_struct_double_words_offset_reg(&mut self, vt: Register, index: UImm1, xn_sp: Register, xm: Register) -> T {
+    fn ld1_single_struct_double_words_offset_reg(
+        &mut self,
+        vt: Register,
+        index: UImm1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0, xm, 0b100, 64, index, xn_sp, &[vt])
     }
-
 
     /// [LD3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--single-structure---Load-single-3-element-structure-to-one-lane-of-three-registers-?lang=en)
     ///
@@ -1032,10 +1452,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.B, <Vt2>.B, <Vt3>.B }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld3_single_struct_bytes(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm4, xn_sp: Register) -> T {
+    fn ld3_single_struct_bytes(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 0, 0b001, 8, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--single-structure---Load-single-3-element-structure-to-one-lane-of-three-registers-?lang=en)
     ///
@@ -1047,10 +1473,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.H, <Vt2>.H, <Vt3>.H }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld3_single_struct_half_words(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm3, xn_sp: Register) -> T {
+    fn ld3_single_struct_half_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 0, 0b011, 16, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--single-structure---Load-single-3-element-structure-to-one-lane-of-three-registers-?lang=en)
     ///
@@ -1062,10 +1494,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.S, <Vt2>.S, <Vt3>.S }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld3_single_struct_single_words(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm2, xn_sp: Register) -> T {
+    fn ld3_single_struct_single_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 0, 0b101, 32, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--single-structure---Load-single-3-element-structure-to-one-lane-of-three-registers-?lang=en)
     ///
@@ -1077,10 +1515,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.D, <Vt2>.D, <Vt3>.D }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld3_single_struct_double_words(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm1, xn_sp: Register) -> T {
+    fn ld3_single_struct_double_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 0, 0b101, 64, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--single-structure---Load-single-3-element-structure-to-one-lane-of-three-registers-?lang=en)
     ///
@@ -1092,10 +1536,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.B, <Vt2>.B, <Vt3>.B }[<index>], [<Xn|SP>], #3
     /// ```
     #[inline(always)]
-    fn ld3_single_struct_bytes_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm4, xn_sp: Register) -> T {
+    fn ld3_single_struct_bytes_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0, 0b001, 8, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--single-structure---Load-single-3-element-structure-to-one-lane-of-three-registers-?lang=en)
     ///
@@ -1107,10 +1557,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.B, <Vt2>.B, <Vt3>.B }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld3_single_struct_bytes_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm4, xn_sp: Register, xm: Register) -> T {
+    fn ld3_single_struct_bytes_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm4,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0, xm, 0b001, 8, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--single-structure---Load-single-3-element-structure-to-one-lane-of-three-registers-?lang=en)
     ///
@@ -1122,10 +1579,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.H, <Vt2>.H, <Vt3>.H }[<index>], [<Xn|SP>], #6
     /// ```
     #[inline(always)]
-    fn ld3_single_struct_half_words_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm3, xn_sp: Register) -> T {
+    fn ld3_single_struct_half_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0, 0b011, 16, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--single-structure---Load-single-3-element-structure-to-one-lane-of-three-registers-?lang=en)
     ///
@@ -1137,10 +1600,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.H, <Vt2>.H, <Vt3>.H }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld3_single_struct_half_words_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm3, xn_sp: Register, xm: Register) -> T {
+    fn ld3_single_struct_half_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm3,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0, xm, 0b011, 16, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--single-structure---Load-single-3-element-structure-to-one-lane-of-three-registers-?lang=en)
     ///
@@ -1152,10 +1622,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.S, <Vt2>.S, <Vt3>.S }[<index>], [<Xn|SP>], #12
     /// ```
     #[inline(always)]
-    fn ld3_single_struct_single_words_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm2, xn_sp: Register) -> T {
+    fn ld3_single_struct_single_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0, 0b101, 32, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--single-structure---Load-single-3-element-structure-to-one-lane-of-three-registers-?lang=en)
     ///
@@ -1167,10 +1643,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.S, <Vt2>.S, <Vt3>.S }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld3_single_struct_single_words_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm2, xn_sp: Register, xm: Register) -> T {
+    fn ld3_single_struct_single_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm2,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0, xm, 0b101, 32, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--single-structure---Load-single-3-element-structure-to-one-lane-of-three-registers-?lang=en)
     ///
@@ -1182,10 +1665,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.D, <Vt2>.D, <Vt3>.D }[<index>], [<Xn|SP>], #24
     /// ```
     #[inline(always)]
-    fn ld3_single_struct_double_words_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm1, xn_sp: Register) -> T {
+    fn ld3_single_struct_double_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0, 0b101, 64, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--single-structure---Load-single-3-element-structure-to-one-lane-of-three-registers-?lang=en)
     ///
@@ -1197,10 +1686,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.D, <Vt2>.D, <Vt3>.D }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld3_single_struct_double_words_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, index: UImm1, xn_sp: Register, xm: Register) -> T {
+    fn ld3_single_struct_double_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        index: UImm1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0, xm, 0b101, 64, index, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD1R - Load one single element structure and Replicate to all lanes - of one register - ](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1R--Load-one-single-element-structure-and-Replicate-to-all-lanes--of-one-register--?lang=en)
     ///
@@ -1215,7 +1711,6 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     fn ld1r(&mut self, vt: Register, t: ArrSpec1, xn_sp: Register) -> T {
         emit_adv_ldxr_plain(self, 1, 0, 0b110, t, xn_sp, &[vt])
     }
-
 
     /// [LD1R - Load one single element structure and Replicate to all lanes - of one register - ](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1R--Load-one-single-element-structure-and-Replicate-to-all-lanes--of-one-register--?lang=en)
     ///
@@ -1233,7 +1728,6 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
         emit_adv_ldxr_off_imm(self, 1, 0, 0b110, t, xn_sp, &[vt])
     }
 
-
     /// [LD1R - Load one single element structure and Replicate to all lanes - of one register - ](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1R--Load-one-single-element-structure-and-Replicate-to-all-lanes--of-one-register--?lang=en)
     ///
     /// Load one single-element structure and Replicate to all lanes (of one register). This instruction loads a single-element structure from memory and replicates the structure to all the lanes of the SIMD&FP register.
@@ -1248,7 +1742,6 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
         emit_adv_ldxr_off_reg(self, 1, 0, xm, 0b110, t, xn_sp, &[vt])
     }
 
-
     /// [LD3R - Load single 3 element structure and Replicate to all lanes of three registers](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3R--Load-single-3-element-structure-and-Replicate-to-all-lanes-of-three-registers-?lang=en)
     ///
     /// Load single 3-element structure and Replicate to all lanes of three registers. This instruction loads a 3-element structure from memory and replicates the structure to all the lanes of the three SIMD&FP registers.
@@ -1259,10 +1752,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3R { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld3r(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn ld3r(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldxr_plain(self, 1, 0, 0b111, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3R - Load single 3 element structure and Replicate to all lanes of three registers](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3R--Load-single-3-element-structure-and-Replicate-to-all-lanes-of-three-registers-?lang=en)
     ///
@@ -1276,10 +1775,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     ///
     /// *Note*: `<imm>` implicitly given by the chosen arrangement specification `t`
     #[inline(always)]
-    fn ld3r_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn ld3r_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldxr_off_imm(self, 1, 0, 0b111, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3R - Load single 3 element structure and Replicate to all lanes of three registers](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3R--Load-single-3-element-structure-and-Replicate-to-all-lanes-of-three-registers-?lang=en)
     ///
@@ -1291,10 +1796,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD3R { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld3r_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpec1, xn_sp: Register, xm: Register) -> T {
+    fn ld3r_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldxr_off_reg(self, 1, 0, xm, 0b111, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--single-structure---Load-single-2-element-structure-to-one-lane-of-two-registers-?lang=en)
     ///
@@ -1306,10 +1818,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.B, <Vt2>.B }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld2_single_struct_bytes(&mut self, vt: Register, vt2: Register, index: UImm4, xn_sp: Register) -> T {
+    fn ld2_single_struct_bytes(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 1, 0b00, 8, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--single-structure---Load-single-2-element-structure-to-one-lane-of-two-registers-?lang=en)
     ///
@@ -1321,10 +1838,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.H, <Vt2>.H }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld2_single_struct_half_words(&mut self, vt: Register, vt2: Register, index: UImm3, xn_sp: Register) -> T {
+    fn ld2_single_struct_half_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 1, 0b010, 16, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--single-structure---Load-single-2-element-structure-to-one-lane-of-two-registers-?lang=en)
     ///
@@ -1336,10 +1858,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.S, <Vt2>.S }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld2_single_struct_single_words(&mut self, vt: Register, vt2: Register, index: UImm2, xn_sp: Register) -> T {
+    fn ld2_single_struct_single_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 1, 0b100, 32, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--single-structure---Load-single-2-element-structure-to-one-lane-of-two-registers-?lang=en)
     ///
@@ -1351,10 +1878,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.D, <Vt2>.D }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld2_single_struct_double_words(&mut self, vt: Register, vt2: Register, index: UImm1, xn_sp: Register) -> T {
+    fn ld2_single_struct_double_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 1, 0b100, 64, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--single-structure---Load-single-2-element-structure-to-one-lane-of-two-registers-?lang=en)
     ///
@@ -1366,10 +1898,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.B, <Vt2>.B }[<index>], [<Xn|SP>], #2
     /// ```
     #[inline(always)]
-    fn ld2_single_struct_bytes_offset_imm(&mut self, vt: Register, vt2: Register, index: UImm4, xn_sp: Register) -> T {
+    fn ld2_single_struct_bytes_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 1, 0b000, 8, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--single-structure---Load-single-2-element-structure-to-one-lane-of-two-registers-?lang=en)
     ///
@@ -1381,10 +1918,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.B, <Vt2>.B }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld2_single_struct_bytes_offset_reg(&mut self, vt: Register, vt2: Register, index: UImm4, xn_sp: Register, xm: Register) -> T {
+    fn ld2_single_struct_bytes_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm4,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 1, xm, 0b000, 8, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--single-structure---Load-single-2-element-structure-to-one-lane-of-two-registers-?lang=en)
     ///
@@ -1396,10 +1939,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.H, <Vt2>.H }[<index>], [<Xn|SP>], #4
     /// ```
     #[inline(always)]
-    fn ld2_single_struct_half_words_offset_imm(&mut self, vt: Register, vt2: Register, index: UImm3, xn_sp: Register) -> T {
+    fn ld2_single_struct_half_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 1, 0b010, 16, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--single-structure---Load-single-2-element-structure-to-one-lane-of-two-registers-?lang=en)
     ///
@@ -1411,10 +1959,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.H, <Vt2>.H }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld2_single_struct_half_words_offset_reg(&mut self, vt: Register, vt2: Register, index: UImm3, xn_sp: Register, xm: Register) -> T {
+    fn ld2_single_struct_half_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm3,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 1, xm, 0b010, 16, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--single-structure---Load-single-2-element-structure-to-one-lane-of-two-registers-?lang=en)
     ///
@@ -1426,10 +1980,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.S, <Vt2>.S }[<index>], [<Xn|SP>], #8
     /// ```
     #[inline(always)]
-    fn ld2_single_struct_single_words_offset_imm(&mut self, vt: Register, vt2: Register, index: UImm2, xn_sp: Register) -> T {
+    fn ld2_single_struct_single_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 1, 0b100, 32, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--single-structure---Load-single-2-element-structure-to-one-lane-of-two-registers-?lang=en)
     ///
@@ -1441,10 +2000,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.S, <Vt2>.S }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld2_single_struct_single_words_offset_reg(&mut self, vt: Register, vt2: Register, index: UImm2, xn_sp: Register, xm: Register) -> T {
+    fn ld2_single_struct_single_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm2,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 1, xm, 0b100, 32, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--single-structure---Load-single-2-element-structure-to-one-lane-of-two-registers-?lang=en)
     ///
@@ -1456,10 +2021,15 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.D, <Vt2>.D }[<index>], [<Xn|SP>], #16
     /// ```
     #[inline(always)]
-    fn ld2_single_struct_double_words_offset_imm(&mut self, vt: Register, vt2: Register, index: UImm1, xn_sp: Register) -> T {
+    fn ld2_single_struct_double_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 1, 0b100, 64, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--single-structure---Load-single-2-element-structure-to-one-lane-of-two-registers-?lang=en)
     ///
@@ -1471,10 +2041,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.D, <Vt2>.D }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld2_single_struct_double_words_offset_reg(&mut self, vt: Register, vt2: Register, index: UImm1, xn_sp: Register, xm: Register) -> T {
+    fn ld2_single_struct_double_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        index: UImm1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 1, xm, 0b100, 64, index, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--single-structure---Load-single-4-element-structure-to-one-lane-of-four-registers-?lang=en)
     ///
@@ -1486,10 +2062,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.B, <Vt2>.B, <Vt3>.B, <Vt4>.B }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld4_single_struct_bytes(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm4, xn_sp: Register) -> T {
+    fn ld4_single_struct_bytes(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 1, 0b001, 8, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--single-structure---Load-single-4-element-structure-to-one-lane-of-four-registers-?lang=en)
     ///
@@ -1501,10 +2084,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.H, <Vt2>.H, <Vt3>.H, <Vt4>.H }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld4_single_struct_half_words(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm3, xn_sp: Register) -> T {
+    fn ld4_single_struct_half_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 1, 0b011, 16, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--single-structure---Load-single-4-element-structure-to-one-lane-of-four-registers-?lang=en)
     ///
@@ -1516,10 +2106,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.S, <Vt2>.S, <Vt3>.S, <Vt4>.S }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld4_single_struct_single_words(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm2, xn_sp: Register) -> T {
+    fn ld4_single_struct_single_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 1, 0b101, 32, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--single-structure---Load-single-4-element-structure-to-one-lane-of-four-registers-?lang=en)
     ///
@@ -1531,10 +2128,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.D, <Vt2>.D, <Vt3>.D, <Vt4>.D }[<index>], [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld4_single_struct_double_words(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm1, xn_sp: Register) -> T {
+    fn ld4_single_struct_double_words(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 1, 0b101, 64, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--single-structure---Load-single-4-element-structure-to-one-lane-of-four-registers-?lang=en)
     ///
@@ -1546,10 +2150,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.B, <Vt2>.B, <Vt3>.B, <Vt4>.B }[<index>], [<Xn|SP>], #4
     /// ```
     #[inline(always)]
-    fn ld4_single_struct_bytes_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm4, xn_sp: Register) -> T {
+    fn ld4_single_struct_bytes_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm4,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 1, 0b001, 8, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--single-structure---Load-single-4-element-structure-to-one-lane-of-four-registers-?lang=en)
     ///
@@ -1561,10 +2172,18 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.B, <Vt2>.B, <Vt3>.B, <Vt4>.B }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld4_single_struct_bytes_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm4, xn_sp: Register, xm: Register) -> T {
+    fn ld4_single_struct_bytes_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm4,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 1, xm, 0b001, 8, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--single-structure---Load-single-4-element-structure-to-one-lane-of-four-registers-?lang=en)
     ///
@@ -1576,10 +2195,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.H, <Vt2>.H, <Vt3>.H, <Vt4>.H }[<index>], [<Xn|SP>], #8
     /// ```
     #[inline(always)]
-    fn ld4_single_struct_half_words_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm3, xn_sp: Register) -> T {
+    fn ld4_single_struct_half_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm3,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 1, 0b011, 16, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--single-structure---Load-single-4-element-structure-to-one-lane-of-four-registers-?lang=en)
     ///
@@ -1591,10 +2217,28 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.H, <Vt2>.H, <Vt3>.H, <Vt4>.H }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld4_single_struct_half_words_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm3, xn_sp: Register, xm: Register) -> T {
-        emit_adv_ldr_str_off_reg(self, 1, 1, xm, 0b011, 16, index, xn_sp, &[vt, vt2, vt3, vt4])
+    fn ld4_single_struct_half_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm3,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
+        emit_adv_ldr_str_off_reg(
+            self,
+            1,
+            1,
+            xm,
+            0b011,
+            16,
+            index,
+            xn_sp,
+            &[vt, vt2, vt3, vt4],
+        )
     }
-
 
     /// [LD4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--single-structure---Load-single-4-element-structure-to-one-lane-of-four-registers-?lang=en)
     ///
@@ -1606,10 +2250,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.S, <Vt2>.S, <Vt3>.S, <Vt4>.S }[<index>], [<Xn|SP>], #16
     /// ```
     #[inline(always)]
-    fn ld4_single_struct_single_words_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm2, xn_sp: Register) -> T {
+    fn ld4_single_struct_single_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm2,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 1, 0b101, 32, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--single-structure---Load-single-4-element-structure-to-one-lane-of-four-registers-?lang=en)
     ///
@@ -1621,10 +2272,28 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.S, <Vt2>.S, <Vt3>.S, <Vt4>.S }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld4_single_struct_single_words_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm2, xn_sp: Register, xm: Register) -> T {
-        emit_adv_ldr_str_off_reg(self, 1, 1, xm, 0b101, 32, index, xn_sp, &[vt, vt2, vt3, vt4])
+    fn ld4_single_struct_single_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm2,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
+        emit_adv_ldr_str_off_reg(
+            self,
+            1,
+            1,
+            xm,
+            0b101,
+            32,
+            index,
+            xn_sp,
+            &[vt, vt2, vt3, vt4],
+        )
     }
-
 
     /// [LD4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--single-structure---Load-single-4-element-structure-to-one-lane-of-four-registers-?lang=en)
     ///
@@ -1636,10 +2305,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.D, <Vt2>.D, <Vt3>.D, <Vt4>.D }[<index>], [<Xn|SP>], #32
     /// ```
     #[inline(always)]
-    fn ld4_single_struct_double_words_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm1, xn_sp: Register) -> T {
+    fn ld4_single_struct_double_words_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 1, 0b101, 64, index, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD4 - single structure](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--single-structure---Load-single-4-element-structure-to-one-lane-of-four-registers-?lang=en)
     ///
@@ -1651,10 +2327,28 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.D, <Vt2>.D, <Vt3>.D, <Vt4>.D }[<index>], [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld4_single_struct_double_words_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, index: UImm1, xn_sp: Register, xm: Register) -> T {
-        emit_adv_ldr_str_off_reg(self, 1, 1, xm, 0b101, 64, index, xn_sp, &[vt, vt2, vt3, vt4])
+    fn ld4_single_struct_double_words_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        index: UImm1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
+        emit_adv_ldr_str_off_reg(
+            self,
+            1,
+            1,
+            xm,
+            0b101,
+            64,
+            index,
+            xn_sp,
+            &[vt, vt2, vt3, vt4],
+        )
     }
-
 
     /// [LD2R - Load single 2 element structure and Replicate to all lanes of two registers](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2R--Load-single-2-element-structure-and-Replicate-to-all-lanes-of-two-registers-?lang=en)
     ///
@@ -1669,7 +2363,6 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     fn ld2r(&mut self, vt: Register, vt2: Register, t: ArrSpec1, xn_sp: Register) -> T {
         emit_adv_ldxr_plain(self, 1, 1, 0b110, t, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2R - Load single 2 element structure and Replicate to all lanes of two registers](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2R--Load-single-2-element-structure-and-Replicate-to-all-lanes-of-two-registers-?lang=en)
     ///
@@ -1687,7 +2380,6 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
         emit_adv_ldxr_off_imm(self, 1, 1, 0b110, t, xn_sp, &[vt, vt2])
     }
 
-
     /// [LD2R - Load single 2 element structure and Replicate to all lanes of two registers](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2R--Load-single-2-element-structure-and-Replicate-to-all-lanes-of-two-registers-?lang=en)
     ///
     /// Load single 2-element structure and Replicate to all lanes of two registers. This instruction loads a 2-element structure from memory and replicates the structure to all the lanes of the two SIMD&FP registers.
@@ -1698,10 +2390,16 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD2R { <Vt>.<T>, <Vt2>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld2r_offset_reg(&mut self, vt: Register, vt2: Register, t: ArrSpec1, xn_sp: Register, xm: Register) -> T {
+    fn ld2r_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldxr_off_reg(self, 1, 1, xm, 0b110, t, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD4R - Load single 4 element structure and Replicate to all lanes of four registers](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4R--Load-single-4-element-structure-and-Replicate-to-all-lanes-of-four-registers-?lang=en)
     ///
@@ -1713,10 +2411,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4R { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld4r(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn ld4r(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldxr_plain(self, 1, 1, 0b111, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD4R - Load single 4 element structure and Replicate to all lanes of four registers](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4R--Load-single-4-element-structure-and-Replicate-to-all-lanes-of-four-registers-?lang=en)
     ///
@@ -1730,10 +2435,17 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     ///
     /// *Note*: `<imm>` implicitly given by the chosen arrangement specification `t`
     #[inline(always)]
-    fn ld4r_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn ld4r_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldxr_off_imm(self, 1, 1, 0b111, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD4R - Load single 4 element structure and Replicate to all lanes of four registers](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4R--Load-single-4-element-structure-and-Replicate-to-all-lanes-of-four-registers-?lang=en)
     ///
@@ -1745,15 +2457,24 @@ pub trait AdvancedSIMDLoadStoreSingleStructures<T>: InstructionProcessor<T> {
     /// LD4R { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld4r_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpec1, xn_sp: Register, xm: Register) -> T {
+    fn ld4r_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldxr_off_reg(self, 1, 1, xm, 0b111, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]

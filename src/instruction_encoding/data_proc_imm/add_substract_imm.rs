@@ -7,32 +7,48 @@
 //! - [SUBS (immediate)](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--immediate---Subtract--immediate---setting-flags-?lang=en)
 
 use bit_seq::bseq_32;
-use crate::instruction_emitter::Emitter;
-use crate::instruction_encoding::InstructionProcessor;
 
-use crate::instruction_stream::InstrStream;
-use crate::mc_memory::Memory;
-use crate::types::{Imm12, Register, UImm10, UImm4, UImm6};
+use crate::instruction_encoding::InstructionProcessor;
 use crate::types::shifts::Shift1;
+use crate::types::{Imm12, Register, UImm10, UImm4};
 
 /// The `add_sub_imm` function is a helper function to generate ADD/SUB instructions
 /// (with immediate value) according to the ARMv8 encoding rules. This is not intended to be used
 /// directly but rather used internally by other public-facing functions.
 /// The parameters are bits used in the encoding: `sf` for setting the operation size, `op` for
-/// determining add/sub operation, `S` for setting the flags, `shift` for optional left shift
+/// determining add/sub operation, `s` for setting the flags, `shift` for optional left shift
 /// of the immediate, `imm12` is the immediate value, `rn` and `rd` are registers.
 #[inline(always)]
-fn emit_add_sub_imm_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op: u8, S: u8, shift: u8, imm12: u16, rn: Register, rd: Register) -> T {
-    let r = bseq_32!(sf:1 op:1 S:1 10001 0 shift:1 imm12:12 rn:5 rd:5);
+fn emit_add_sub_imm_x<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: u8,
+    op: u8,
+    s: u8,
+    shift: u8,
+    imm12: u16,
+    rn: Register,
+    rd: Register,
+) -> T {
+    let r = bseq_32!(sf:1 op:1 s:1 10001 0 shift:1 imm12:12 rn:5 rd:5);
     proc.process(r)
 }
 
 #[inline(always)]
-fn emit_add_sub_imm_w_tags_x<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op: u8, S: u8, o2: u8, uimm6: u8, op3: u8, uimm4: u8, rn: Register, rd: Register) -> T {
-    let r = bseq_32!(sf:1 op:1 S:1 100011 o2:1 uimm6:6 op3:2 uimm4:4 rn:5 rd:5);
+fn emit_add_sub_imm_w_tags_x<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: u8,
+    op: u8,
+    s: u8,
+    o2: u8,
+    uimm6: u8,
+    op3: u8,
+    uimm4: u8,
+    rn: Register,
+    rd: Register,
+) -> T {
+    let r = bseq_32!(sf:1 op:1 s:1 100011 o2:1 uimm6:6 op3:2 uimm4:4 rn:5 rd:5);
     proc.process(r)
 }
-
 
 /// # Add/subtract (immediate)
 ///
@@ -240,7 +256,6 @@ pub trait AddSubtractImmediate<T>: InstructionProcessor<T> {
         emit_add_sub_imm_x(self, 1, 1, 1, lsl.into(), imm12, rn, rd)
     }
 
-
     // Add/substract (immediate, with tags)
 
     /// [ADDG](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDG--Add-with-Tag-?lang=en)
@@ -250,8 +265,16 @@ pub trait AddSubtractImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn addg(&mut self, xd_sp: Register, xn_sp: Register, uimm6: UImm10, uimm4: UImm4) -> T {
-        debug_assert!(uimm6 % 16 == 0, "uimm6 must be a multiply of 16, was {}", uimm6);
-        debug_assert!(uimm6 <= 1008, "uimm6 must be in range 0 to 1008, was {}", uimm6);
+        debug_assert!(
+            uimm6 % 16 == 0,
+            "uimm6 must be a multiply of 16, was {}",
+            uimm6
+        );
+        debug_assert!(
+            uimm6 <= 1008,
+            "uimm6 must be in range 0 to 1008, was {}",
+            uimm6
+        );
         let uimm6 = uimm6 >> 4;
         emit_add_sub_imm_w_tags_x(self, 1, 0, 0, 0, uimm6 as u8, 0, uimm4, xn_sp, xd_sp)
     }
@@ -263,8 +286,16 @@ pub trait AddSubtractImmediate<T>: InstructionProcessor<T> {
     /// ```
     #[inline(always)]
     fn subg(&mut self, xd_sp: Register, xn_sp: Register, uimm6: UImm10, uimm4: UImm4) -> T {
-        debug_assert!(uimm6 % 16 == 0, "uimm6 must be a multiply of 16, was {}", uimm6);
-        debug_assert!(uimm6 <= 1008, "uimm6 must be in range 0 to 1008, was {}", uimm6);
+        debug_assert!(
+            uimm6 % 16 == 0,
+            "uimm6 must be a multiply of 16, was {}",
+            uimm6
+        );
+        debug_assert!(
+            uimm6 <= 1008,
+            "uimm6 must be in range 0 to 1008, was {}",
+            uimm6
+        );
         let uimm6 = uimm6 >> 4;
         emit_add_sub_imm_w_tags_x(self, 1, 1, 0, 0, uimm6 as u8, 0, uimm4, xn_sp, xd_sp)
     }
@@ -274,6 +305,7 @@ pub trait AddSubtractImmediate<T>: InstructionProcessor<T> {
 mod tests {
     use crate::assert_panic;
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]

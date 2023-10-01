@@ -6,26 +6,50 @@
 //!  - [SUB - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--extended-register---Subtract--extended-register--?lang=en)
 //!  - [SUBS - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--extended-register---Subtract--extended-register---setting-flags-?lang=en)
 
-
-
 use bit_seq::bseq_32;
-use crate::types::{Register, UImm2};
+
 use crate::instruction_encoding::InstructionProcessor;
+use crate::types::{Register, UImm2};
 use crate::types::extends::RegExtend;
 
 #[inline(always)]
-fn emit_add_sub_ext<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op: u8, s: u8, opt: u8, rm: Register, option: u8, imm3: u8, rn: Register, rd: Register) -> T {
+fn emit_add_sub_ext<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: u8,
+    op: u8,
+    s: u8,
+    opt: u8,
+    rm: Register,
+    option: u8,
+    imm3: u8,
+    rn: Register,
+    rd: Register,
+) -> T {
     let r = bseq_32!(sf:1 op:1 s:1 01011 opt:2 1 rm:5 option:3 imm3:3 rn:5 rd:5);
     proc.process(r)
 }
 
 #[inline(always)]
-fn emit_add_sub_ext_opt_shift<P: InstructionProcessor<T>, T>(proc: &mut P, sf: u8, op: u8, s: u8, opt: u8, rm: Register, extend: RegExtend, amount: Option<UImm2>, rn: Register, rd: Register) -> T {
+fn emit_add_sub_ext_opt_shift<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    sf: u8,
+    op: u8,
+    s: u8,
+    opt: u8,
+    rm: Register,
+    extend: RegExtend,
+    amount: Option<UImm2>,
+    rn: Register,
+    rd: Register,
+) -> T {
     let amount = amount.unwrap_or(0);
-    debug_assert!(amount <= 4, "shift amount must be in range 0 to 4, was {}", amount);
+    debug_assert!(
+        amount <= 4,
+        "shift amount must be in range 0 to 4, was {}",
+        amount
+    );
     emit_add_sub_ext(proc, sf, op, s, opt, rm, extend.into(), amount, rn, rd)
 }
-
 
 /// # Add/subtract (extended register)
 ///
@@ -43,10 +67,16 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
     /// ADD <Wd|WSP>, <Wn|WSP>, <Wm>, <extend> {#<amount>}
     /// ```
     #[inline(always)]
-    fn add_32_reg_extend(&mut self, wd_wsp: Register, wn_wsp: Register, wm: Register, extend: RegExtend, amount: Option<UImm2>) -> T {
+    fn add_32_reg_extend(
+        &mut self,
+        wd_wsp: Register,
+        wn_wsp: Register,
+        wm: Register,
+        extend: RegExtend,
+        amount: Option<UImm2>,
+    ) -> T {
         emit_add_sub_ext_opt_shift(self, 0, 0, 0, 0b00, wm, extend, amount, wn_wsp, wd_wsp)
     }
-
 
     /// [ADD - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADD--extended-register---Add--extended-register--?lang=en)
     ///
@@ -59,10 +89,16 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
     /// **Note**: The `<R>` in `<R><m>` is implicitly given by the chosen `<extend>`. [`RegExtend`] also does not support `LSL`
     /// as it simplifies the api.
     #[inline(always)]
-    fn add_64_reg_extend(&mut self, xd_sp: Register, xn_sp: Register, m: Register, extend: RegExtend, amount: Option<UImm2>) -> T {
+    fn add_64_reg_extend(
+        &mut self,
+        xd_sp: Register,
+        xn_sp: Register,
+        m: Register,
+        extend: RegExtend,
+        amount: Option<UImm2>,
+    ) -> T {
         emit_add_sub_ext_opt_shift(self, 1, 0, 0, 0b00, m, extend, amount, xn_sp, xd_sp)
     }
-
 
     /// [ADDS - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDS--extended-register---Add--extended-register---setting-flags-?lang=en)
     ///
@@ -74,10 +110,16 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
     /// ADDS <Wd>, <Wn|WSP>, <Wm>{, <extend> {#<amount>}}
     /// ```
     #[inline(always)]
-    fn adds_32_reg_extend(&mut self, wd_wsp: Register, wn_wsp: Register, wm: Register, extend: RegExtend, amount: Option<UImm2>) -> T {
+    fn adds_32_reg_extend(
+        &mut self,
+        wd_wsp: Register,
+        wn_wsp: Register,
+        wm: Register,
+        extend: RegExtend,
+        amount: Option<UImm2>,
+    ) -> T {
         emit_add_sub_ext_opt_shift(self, 0, 0, 1, 0b00, wm, extend, amount, wn_wsp, wd_wsp)
     }
-
 
     /// [ADDS - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ADDS--extended-register---Add--extended-register---setting-flags-?lang=en)
     ///
@@ -92,10 +134,16 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
     /// **Note**: The `<R>` in `<R><m>` is implicitly given by the chosen `<extend>`. [`RegExtend`] also does not support `LSL`
     /// as it simplifies the api.
     #[inline(always)]
-    fn adds_64_reg_extend(&mut self, xd_sp: Register, xn_sp: Register, m: Register, extend: RegExtend, amount: Option<UImm2>) -> T {
+    fn adds_64_reg_extend(
+        &mut self,
+        xd_sp: Register,
+        xn_sp: Register,
+        m: Register,
+        extend: RegExtend,
+        amount: Option<UImm2>,
+    ) -> T {
         emit_add_sub_ext_opt_shift(self, 1, 0, 1, 0b00, m, extend, amount, xn_sp, xd_sp)
     }
-
 
     /// [SUB - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--extended-register---Subtract--extended-register--?lang=en)
     ///
@@ -105,10 +153,16 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
     /// SUB <Wd|WSP>, <Wn|WSP>, <Wm>{, <extend> {#<amount>}}
     /// ```
     #[inline(always)]
-    fn sub_32_reg_extend(&mut self, wd_wsp: Register, wn_wsp: Register, wm: Register, extend: RegExtend, amount: Option<UImm2>) -> T {
+    fn sub_32_reg_extend(
+        &mut self,
+        wd_wsp: Register,
+        wn_wsp: Register,
+        wm: Register,
+        extend: RegExtend,
+        amount: Option<UImm2>,
+    ) -> T {
         emit_add_sub_ext_opt_shift(self, 0, 1, 0, 0b00, wm, extend, amount, wn_wsp, wd_wsp)
     }
-
 
     /// [SUB - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUB--extended-register---Subtract--extended-register--?lang=en)
     ///
@@ -121,10 +175,16 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
     /// **Note**: The `<R>` in `<R><m>` is implicitly given by the chosen `<extend>`. [`RegExtend`] also does not support `LSL`
     /// as it simplifies the api.
     #[inline(always)]
-    fn sub_64_reg_extend(&mut self, xd_sp: Register, xn_sp: Register, m: Register, extend: RegExtend, amount: Option<UImm2>) -> T {
+    fn sub_64_reg_extend(
+        &mut self,
+        xd_sp: Register,
+        xn_sp: Register,
+        m: Register,
+        extend: RegExtend,
+        amount: Option<UImm2>,
+    ) -> T {
         emit_add_sub_ext_opt_shift(self, 1, 1, 0, 0b00, m, extend, amount, xn_sp, xd_sp)
     }
-
 
     /// [SUBS - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--extended-register---Subtract--extended-register---setting-flags-?lang=en)
     ///
@@ -136,10 +196,16 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
     /// SUBS <Wd>, <Wn|WSP>, <Wm>{, <extend> {#<amount>}}
     /// ```
     #[inline(always)]
-    fn subs_32_reg_extend(&mut self, wd_wsp: Register, wn_wsp: Register, wm: Register, extend: RegExtend, amount: Option<UImm2>) -> T {
+    fn subs_32_reg_extend(
+        &mut self,
+        wd_wsp: Register,
+        wn_wsp: Register,
+        wm: Register,
+        extend: RegExtend,
+        amount: Option<UImm2>,
+    ) -> T {
         emit_add_sub_ext_opt_shift(self, 0, 1, 1, 0b00, wm, extend, amount, wn_wsp, wd_wsp)
     }
-
 
     /// [SUBS - extended register](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SUBS--extended-register---Subtract--extended-register---setting-flags-?lang=en)
     ///
@@ -154,16 +220,23 @@ pub trait AddSubtractExtendedRegister<T>: InstructionProcessor<T> {
     /// **Note**: The `<R>` in `<R><m>` is implicitly given by the chosen `<extend>`. We also [`RegExtend`] does not support `LSL`
     /// as it simplifies the api.
     #[inline(always)]
-    fn subs_64_reg_extend(&mut self, xd_sp: Register, xn_sp: Register, m: Register, extend: RegExtend, amount: Option<UImm2>) -> T {
+    fn subs_64_reg_extend(
+        &mut self,
+        xd_sp: Register,
+        xn_sp: Register,
+        m: Register,
+        extend: RegExtend,
+        amount: Option<UImm2>,
+    ) -> T {
         emit_add_sub_ext_opt_shift(self, 1, 1, 1, 0b00, m, extend, amount, xn_sp, xd_sp)
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::test_utils::test_producer::TestProducer;
+
+    use super::*;
 
     #[test]
     fn test_add() {

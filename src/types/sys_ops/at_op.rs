@@ -1,6 +1,6 @@
-use crate::types::encodable::Encodable;
 use AtOp::*;
 
+use crate::types::encodable::Encodable;
 
 /// Operation type for [AT instruction](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AT--Address-Translate--an-alias-of-SYS-?lang=en).
 pub enum AtOp {
@@ -19,7 +19,6 @@ pub enum AtOp {
     S1E3R,
     S1E3W,
 }
-
 
 impl Encodable<(u8, u8, u8)> for AtOp {
     /// Encoding for AT Operation. Consult the [arm64 docs](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/AT--Address-Translate--an-alias-of-SYS-?lang=en) for more.

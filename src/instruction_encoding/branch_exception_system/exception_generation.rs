@@ -11,16 +11,19 @@
 //! - [DCPS3](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/DCPS3--Debug-Change-PE-State-to-EL3-?lang=en)
 
 use bit_seq::bseq_32;
-use crate::instruction_emitter::Emitter;
+
 use crate::instruction_encoding::InstructionProcessor;
-use crate::instruction_stream::InstrStream;
-use crate::mc_memory::Memory;
-use crate::types::instruction::Instr;
 use crate::types::UImm16;
 
 #[inline(always)]
-fn emit_exception_gen_x<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, imm16: u16, op2: u8, LL: u8) -> T {
-    let i = bseq_32!(11010100 opc:3 imm16:16 op2:3 LL:2);
+fn emit_exception_gen_x<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    opc: u8,
+    imm16: u16,
+    op2: u8,
+    ll: u8,
+) -> T {
+    let i = bseq_32!(11010100 opc:3 imm16:16 op2:3 ll:2);
     proc.process(i)
 }
 
@@ -76,14 +79,15 @@ pub trait ExceptionGeneration<T>: InstructionProcessor<T> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::mc_memory::MockMemory;
+    use crate::stream_mock;
     use crate::instruction_emitter::MockEmitter;
-    use crate::{stream_mock};
+    use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::MockMemory;
     use crate::types::InstructionPointer;
+
+    use super::*;
 
     #[test]
     fn test_exception_gen() {

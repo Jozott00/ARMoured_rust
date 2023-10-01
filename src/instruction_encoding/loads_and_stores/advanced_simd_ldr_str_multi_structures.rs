@@ -10,39 +10,81 @@
 //!  - [LD3 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--multiple-structures---Load-multiple-3-element-structures-to-three-registers-?lang=en)
 //!  - [LD4 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--multiple-structures---Load-multiple-4-element-structures-to-four-registers-?lang=en)
 
-
-
 use bit_seq::bseq_32;
+
 use crate::instruction_encoding::InstructionProcessor;
-use crate::types::{Register, UImm6};
-use crate::types::ArrSpecifier::{ArrSpec, ArrSpecX, ArrSpec1};
+use crate::types::arr_specifier::{ArrSpec, ArrSpec1, ArrSpecX};
+use crate::types::Register;
 
 #[inline(always)]
-fn emit_adv_ldr_str_all<P: InstructionProcessor<T>, T>(proc: &mut P, q: u8, with_offset: bool, l: u8, rm: Register, opcode: u8, size: u8, rn: Register, rt: Register) -> T {
+fn emit_adv_ldr_str_all<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    q: u8,
+    with_offset: bool,
+    l: u8,
+    rm: Register,
+    opcode: u8,
+    size: u8,
+    rn: Register,
+    rt: Register,
+) -> T {
     let op = with_offset as u8;
     let r = bseq_32!(0 q:1 001100 op:1 l:1 0 rm:5 opcode:4 size:2 rn:5 rt:5);
     proc.process(r)
 }
 
 #[inline(always)]
-fn emit_adv_ldr_str_plain<P: InstructionProcessor<T>, T, A: ArrSpec>(proc: &mut P, l: u8, opcode: u8, t: A, rn: Register, vts: &[Register]) -> T {
-    debug_assert!(are_indices_sequential(vts), "vector registers must be sequential, were {:?}", vts);
+fn emit_adv_ldr_str_plain<P: InstructionProcessor<T>, T, A: ArrSpec>(
+    proc: &mut P,
+    l: u8,
+    opcode: u8,
+    t: A,
+    rn: Register,
+    vts: &[Register],
+) -> T {
+    debug_assert!(
+        are_indices_sequential(vts),
+        "vector registers must be sequential, were {:?}",
+        vts
+    );
     emit_adv_ldr_str_all(proc, t.q(), false, l, 0, opcode, t.size(), rn, vts[0])
 }
 
 #[inline(always)]
-fn emit_adv_ldr_str_off_reg<P: InstructionProcessor<T>, T, A: ArrSpec>(proc: &mut P, l: u8, opcode: u8, rm: Register, t: A, rn: Register, vts: &[Register]) -> T {
-    debug_assert!(are_indices_sequential(vts), "vector registers must be sequential, were {:?}", vts);
+fn emit_adv_ldr_str_off_reg<P: InstructionProcessor<T>, T, A: ArrSpec>(
+    proc: &mut P,
+    l: u8,
+    opcode: u8,
+    rm: Register,
+    t: A,
+    rn: Register,
+    vts: &[Register],
+) -> T {
+    debug_assert!(
+        are_indices_sequential(vts),
+        "vector registers must be sequential, were {:?}",
+        vts
+    );
     emit_adv_ldr_str_all(proc, t.q(), true, l, rm, opcode, t.size(), rn, vts[0])
 }
 
 #[inline(always)]
-fn emit_adv_ldr_str_off_imm<P: InstructionProcessor<T>, T, A: ArrSpec>(proc: &mut P, l: u8, opcode: u8, t: A, rn: Register, vts: &[Register]) -> T {
-    debug_assert!(are_indices_sequential(vts), "vector registers must be sequential, were {:?}", vts);
+fn emit_adv_ldr_str_off_imm<P: InstructionProcessor<T>, T, A: ArrSpec>(
+    proc: &mut P,
+    l: u8,
+    opcode: u8,
+    t: A,
+    rn: Register,
+    vts: &[Register],
+) -> T {
+    debug_assert!(
+        are_indices_sequential(vts),
+        "vector registers must be sequential, were {:?}",
+        vts
+    );
     emit_adv_ldr_str_all(proc, t.q(), true, l, 0b11111, opcode, t.size(), rn, vts[0])
 }
 
-#[cfg(debug_assertions)]
 fn are_indices_sequential(indices: &[Register]) -> bool {
     for i in 0..(indices.len() - 1) {
         if (indices[i] + 1) % 32 != indices[(i + 1) % indices.len()] {
@@ -74,10 +116,17 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st4_multi_structs(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpecX, xn_sp: Register) -> T {
+    fn st4_multi_structs(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 0b0000, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST4 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--multiple-structures---Store-multiple-4-element-structures-from-four-registers-?lang=en)
     ///
@@ -91,10 +140,17 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     ///
     /// *Note*: The register is implicitly given by the chose arrange spec
     #[inline(always)]
-    fn st4_multi_structs_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpecX, xn_sp: Register) -> T {
+    fn st4_multi_structs_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0b0000, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST4 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST4--multiple-structures---Store-multiple-4-element-structures-from-four-registers-?lang=en)
     ///
@@ -106,10 +162,18 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST4 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st4_multi_structs_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpecX, xn_sp: Register, xm: Register) -> T {
+    fn st4_multi_structs_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0b0000, xm, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--multiple-structures---Store-multiple-single-element-structures-from-one--two--three--or-four-registers-?lang=en)
     ///
@@ -125,7 +189,6 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
         emit_adv_ldr_str_plain(self, 0, 0b0111, t, xn_sp, &[vt])
     }
 
-
     /// [ST1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--multiple-structures---Store-multiple-single-element-structures-from-one--two--three--or-four-registers-?lang=en)
     ///
     /// Store multiple single-element structures from one, two, three, or four registers. This instruction stores elements to memory from one, two, three, or four SIMD&FP registers, without interleaving. Every element of each register is stored.
@@ -136,10 +199,15 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.<T>, <Vt2>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st1_multi_structs_two_reg(&mut self, vt: Register, vt2: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn st1_multi_structs_two_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 0b1010, t, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--multiple-structures---Store-multiple-single-element-structures-from-one--two--three--or-four-registers-?lang=en)
     ///
@@ -151,10 +219,16 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st1_multi_structs_three_reg(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn st1_multi_structs_three_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 0b0110, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--multiple-structures---Store-multiple-single-element-structures-from-one--two--three--or-four-registers-?lang=en)
     ///
@@ -166,10 +240,17 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st1_multi_structs_four_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn st1_multi_structs_four_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 0b0010, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--multiple-structures---Store-multiple-single-element-structures-from-one--two--three--or-four-registers-?lang=en)
     ///
@@ -181,10 +262,14 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.<T> }, [<Xn|SP>], <imm>
     /// ```
     #[inline(always)]
-    fn st1_multi_structs_one_reg_offset_imm(&mut self, vt: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn st1_multi_structs_one_reg_offset_imm(
+        &mut self,
+        vt: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0b0111, t, xn_sp, &[vt])
     }
-
 
     /// [ST1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--multiple-structures---Store-multiple-single-element-structures-from-one--two--three--or-four-registers-?lang=en)
     ///
@@ -196,10 +281,15 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st1_multi_structs_one_reg_offset_reg(&mut self, vt: Register, t: ArrSpec1, xn_sp: Register, xm: Register) -> T {
+    fn st1_multi_structs_one_reg_offset_reg(
+        &mut self,
+        vt: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0b0111, xm, t, xn_sp, &[vt])
     }
-
 
     /// [ST1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--multiple-structures---Store-multiple-single-element-structures-from-one--two--three--or-four-registers-?lang=en)
     ///
@@ -211,10 +301,15 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.<T>, <Vt2>.<T> }, [<Xn|SP>], <imm>
     /// ```
     #[inline(always)]
-    fn st1_multi_structs_two_reg_offset_imm(&mut self, vt: Register, vt2: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn st1_multi_structs_two_reg_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0b1010, t, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--multiple-structures---Store-multiple-single-element-structures-from-one--two--three--or-four-registers-?lang=en)
     ///
@@ -226,10 +321,16 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.<T>, <Vt2>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st1_multi_structs_two_reg_offset_reg(&mut self, vt: Register, vt2: Register, t: ArrSpec1, xn_sp: Register, xm: Register) -> T {
+    fn st1_multi_structs_two_reg_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0b1010, xm, t, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--multiple-structures---Store-multiple-single-element-structures-from-one--two--three--or-four-registers-?lang=en)
     ///
@@ -241,10 +342,16 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>], <imm>
     /// ```
     #[inline(always)]
-    fn st1_multi_structs_three_reg_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn st1_multi_structs_three_reg_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0b0110, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--multiple-structures---Store-multiple-single-element-structures-from-one--two--three--or-four-registers-?lang=en)
     ///
@@ -256,10 +363,17 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st1_multi_structs_three_reg_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpec1, xn_sp: Register, xm: Register) -> T {
+    fn st1_multi_structs_three_reg_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0b0110, xm, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST1--multiple-structures---Store-multiple-single-element-structures-from-one--two--three--or-four-registers-?lang=en)
     ///
@@ -271,7 +385,15 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>], <imm>
     /// ```
     #[inline(always)]
-    fn st1_multi_structs_four_reg_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn st1_multi_structs_four_reg_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0b0010, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
 
@@ -285,10 +407,18 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST1 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st1_multi_structs_four_reg_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpec1, xn_sp: Register, xm: Register) -> T {
+    fn st1_multi_structs_four_reg_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0b0010, xm, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [ST3 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--multiple-structures---Store-multiple-3-element-structures-from-three-registers-?lang=en)
     ///
@@ -300,10 +430,16 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st3_multi_structs(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpecX, xn_sp: Register) -> T {
+    fn st3_multi_structs(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 0b0100, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST3 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--multiple-structures---Store-multiple-3-element-structures-from-three-registers-?lang=en)
     ///
@@ -315,10 +451,16 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>], <imm>
     /// ```
     #[inline(always)]
-    fn st3_multi_structs_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpecX, xn_sp: Register) -> T {
+    fn st3_multi_structs_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0b0100, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST3 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST3--multiple-structures---Store-multiple-3-element-structures-from-three-registers-?lang=en)
     ///
@@ -330,10 +472,17 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST3 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st3_multi_structs_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpecX, xn_sp: Register, xm: Register) -> T {
+    fn st3_multi_structs_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0b0100, xm, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [ST2 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--multiple-structures---Store-multiple-2-element-structures-from-two-registers-?lang=en)
     ///
@@ -345,10 +494,15 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.<T>, <Vt2>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn st2_multi_structs(&mut self, vt: Register, vt2: Register, t: ArrSpecX, xn_sp: Register) -> T {
+    fn st2_multi_structs(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 0, 0b1000, t, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST2 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--multiple-structures---Store-multiple-2-element-structures-from-two-registers-?lang=en)
     ///
@@ -360,10 +514,15 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.<T>, <Vt2>.<T> }, [<Xn|SP>], <imm>
     /// ```
     #[inline(always)]
-    fn st2_multi_structs_offset_imm(&mut self, vt: Register, vt2: Register, t: ArrSpecX, xn_sp: Register) -> T {
+    fn st2_multi_structs_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 0, 0b1000, t, xn_sp, &[vt, vt2])
     }
-
 
     /// [ST2 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/ST2--multiple-structures---Store-multiple-2-element-structures-from-two-registers-?lang=en)
     ///
@@ -375,10 +534,16 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// ST2 { <Vt>.<T>, <Vt2>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn st2_multi_structs_offset_reg(&mut self, vt: Register, vt2: Register, t: ArrSpecX, xn_sp: Register, xm: Register) -> T {
+    fn st2_multi_structs_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 0, 0b1000, xm, t, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD4 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--multiple-structures---Load-multiple-4-element-structures-to-four-registers-?lang=en)
     ///
@@ -390,10 +555,17 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld4_multi_structs(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpecX, xn_sp: Register) -> T {
+    fn ld4_multi_structs(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 0b0000, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD4 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--multiple-structures---Load-multiple-4-element-structures-to-four-registers-?lang=en)
     ///
@@ -405,10 +577,17 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>], <imm>
     /// ```
     #[inline(always)]
-    fn ld4_multi_structs_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpecX, xn_sp: Register) -> T {
+    fn ld4_multi_structs_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0b0000, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD4 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD4--multiple-structures---Load-multiple-4-element-structures-to-four-registers-?lang=en)
     ///
@@ -420,10 +599,18 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD4 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld4_multi_structs_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpecX, xn_sp: Register, xm: Register) -> T {
+    fn ld4_multi_structs_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0b0000, xm, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--multiple-structures---Load-multiple-single-element-structures-to-one--two--three--or-four-registers-?lang=en)
     ///
@@ -439,7 +626,6 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
         emit_adv_ldr_str_plain(self, 1, 0b0111, t, xn_sp, &[vt])
     }
 
-
     /// [LD1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--multiple-structures---Load-multiple-single-element-structures-to-one--two--three--or-four-registers-?lang=en)
     ///
     /// Load multiple single-element structures to one, two, three, or four registers. This instruction loads multiple single-element structures from memory and writes the result to one, two, three, or four SIMD&FP registers.
@@ -450,10 +636,15 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.<T>, <Vt2>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld1_multi_structs_two_reg(&mut self, vt: Register, vt2: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn ld1_multi_structs_two_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 0b1010, t, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--multiple-structures---Load-multiple-single-element-structures-to-one--two--three--or-four-registers-?lang=en)
     ///
@@ -465,10 +656,16 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld1_multi_structs_three_reg(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn ld1_multi_structs_three_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 0b0110, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--multiple-structures---Load-multiple-single-element-structures-to-one--two--three--or-four-registers-?lang=en)
     ///
@@ -480,7 +677,15 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld1_multi_structs_four_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn ld1_multi_structs_four_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 0b0010, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
 
@@ -494,10 +699,14 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.<T> }, [<Xn|SP>], <imm>
     /// ```
     #[inline(always)]
-    fn ld1_multi_structs_one_reg_offset_imm(&mut self, vt: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn ld1_multi_structs_one_reg_offset_imm(
+        &mut self,
+        vt: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0b0111, t, xn_sp, &[vt])
     }
-
 
     /// [LD1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--multiple-structures---Load-multiple-single-element-structures-to-one--two--three--or-four-registers-?lang=en)
     ///
@@ -509,10 +718,15 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld1_multi_structs_one_reg_offset_reg(&mut self, vt: Register, t: ArrSpec1, xn_sp: Register, xm: Register) -> T {
+    fn ld1_multi_structs_one_reg_offset_reg(
+        &mut self,
+        vt: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0b0111, xm, t, xn_sp, &[vt])
     }
-
 
     /// [LD1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--multiple-structures---Load-multiple-single-element-structures-to-one--two--three--or-four-registers-?lang=en)
     ///
@@ -524,10 +738,15 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.<T>, <Vt2>.<T> }, [<Xn|SP>], <imm>
     /// ```
     #[inline(always)]
-    fn ld1_multi_structs_two_reg_offset_imm(&mut self, vt: Register, vt2: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn ld1_multi_structs_two_reg_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0b1010, t, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--multiple-structures---Load-multiple-single-element-structures-to-one--two--three--or-four-registers-?lang=en)
     ///
@@ -539,10 +758,16 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.<T>, <Vt2>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld1_multi_structs_two_reg_offset_reg(&mut self, vt: Register, vt2: Register, t: ArrSpec1, xn_sp: Register, xm: Register) -> T {
+    fn ld1_multi_structs_two_reg_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0b1010, xm, t, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--multiple-structures---Load-multiple-single-element-structures-to-one--two--three--or-four-registers-?lang=en)
     ///
@@ -554,10 +779,16 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>], <imm>
     /// ```
     #[inline(always)]
-    fn ld1_multi_structs_three_reg_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn ld1_multi_structs_three_reg_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0b0110, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--multiple-structures---Load-multiple-single-element-structures-to-one--two--three--or-four-registers-?lang=en)
     ///
@@ -569,10 +800,17 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld1_multi_structs_three_reg_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpec1, xn_sp: Register, xm: Register) -> T {
+    fn ld1_multi_structs_three_reg_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0b0110, xm, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--multiple-structures---Load-multiple-single-element-structures-to-one--two--three--or-four-registers-?lang=en)
     ///
@@ -584,10 +822,17 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>], <imm>
     /// ```
     #[inline(always)]
-    fn ld1_multi_structs_four_reg_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpec1, xn_sp: Register) -> T {
+    fn ld1_multi_structs_four_reg_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0b0010, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD1 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD1--multiple-structures---Load-multiple-single-element-structures-to-one--two--three--or-four-registers-?lang=en)
     ///
@@ -599,10 +844,18 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD1 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld1_multi_structs_four_reg_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, vt4: Register, t: ArrSpec1, xn_sp: Register, xm: Register) -> T {
+    fn ld1_multi_structs_four_reg_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        vt4: Register,
+        t: ArrSpec1,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0b0010, xm, t, xn_sp, &[vt, vt2, vt3, vt4])
     }
-
 
     /// [LD3 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--multiple-structures---Load-multiple-3-element-structures-to-three-registers-?lang=en)
     ///
@@ -614,10 +867,16 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld3_multi_structs(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpecX, xn_sp: Register) -> T {
+    fn ld3_multi_structs(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 0b0100, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--multiple-structures---Load-multiple-3-element-structures-to-three-registers-?lang=en)
     ///
@@ -629,10 +888,16 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>], <imm>
     /// ```
     #[inline(always)]
-    fn ld3_multi_structs_offset_imm(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpecX, xn_sp: Register) -> T {
+    fn ld3_multi_structs_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0b0100, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD3 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD3--multiple-structures---Load-multiple-3-element-structures-to-three-registers-?lang=en)
     ///
@@ -644,10 +909,17 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD3 { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld3_multi_structs_offset_reg(&mut self, vt: Register, vt2: Register, vt3: Register, t: ArrSpecX, xn_sp: Register, xm: Register) -> T {
+    fn ld3_multi_structs_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        vt3: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0b0100, xm, t, xn_sp, &[vt, vt2, vt3])
     }
-
 
     /// [LD2 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--multiple-structures---Load-multiple-2-element-structures-to-two-registers-?lang=en)
     ///
@@ -659,10 +931,15 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.<T>, <Vt2>.<T> }, [<Xn|SP>]
     /// ```
     #[inline(always)]
-    fn ld2_multi_structs(&mut self, vt: Register, vt2: Register, t: ArrSpecX, xn_sp: Register) -> T {
+    fn ld2_multi_structs(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_plain(self, 1, 0b1000, t, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--multiple-structures---Load-multiple-2-element-structures-to-two-registers-?lang=en)
     ///
@@ -674,10 +951,15 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.<T>, <Vt2>.<T> }, [<Xn|SP>], <imm>
     /// ```
     #[inline(always)]
-    fn ld2_multi_structs_offset_imm(&mut self, vt: Register, vt2: Register, t: ArrSpecX, xn_sp: Register) -> T {
+    fn ld2_multi_structs_offset_imm(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+    ) -> T {
         emit_adv_ldr_str_off_imm(self, 1, 0b1000, t, xn_sp, &[vt, vt2])
     }
-
 
     /// [LD2 - multiple structures](https://developer.arm.com/documentation/ddi0596/2021-12/SIMD-FP-Instructions/LD2--multiple-structures---Load-multiple-2-element-structures-to-two-registers-?lang=en)
     ///
@@ -689,7 +971,14 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
     /// LD2 { <Vt>.<T>, <Vt2>.<T> }, [<Xn|SP>], <Xm>
     /// ```
     #[inline(always)]
-    fn ld2_multi_structs_offset_reg(&mut self, vt: Register, vt2: Register, t: ArrSpecX, xn_sp: Register, xm: Register) -> T {
+    fn ld2_multi_structs_offset_reg(
+        &mut self,
+        vt: Register,
+        vt2: Register,
+        t: ArrSpecX,
+        xn_sp: Register,
+        xm: Register,
+    ) -> T {
         emit_adv_ldr_str_off_reg(self, 1, 0b1000, xm, t, xn_sp, &[vt, vt2])
     }
 }
@@ -698,6 +987,7 @@ pub trait AdvancedSIMDLoadStoreMultipleStructures<T>: InstructionProcessor<T> {
 mod tests {
     use crate::assert_panic;
     use crate::test_utils::test_producer::TestProducer;
+
     use super::*;
 
     #[test]

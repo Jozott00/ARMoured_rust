@@ -11,27 +11,34 @@
 //! - [ERETAA, ERETAB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ERETAA--ERETAB--Exception-Return--with-pointer-authentication-?lang=en)
 //! - [DRPS](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/DRPS--Debug-restore-process-state-?lang=en)
 
-
 use bit_seq::{bseq_32, bseq_8};
-use crate::instruction_emitter::Emitter;
+
 use crate::instruction_encoding::InstructionProcessor;
-use crate::instruction_stream::InstrStream;
-use crate::mc_memory::Memory;
-use crate::types::instruction::Instr;
-use crate::types::{Register, UImm16, UImm3, UImm4};
-use crate::types::encodable::Encodable;
-use crate::types::sys_ops::at_op::AtOp;
-use crate::types::sys_ops::dc_op::DcOp;
-use crate::types::sys_ops::ic_op::IcOp;
+use crate::types::Register;
 
 #[inline(always)]
-fn emit_uncond_br_reg<P: InstructionProcessor<T>, T>(proc: &mut P, opc: u8, op2: u8, op3: u8, rn: Register, op4: u8) -> T {
+fn emit_uncond_br_reg<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    opc: u8,
+    op2: u8,
+    op3: u8,
+    rn: Register,
+    op4: u8,
+) -> T {
     let i = bseq_32!(1101011 opc:4 op2:5 op3:6 rn:5 op4:5);
     proc.process(i)
 }
 
 #[inline(always)]
-fn emit_br_x<P: InstructionProcessor<T>, T>(proc: &mut P, z: u8, op: u8, a: u8, m: u8, rn: Register, rm: Register) -> T {
+fn emit_br_x<P: InstructionProcessor<T>, T>(
+    proc: &mut P,
+    z: u8,
+    op: u8,
+    a: u8,
+    m: u8,
+    rn: Register,
+    rm: Register,
+) -> T {
     let opc = bseq_8!(z:1 0 op:2);
     let op3 = bseq_8!(a:1 m:1);
     emit_uncond_br_reg(proc, opc, 0b11111, op3, rn, rm)
@@ -106,7 +113,6 @@ pub trait UnconditionalBranchRegister<T>: InstructionProcessor<T> {
         emit_br_x(self, 0, 1, 0, 0, xn, 0)
     }
 
-
     /// [BLRAAZ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BLRAA--BLRAAZ--BLRAB--BLRABZ--Branch-with-Link-to-Register--with-pointer-authentication-?lang=en)
     ///
     /// ```asm
@@ -116,7 +122,6 @@ pub trait UnconditionalBranchRegister<T>: InstructionProcessor<T> {
     fn blraaz(&mut self, xn: Register) -> T {
         emit_br_x(self, 0, 1, 1, 0, xn, 0b11111)
     }
-
 
     /// [BLRAA](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BLRAA--BLRAAZ--BLRAB--BLRABZ--Branch-with-Link-to-Register--with-pointer-authentication-?lang=en)
     ///
@@ -128,7 +133,6 @@ pub trait UnconditionalBranchRegister<T>: InstructionProcessor<T> {
         emit_br_x(self, 1, 1, 1, 0, xn, xm_sp)
     }
 
-
     /// [BLRABZ](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BLRAA--BLRAAZ--BLRAB--BLRABZ--Branch-with-Link-to-Register--with-pointer-authentication-?lang=en)
     ///
     /// ```asm
@@ -139,7 +143,6 @@ pub trait UnconditionalBranchRegister<T>: InstructionProcessor<T> {
         emit_br_x(self, 0, 1, 1, 1, xn, 0b11111)
     }
 
-
     /// [BLRAB](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/BLRAA--BLRAAZ--BLRAB--BLRABZ--Branch-with-Link-to-Register--with-pointer-authentication-?lang=en)
     ///
     /// ```asm
@@ -149,7 +152,6 @@ pub trait UnconditionalBranchRegister<T>: InstructionProcessor<T> {
     fn blrab(&mut self, xn: Register, xm_sp: Register) -> T {
         emit_br_x(self, 1, 1, 1, 1, xn, xm_sp)
     }
-
 
     /// [RET](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/RET--Return-from-subroutine-?lang=en)
     ///
@@ -229,7 +231,6 @@ pub trait UnconditionalBranchRegister<T>: InstructionProcessor<T> {
         emit_uncond_br_reg(self, 0b0100, 0b11111, 0b11, 0b11111, 0)
     }
 
-
     /// [DRPS](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/DRPS--Debug-restore-process-state-?lang=en)
     ///
     /// ```asm
@@ -243,11 +244,13 @@ pub trait UnconditionalBranchRegister<T>: InstructionProcessor<T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::mc_memory::MockMemory;
     use crate::instruction_emitter::MockEmitter;
-    use crate::{stream_mock};
+    use crate::instruction_stream::InstrStream;
+    use crate::mc_memory::MockMemory;
+    use crate::stream_mock;
     use crate::types::InstructionPointer;
+
+    use super::*;
 
     #[test]
     fn test_br_x() {
