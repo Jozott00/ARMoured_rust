@@ -36,10 +36,11 @@
 //!  - [ST64B - Single copy Atomic 64 byte Store without Return](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/ST64B--Single-copy-Atomic-64-byte-Store-without-Return-?lang=en)
 //!  - [LD64B - Single copy Atomic 64 byte Load](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LD64B--Single-copy-Atomic-64-byte-Load-?lang=en)
 
-use bit_seq::bseq_32;
-
 use crate::instruction_encoding::InstructionProcessor;
+#[allow(unused_imports)]
 use crate::types::Register;
+#[allow(unused_imports)]
+use bit_seq::bseq_32;
 
 #[inline(always)]
 #[cfg(feature = "arm_feat_lse")]

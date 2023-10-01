@@ -64,6 +64,7 @@ type InstrRes = String;
 pub struct TestProducer {}
 
 impl TestProducer {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         TestProducer {}
     }
